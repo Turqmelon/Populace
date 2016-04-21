@@ -1,0 +1,62 @@
+name: Populace
+author: Turqmelon
+version: 1.0
+main: com.turqmelon.Populace.Populace
+depend: [MelonEco]
+description: A modern town system.
+commands:
+  allow:
+    usage: /allow <Player>
+    description: Adds a player to a plot allow list
+  claim:
+    usage: /claim
+    description: Claims the chunk you are standing in for the town
+  forsale:
+    usage: /forsale <Price>
+    description: Puts a town plot up for sale
+    aliases: [fs]
+  giveplot:
+    usage: /giveplot <Player>
+    description: Gives the plot you are standing in to a resident
+  invite:
+    usage: /invite <Player>
+    description: Invites a player to town (or revokes a pending invitation)
+  join:
+    usage: /join <Town>
+    description: Accepts an invitation or joins a public town
+  notforsale:
+    usage: /notforsale
+    description: Marks a for sale plot as not for sale
+    aliases: [nfs]
+  town:
+    usage: /town [Town]
+    description: Opens info about your town, or the supplied town
+  towns:
+    usage: /towns
+    description: Shows info about all towns on the server
+  unclaim:
+    usage: /unclaim
+    description: Unclaims the plot you are standing in
+  visit:
+    usage: /visit [Town]
+    description: Warps to the spawn of your town, or the specified town
+    aliases: [tspawn, townspawn, travel]
+  newtown:
+    usage: /newTown <Name>
+    description: Creates a new town
+  plot:
+    usage: /plot
+    description: Shows info about the plot you are standing in
+  resident:
+    usage: /resident [Player]
+    description: Shows info about the supplied player
+    aliases: [player, me]
+  map:
+    usage: /map [Town]
+    description: Spawns a map for a town
+  visualize:
+    usage: /visualize
+    description: Visualizes the plot you are standing in
+  populace:
+    usage: /populace [save]
+    description: Shows details about Populace
