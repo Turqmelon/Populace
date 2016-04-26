@@ -37,7 +37,14 @@ public class PopulaceCommand implements CommandExecutor {
             Player player = (Player)sender;
 
             if (args.length == 0){
-                player.sendMessage(Msg.INFO + "Populace version " + Populace.getInstance().getDescription().getVersion() + " by Turqmelon");
+                player.sendMessage(Msg.INFO + "Populace Suite by (§3§nhttp://turqmelon.com§b)");
+                player.sendMessage(Msg.INFO + "Populace (Core) version " + Populace.getInstance().getDescription().getVersion());
+                if (Populace.isPopulaceChatLoaded()) {
+                    player.sendMessage(Msg.INFO + "PopulaceChat version " + Populace.getInstance().getServer().getPluginManager().getPlugin("PopulaceChat").getDescription().getVersion());
+                }
+                if (Populace.isPopulaceMarketLoaded()) {
+                    player.sendMessage(Msg.INFO + "PopulaceMarket version " + Populace.getInstance().getServer().getPluginManager().getPlugin("PopulaceMarket").getDescription().getVersion());
+                }
             }
             else if (args[0].equalsIgnoreCase("save") && player.hasPermission("populace.save")){
                 player.sendMessage(Msg.OK + "Saving...");

@@ -706,7 +706,7 @@ public class Town implements Comparable {
                     list.add("§fNext Upkeep Collection §e" + Populace.getNewDayCountdown());
                 }
 
-                if (rank.getPermissionLevel() >= TownRank.GUEST.getPermissionLevel() && rank.getPermissionLevel()<TownRank.MAYOR.getPermissionLevel()){
+                if (rank.getPermissionLevel() > TownRank.GUEST.getPermissionLevel() && rank.getPermissionLevel() < TownRank.MAYOR.getPermissionLevel()) {
                     list.add("§a");
                     list.add("§6§lYour Taxes");
                     list.add("§7If you cannot afford your taxes, you will be");
