@@ -85,6 +85,9 @@ public class TownManager {
                 TownManager.getTowns().add(town);
                 Bukkit.broadcastMessage(Msg.OK + mayor.getName() + " founded " + town.getName() + town.getLevel().getSuffix() + "!");
                 town.sendTownBroadcast(TownRank.RESIDENT, "Welcome to your new town!");
+                if (Populace.isPopulaceChatLoaded()) {
+                    TownChatBridge.firstTownJoin(mayor);
+                }
 
                 new BukkitRunnable(){
 

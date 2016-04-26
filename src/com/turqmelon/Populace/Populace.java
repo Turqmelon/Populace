@@ -16,6 +16,8 @@ import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
@@ -59,6 +61,31 @@ public class Populace extends JavaPlugin {
     private static Currency currency;
     private static long lastNewDay = 0;
     private static boolean fullyEnabled = false;
+
+    private static boolean populaceChatLoaded = false;
+    private static boolean populaceMarketLoaded = false;
+
+    private void postSetup() {
+        PluginManager pm = getServer().getPluginManager();
+        Plugin chat = pm.getPlugin("PopulaceChat");
+        Plugin market = pm.getPlugin("PopulaceMarket");
+
+        getLog().log(Level.INFO, "Looking for PopulaceChat...");
+        if (chat != null && chat.isEnabled()) {
+            getLog().log(Level.INFO, "PopulaceChat is here! Hooked!");
+            populaceChatLoaded = true;
+        } else {
+            getLog().log(Level.WARNING, "PopulaceChat not found. Features using it won't be used.");
+        }
+
+        getLog().log(Level.INFO, "Looking for PopulaceMarket...");
+        if (market != null && market.isEnabled()) {
+            getLog().log(Level.INFO, "PopulaceMarket is here! Hooked!");
+            populaceMarketLoaded = true;
+        } else {
+            getLog().log(Level.WARNING, "PopulaceMarket not found. Features using it won't be used.");
+        }
+    }
 
     public void loadData() throws ParseException, IOException {
 
@@ -284,6 +311,9 @@ public class Populace extends JavaPlugin {
 
         fullyEnabled = true; // Data successfully loaded!
 
+        // Will check for Chat and Market plugins after all plugins load
+        getServer().getScheduler().scheduleSyncDelayedTask(this, this::postSetup);
+
         new BukkitRunnable(){
             @Override
             public void run() {
@@ -307,6 +337,14 @@ public class Populace extends JavaPlugin {
             }
         }.runTaskTimer(this, 600L, 600L);
 
+    }
+
+    public static boolean isPopulaceChatLoaded() {
+        return populaceChatLoaded;
+    }
+
+    public static boolean isPopulaceMarketLoaded() {
+        return populaceMarketLoaded;
     }
 
     public static Logger getLog() {

@@ -818,6 +818,9 @@ public class Town implements Comparable {
         if (resident.getTown() == null){
             getResidents().put(resident, TownRank.RESIDENT);
             resident.setTown(this);
+            if (Populace.isPopulaceChatLoaded()) {
+                TownChatBridge.firstTownJoin(resident);
+            }
             if (getNextLevel() != null && getResidents().size() >= getNextLevel().getResidents()){
                 TownLevel newLevel = TownLevel.getAppropriateLevel(getResidents().size());
                 setLevel(newLevel);
