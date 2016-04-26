@@ -1,5 +1,7 @@
 package com.turqmelon.Populace.Town;
 
+import org.bukkit.ChatColor;
+
 /******************************************************************************
  *                                                                            *
  * CONFIDENTIAL                                                               *
@@ -21,27 +23,33 @@ package com.turqmelon.Populace.Town;
  ******************************************************************************/
 public enum TownLevel {
 
-    SETTLEMENT("Settlement", " Settlement", 1, 1, 16),
-    HAMLET("Hamlet", " Hamlet", 2, 1, 32),
-    VILLAGE("Village", " Village", 6, 1, 96),
-    TOWN("Town", " Town", 10, 1, 160),
-    LARGE_TOWN("Large Town", " Town", 15, 1.1, 224),
-    CITY("City", " City", 25, 1.2, 320),
-    LARGE_CITY("Large City", " City", 30, 1.3, 384),
-    METROPOLIS("Metropolis", " Metropolis", 50, 1.5, 448);
+    SETTLEMENT("Settlement", " Settlement", ChatColor.DARK_GRAY, 1, 1, 16),
+    HAMLET("Hamlet", " Hamlet", ChatColor.GRAY, 2, 1, 32),
+    VILLAGE("Village", " Village", ChatColor.BLUE, 6, 1, 96),
+    TOWN("Town", " Town", ChatColor.DARK_GREEN, 10, 1, 160),
+    LARGE_TOWN("Large Town", " Town", ChatColor.GREEN, 15, 1.1, 224),
+    CITY("City", " City", ChatColor.YELLOW, 25, 1.2, 320),
+    LARGE_CITY("Large City", " City", ChatColor.GOLD, 30, 1.3, 384),
+    METROPOLIS("Metropolis", " Metropolis", ChatColor.RED, 50, 1.5, 448);
 
     private String name;
     private String suffix;
+    private ChatColor color;
     private int residents;
     private double upkeepModifier;
     private int maxland;
 
-    TownLevel(String name, String suffix, int residents, double upkeepModifier, int maxland) {
+    TownLevel(String name, String suffix, ChatColor color, int residents, double upkeepModifier, int maxland) {
         this.name = name;
         this.suffix = suffix;
+        this.color = color;
         this.residents = residents;
         this.upkeepModifier = upkeepModifier;
         this.maxland = maxland;
+    }
+
+    public ChatColor getColor() {
+        return color;
     }
 
     public static TownLevel getAppropriateLevel(int residents){

@@ -650,7 +650,7 @@ public class Town implements Comparable {
                 list.addAll(Arrays.asList(
 
                         "§fMayor §e" + getMayor().getName(),
-                        "§fLevel §e" + getLevel().getName() + (getNextLevel()!=null?" §7§o(Next level at " + getNextLevel().getResidents() + " Residents)":""),
+                        "§fLevel §e" + getLevel().getColor() + getLevel().getName() + (getNextLevel() != null ? " §7§o(Next level at " + getNextLevel().getResidents() + " Residents)" : ""),
                         "§fLand §e" + getPlots().size() + "§f/§e" + getMaxLand(),
                         "§fResidents §e" + getResidents().size(),
                         "§fBonus Land §e" + getBonusLand(),
