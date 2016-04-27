@@ -24,6 +24,9 @@ public class Configuration {
     // Allows PVP in the wilderness
     public static boolean WILDERNESS_PVP = true;
 
+    // The minimum amount of blocks that residents must be from a town to make another
+    public static int TOWN_MINIMUM_BUFFER = 250;
+
     // The cost for town creation
     public static double TOWN_CREATION_FEE = 1000;
 

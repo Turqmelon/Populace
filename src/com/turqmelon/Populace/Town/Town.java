@@ -590,7 +590,7 @@ public class Town implements Comparable {
                     }
                     return false;
                 case TOO_CLOSE_TO_TOWN:
-                    resident.sendMessage(Msg.ERR + "You can't place your first claim here, as it's within 240 blocks of another town's borders.");
+                    resident.sendMessage(Msg.ERR + "You can't place your first claim here, as it's within " + Configuration.TOWN_MINIMUM_BUFFER + " blocks of another town's borders.");
                     return false;
                 case REQUIRE_OUTPOST:
 
@@ -652,8 +652,10 @@ public class Town implements Comparable {
         if (getPlots().size() == 0){
             adjacent = true;
 
-            for(int x = -15; x <= 15; x++){
-                for(int z = -15; z <= 15; z++){
+            int chunkView = Configuration.TOWN_MINIMUM_BUFFER / 16;
+
+            for (int x = -chunkView; x <= chunkView; x++) {
+                for (int z = -chunkView; z <= chunkView; z++) {
                     PlotChunk c = new PlotChunk(chunk.getWorld(), chunk.getX()+x, chunk.getZ()+z);
                     Plot plot = PlotManager.getPlot(c);
                     if (plot != null){
