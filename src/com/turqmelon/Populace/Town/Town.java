@@ -852,6 +852,10 @@ public class Town implements Comparable {
             kickOut(resident, null, "Town has been destroyed.");
         }
 
+        for (Plot plot : getPlots()) {
+            Bukkit.getPluginManager().callEvent(new TownUnclaimLandEvent(this, null, plot));
+        }
+
         getPlots().clear();
         TownManager.getTowns().remove(this);
 
