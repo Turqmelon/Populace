@@ -2,7 +2,7 @@ package com.turqmelon.Populace.Town;
 
 import com.turqmelon.MelonEco.utils.Account;
 import com.turqmelon.MelonEco.utils.AccountManager;
-import com.turqmelon.Populace.Events.TownCreationEvent;
+import com.turqmelon.Populace.Events.Town.TownCreationEvent;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Utils.Configuration;
