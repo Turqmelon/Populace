@@ -4,6 +4,7 @@ import com.turqmelon.MelonEco.utils.Account;
 import com.turqmelon.MelonEco.utils.AccountManager;
 import com.turqmelon.MelonEco.utils.Currency;
 import com.turqmelon.Populace.Commands.*;
+import com.turqmelon.Populace.Events.Core.PopulaceNewDayEvent;
 import com.turqmelon.Populace.Listeners.*;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
@@ -177,6 +178,8 @@ public class Populace extends JavaPlugin {
     public void newDay() {
 
         Bukkit.broadcastMessage(Msg.OK + "A new day begins...");
+
+        Bukkit.getPluginManager().callEvent(new PopulaceNewDayEvent());
 
         // Collect taxes from all residents
         for(Resident resident : ResidentManager.getResidents()){

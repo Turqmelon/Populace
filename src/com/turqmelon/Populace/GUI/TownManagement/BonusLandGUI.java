@@ -70,10 +70,10 @@ public class BonusLandGUI extends TownGUI {
                     boolean success = true;
                     switch(action){
                         case BUY:
-                            success = getTown().buyBonusBlocks(1);
+                            success = getTown().buyBonusBlocks(getResident(), 1);
                             break;
                         case SELL:
-                            success = getTown().sellBonusBlocks(1);
+                            success = getTown().sellBonusBlocks(getResident(), 1);
                             break;
                     }
                     if (success){
@@ -163,7 +163,7 @@ public class BonusLandGUI extends TownGUI {
         }
     }
 
-    enum LandAction {
+    public static enum LandAction {
         BUY("bought"),
         SELL("sold");
 

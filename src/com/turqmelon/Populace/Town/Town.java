@@ -2,7 +2,12 @@ package com.turqmelon.Populace.Town;
 
 import com.turqmelon.MelonEco.utils.Account;
 import com.turqmelon.MelonEco.utils.AccountManager;
+import com.turqmelon.Populace.Events.Resident.ResidentJoinTownEvent;
+import com.turqmelon.Populace.Events.Resident.ResidentKickedFromTownEvent;
+import com.turqmelon.Populace.Events.Resident.ResidentLeaveTownEvent;
+import com.turqmelon.Populace.Events.Town.*;
 import com.turqmelon.Populace.GUI.TownGUI;
+import com.turqmelon.Populace.GUI.TownManagement.BonusLandGUI;
 import com.turqmelon.Populace.Plot.*;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
@@ -228,10 +233,18 @@ public class Town implements Comparable {
         return claimed-levelLimit;
     }
 
-    public boolean sellBonusBlocks(int amount){
+    public boolean sellBonusBlocks(Resident resident, int amount) {
         long newAmount = getBonusLand()-amount;
         if (newAmount >= getUsedBonusBlocks()){
             if (newAmount >= 0){
+
+                TownBonusBlocksChangedEvent event = new TownBonusBlocksChangedEvent(this, resident, BonusLandGUI.LandAction.SELL);
+                Bukkit.getPluginManager().callEvent(event);
+
+                if (event.isCancelled()) {
+                    return false;
+                }
+
                 setBonusLand(newAmount);
                 return true;
             }
@@ -239,12 +252,19 @@ public class Town implements Comparable {
         return false;
     }
 
-    public boolean buyBonusBlocks(int amount){
+    public boolean buyBonusBlocks(Resident resident, int amount) {
 
         long newAmount = getBonusLand()+amount;
         if (newAmount <= getLevel().getMaxland()){
-            setBonusLand(newAmount);
 
+            TownBonusBlocksChangedEvent event = new TownBonusBlocksChangedEvent(this, resident, BonusLandGUI.LandAction.BUY);
+            Bukkit.getPluginManager().callEvent(event);
+
+            if (event.isCancelled()) {
+                return false;
+            }
+
+            setBonusLand(newAmount);
             return true;
         }
 
@@ -336,9 +356,18 @@ public class Town implements Comparable {
     private boolean buyChunk(Resident resident, PlotChunk chunk, boolean outpost){
         double price = outpost ? 100 : 50;
         if (getBank() >= price){
+
+            Plot plot = new Plot(UUID.randomUUID(), chunk, outpost ? PlotType.OUTPOST : PlotType.RESIDENTIAL, this);
+
+            TownClaimLandEvent event = new TownClaimLandEvent(this, resident, plot);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return false;
+            }
+
             setBank(getBank()-price);
             sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " purchased " + (outpost?"an outpost":"a chunk") + " for the town.");
-            getPlots().add(new Plot(UUID.randomUUID(), chunk, outpost?PlotType.OUTPOST:PlotType.RESIDENTIAL, this));
+            getPlots().add(plot);
 
             // For the first plot, set a town spawn so it can be warped back to
             if (getPlots().size() == 1){
@@ -453,6 +482,13 @@ public class Town implements Comparable {
                 }
 
                 if (confirmed){
+
+                    TownUnclaimLandEvent event = new TownUnclaimLandEvent(this, resident, plot);
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.isCancelled()) {
+                        return false;
+                    }
+
                     plot.getOwner().getPlotChunks().remove(plot.getPlotChunk());
                     getPlots().remove(plot);
                     sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " unclaimed an owned plot in " + plot.getPlotChunk().getWorld().getName() + " @ X: " + plot.getPlotChunk().getX() +", Z: " + plot.getPlotChunk().getZ());
@@ -473,6 +509,12 @@ public class Town implements Comparable {
                 if (getPlots().size() == 1){
                     resident.sendMessage(Msg.ERR + "Towns must have at least 1 claim.");
                     resident.sendMessage(Msg.ERR + "If you made a mistake, destroy your town and start over.");
+                    return false;
+                }
+
+                TownUnclaimLandEvent event = new TownUnclaimLandEvent(this, resident, plot);
+                Bukkit.getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
                     return false;
                 }
 
@@ -763,6 +805,13 @@ public class Town implements Comparable {
     }
 
     public void sendTownBroadcast(TownRank rank, String message){
+        TownBroadcastEvent event = new TownBroadcastEvent(this, rank, message);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            return;
+        }
+        rank = event.getRank();
+        message = event.getMessage();
         for(Player player : Bukkit.getOnlinePlayers()){
             Resident resident = ResidentManager.getResident(player);
             if (resident == null)continue;
@@ -785,6 +834,9 @@ public class Town implements Comparable {
             }
 
         }
+
+        TownDestructionEvent event = new TownDestructionEvent(this, force);
+        Bukkit.getPluginManager().callEvent(event);
 
         if(getBank() > 0 && getMayor() != null){
             Account account = AccountManager.getAccount(getMayor().getUuid());
@@ -818,9 +870,6 @@ public class Town implements Comparable {
         if (resident.getTown() == null){
             getResidents().put(resident, TownRank.RESIDENT);
             resident.setTown(this);
-            if (Populace.isPopulaceChatLoaded()) {
-                TownChatBridge.firstTownJoin(resident);
-            }
             if (getNextLevel() != null && getResidents().size() >= getNextLevel().getResidents()){
                 TownLevel newLevel = TownLevel.getAppropriateLevel(getResidents().size());
                 setLevel(newLevel);
@@ -837,8 +886,15 @@ public class Town implements Comparable {
     }
 
     // Called when a user is removed from a town
-    private void leaveTown(Resident resident){
+    private void leaveTown(Resident resident, ResidentKickedFromTownEvent kickEvent) {
         if (resident.getTown() != null && resident.getTown().getUuid().equals(getUuid())){
+
+            ResidentLeaveTownEvent event = new ResidentLeaveTownEvent(this, resident, kickEvent);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return;
+            }
+
             getResidents().remove(resident); // Removes them from the town directory
             resident.setTown(null); // Updates user data
             getPlots().stream().filter(plot -> plot.getOwner() != null && plot.getOwner().getUuid().equals(resident.getUuid())).forEach(plot -> {
@@ -865,7 +921,7 @@ public class Town implements Comparable {
     public void leaveOnBehalf(Resident resident){
         if (resident.getTown() != null && resident.getTown().getUuid().equals(getUuid())){
             sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " left on their own accord.");
-            leaveTown(resident);
+            leaveTown(resident, null);
         }
         else{
             resident.sendMessage(Msg.ERR + "You're not part of " + getName() + getLevel().getSuffix() + ".");
@@ -877,6 +933,13 @@ public class Town implements Comparable {
             if (isOpen()){
 
                 if (getPlots().size() > 0){
+
+                    ResidentJoinTownEvent event = new ResidentJoinTownEvent(this, resident, null);
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.isCancelled()) {
+                        return;
+                    }
+
                     joinTown(resident);
                     sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " joined "  + getName() + getLevel().getSuffix() + "!");
 
@@ -902,6 +965,13 @@ public class Town implements Comparable {
             if (resident.getTownInvites().containsKey(getUuid())){
 
                 if (getPlots().size() > 0) {
+
+                    ResidentJoinTownEvent event = new ResidentJoinTownEvent(this, resident, resident.getTownInvites().get(getUuid()));
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.isCancelled()) {
+                        return;
+                    }
+
                     joinTown(resident);
                     sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " joined " + getName() + getLevel().getSuffix() + " on behalf of " + resident.getTownInvites().get(getUuid()).getName() + "'s invitation!");
                     resident.getTownInvites().remove(getUuid());
@@ -934,8 +1004,10 @@ public class Town implements Comparable {
         if (kicker != null){
             if (rank.getPermissionLevel() < getRank(kicker).getPermissionLevel()){
                 if (rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()){
+                    ResidentKickedFromTownEvent event = new ResidentKickedFromTownEvent(this, resident, kicker);
+                    Bukkit.getPluginManager().callEvent(event);
                     sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " was kicked by " + kicker.getName() + (reason!=null?" for " + reason + "!":"!"));
-                    leaveTown(resident);
+                    leaveTown(resident, event);
                 }
                 else{
                     kicker.sendMessage(Msg.ERR + "Only Managers can kick out residents.");
@@ -946,8 +1018,11 @@ public class Town implements Comparable {
             }
         }
         else{
+            ResidentKickedFromTownEvent event = new ResidentKickedFromTownEvent(this, resident, null);
+            Bukkit.getPluginManager().callEvent(event);
             sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " was kicked" + (reason!=null?" for " + reason + "!":"!"));
-            leaveTown(resident);
+
+            leaveTown(resident, event);
         }
 
     }

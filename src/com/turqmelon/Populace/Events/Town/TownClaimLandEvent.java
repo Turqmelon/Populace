@@ -1,10 +1,4 @@
-package com.turqmelon.Populace.Town;
-
-import com.turqmelon.Populace.Resident.Resident;
-import com.turqmelon.Populace.Utils.Msg;
-import com.turqmelon.PopulaceChat.Channels.ChannelManager;
-import com.turqmelon.PopulaceChat.Channels.ChatChannel;
-import com.turqmelon.PopulaceChat.Channels.core.TownChat;
+package com.turqmelon.Populace.Events.Town;
 
 /******************************************************************************
  * *
@@ -25,21 +19,55 @@ import com.turqmelon.PopulaceChat.Channels.core.TownChat;
  * from Turqmelon.                                                            *
  * *
  ******************************************************************************/
-public class TownChatBridge {
 
-    public static void firstTownJoin(Resident resident) {
-        TownChat townChannel = null;
-        for (ChatChannel chatChannel : ChannelManager.getChannels()) {
-            if ((chatChannel instanceof TownChat)) {
-                townChannel = (TownChat) chatChannel;
-                break;
-            }
-        }
-        if (townChannel != null) {
-            ChannelManager.focusChannel(resident, townChannel);
-            resident.sendMessage(Msg.INFO + "The " + townChannel.getColor() + "Town§b chat can only be seen by other members of this town.");
-            resident.sendMessage(Msg.INFO + "Send chat to it with §f/t <Message>§b or focus it with §f/t§b.");
-        }
+import com.turqmelon.Populace.Plot.Plot;
+import com.turqmelon.Populace.Resident.Resident;
+import com.turqmelon.Populace.Town.Town;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+
+public class TownClaimLandEvent extends Event implements Cancellable {
+
+    private static final HandlerList handlers = new HandlerList();
+
+    private Town town;
+    private Resident resident;
+    private Plot plot;
+    private boolean cancelled = false;
+
+    public TownClaimLandEvent(Town town, Resident resident, Plot plot) {
+        this.town = town;
+        this.resident = resident;
+        this.plot = plot;
+    }
+
+    public Resident getResident() {
+        return resident;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+
+    public Town getTown() {
+        return town;
+    }
+
+    public Plot getPlot() {
+        return plot;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
 }

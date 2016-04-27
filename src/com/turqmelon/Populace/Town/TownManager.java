@@ -2,6 +2,7 @@ package com.turqmelon.Populace.Town;
 
 import com.turqmelon.MelonEco.utils.Account;
 import com.turqmelon.MelonEco.utils.AccountManager;
+import com.turqmelon.Populace.Events.TownCreationEvent;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Utils.Configuration;
@@ -85,9 +86,9 @@ public class TownManager {
                 TownManager.getTowns().add(town);
                 Bukkit.broadcastMessage(Msg.OK + mayor.getName() + " founded " + town.getName() + town.getLevel().getSuffix() + "!");
                 town.sendTownBroadcast(TownRank.RESIDENT, "Welcome to your new town!");
-                if (Populace.isPopulaceChatLoaded()) {
-                    TownChatBridge.firstTownJoin(mayor);
-                }
+
+                TownCreationEvent event = new TownCreationEvent(town, mayor);
+                Bukkit.getPluginManager().callEvent(event);
 
                 new BukkitRunnable(){
 

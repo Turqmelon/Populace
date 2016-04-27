@@ -1,5 +1,6 @@
 package com.turqmelon.Populace.GUI;
 
+import com.turqmelon.Populace.Events.Town.TownSpawnSetEvent;
 import com.turqmelon.Populace.GUI.TownManagement.*;
 import com.turqmelon.Populace.Plot.Plot;
 import com.turqmelon.Populace.Plot.PlotManager;
@@ -12,6 +13,7 @@ import com.turqmelon.Populace.Utils.ItemUtil;
 import com.turqmelon.Populace.Utils.Msg;
 import net.minecraft.server.v1_8_R3.NBTBase;
 import net.minecraft.server.v1_8_R3.NBTTagString;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -85,10 +87,15 @@ public class TownGUI extends GUI {
             if (event.isRightClick()){
                 Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
                 if (plot != null && plot.getTown() != null && plot.getTown().getUuid().equals(getTown().getUuid())){
-                    getTown().setSpawn(player.getLocation());
-                    player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
-                    player.closeInventory();
-                    getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " has updated the town spawn!");
+
+                    TownSpawnSetEvent e = new TownSpawnSetEvent(getTown(), getResident(), player.getLocation());
+                    Bukkit.getPluginManager().callEvent(e);
+                    if (!e.isCancelled()) {
+                        getTown().setSpawn(player.getLocation());
+                        player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                        player.closeInventory();
+                        getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " has updated the town spawn!");
+                    }
                 }
                 else{
                     player.sendMessage(Msg.ERR + "Town spawn can only be set within your land.");
