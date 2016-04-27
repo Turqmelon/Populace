@@ -1,5 +1,7 @@
 package com.turqmelon.Populace.Listeners;
 
+import com.turqmelon.Populace.Events.Resident.ResidentPlotEnterEvent;
+import com.turqmelon.Populace.Events.Resident.ResidentPlotLeaveEvent;
 import com.turqmelon.Populace.Plot.Plot;
 import com.turqmelon.Populace.Plot.PlotManager;
 import com.turqmelon.Populace.Resident.Resident;
@@ -7,6 +9,7 @@ import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Utils.HUDUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -52,18 +55,36 @@ public class MoveListener implements Listener {
 
         Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
 
-        if (plot != null && !plot.can(resident, PermissionSet.ENTRY)){
-            if (lastSafePoint.containsKey(player.getUniqueId())){
-                player.teleport(lastSafePoint.get(player.getUniqueId()));
+        if (plot != null) {
+            Plot lastPlot = resident.getDisplayEntity().getPlot();
+            boolean denyEntry = false;
+            if (lastPlot == null || !lastPlot.getUuid().equals(plot.getUuid())) {
+                ResidentPlotEnterEvent enterEvent = new ResidentPlotEnterEvent(plot, resident);
+                Bukkit.getPluginManager().callEvent(enterEvent);
+                if (enterEvent.isCancelled()) {
+                    denyEntry = true;
+                }
+                if (lastPlot != null) {
+                    Bukkit.getPluginManager().callEvent(new ResidentPlotLeaveEvent(lastPlot, resident));
+                }
             }
-            else{
-                player.teleport(player.getLocation().clone().add(16, 0, 0));
+            if (denyEntry || !plot.can(resident, PermissionSet.ENTRY)) {
+                if (lastSafePoint.containsKey(player.getUniqueId())) {
+                    player.teleport(lastSafePoint.get(player.getUniqueId()));
+                } else {
+                    player.teleport(player.getLocation().clone().add(16, 0, 0));
+                }
+                player.playSound(player.getLocation(), Sound.NOTE_BASS, 1, 0);
+                resident.setFallImmunity(System.currentTimeMillis());
+                plot.getPlotChunk().visualize(player, true);
+                HUDUtil.sendActionBar(player, "§c§lYou can't enter that area.");
+                return;
             }
-            player.playSound(player.getLocation(), Sound.NOTE_BASS , 1, 0);
-            resident.setFallImmunity(System.currentTimeMillis());
-            plot.getPlotChunk().visualize(player, true);
-            HUDUtil.sendActionBar(player, "§c§lYou can't enter that area.");
-            return;
+        } else {
+            Plot lastPlot = resident.getDisplayEntity().getPlot();
+            if (lastPlot != null) {
+                Bukkit.getPluginManager().callEvent(new ResidentPlotLeaveEvent(lastPlot, resident));
+            }
         }
 
         lastSafePoint.put(player.getUniqueId(), player.getLocation());

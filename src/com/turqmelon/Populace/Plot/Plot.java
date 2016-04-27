@@ -7,7 +7,9 @@ import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.ItemBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -141,6 +143,11 @@ public class Plot {
         }
 
         if (isOnAllowList(resident)) {
+            return true;
+        }
+
+        Player player = Bukkit.getPlayer(resident.getUuid());
+        if (player != null && player.hasPermission("populace.bypass")) {
             return true;
         }
 
