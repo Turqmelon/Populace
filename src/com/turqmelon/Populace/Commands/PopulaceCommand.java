@@ -26,6 +26,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
 
@@ -38,12 +39,10 @@ public class PopulaceCommand implements CommandExecutor {
 
             if (args.length == 0){
                 player.sendMessage(Msg.INFO + "Populace Suite by (§3§nhttp://turqmelon.com§b)");
-                player.sendMessage(Msg.INFO + "Populace (Core) version " + Populace.getInstance().getDescription().getVersion());
-                if (Populace.isPopulaceChatLoaded()) {
-                    player.sendMessage(Msg.INFO + "PopulaceChat version " + Populace.getInstance().getServer().getPluginManager().getPlugin("PopulaceChat").getDescription().getVersion());
-                }
-                if (Populace.isPopulaceMarketLoaded()) {
-                    player.sendMessage(Msg.INFO + "PopulaceMarket version " + Populace.getInstance().getServer().getPluginManager().getPlugin("PopulaceMarket").getDescription().getVersion());
+                for (Plugin plugin : Populace.getInstance().getServer().getPluginManager().getPlugins()) {
+                    if (plugin.getName().startsWith("Populace") && plugin.isEnabled()) {
+                        player.sendMessage(Msg.INFO + plugin.getName() + " version " + plugin.getDescription().getVersion());
+                    }
                 }
             }
             else if (args[0].equalsIgnoreCase("save") && player.hasPermission("populace.save")){
