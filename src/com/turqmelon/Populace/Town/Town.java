@@ -440,14 +440,25 @@ public class Town implements Comparable {
         if (plot != null) {
 
             int adjacent = 0;
-            for(int x = -1; x <= 1; x++){
-                for(int z = -1; z <= 1; z++){
-                    PlotChunk chunk = new PlotChunk(plot.getPlotChunk().getWorld(), plot.getPlotChunk().getX()+x, plot.getPlotChunk().getZ()+z);
-                    Plot p = PlotManager.getPlot(chunk);
-                    if (p != null && p.getTown() != null && p.getTown().getUuid().equals(getUuid())){
-                        adjacent++;
-                    }
-                }
+            Plot p1 = PlotManager.getPlot(plot.getPlotChunk().getWorld(), plot.getPlotChunk().getX() + 1, plot.getPlotChunk().getZ());
+            Plot p2 = PlotManager.getPlot(plot.getPlotChunk().getWorld(), plot.getPlotChunk().getX(), plot.getPlotChunk().getZ() + 1);
+            Plot p3 = PlotManager.getPlot(plot.getPlotChunk().getWorld(), plot.getPlotChunk().getX() - 1, plot.getPlotChunk().getZ());
+            Plot p4 = PlotManager.getPlot(plot.getPlotChunk().getWorld(), plot.getPlotChunk().getX(), plot.getPlotChunk().getZ() - 1);
+
+            if (p1 != null && p1.getTown().getUuid().equals(getUuid())) {
+                adjacent++;
+            }
+
+            if (p2 != null && p2.getTown().getUuid().equals(getUuid())) {
+                adjacent++;
+            }
+
+            if (p3 != null && p3.getTown().getUuid().equals(getUuid())) {
+                adjacent++;
+            }
+
+            if (p4 != null && p4.getTown().getUuid().equals(getUuid())) {
+                adjacent++;
             }
 
             // The owner asking to unclaim their plot won't really unclaim it, just relinquish ownership
