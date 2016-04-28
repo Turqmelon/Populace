@@ -8,9 +8,7 @@ import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownRank;
-import com.turqmelon.Populace.Utils.ItemBuilder;
-import com.turqmelon.Populace.Utils.ItemUtil;
-import com.turqmelon.Populace.Utils.Msg;
+import com.turqmelon.Populace.Utils.*;
 import net.minecraft.server.v1_8_R3.NBTBase;
 import net.minecraft.server.v1_8_R3.NBTTagString;
 import org.bukkit.Bukkit;
@@ -112,8 +110,7 @@ public class TownGUI extends GUI {
         else if (raw == 50 && getTown().canWarpToSpawn(getResident(), false)){
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             player.closeInventory();
-            player.teleport(getTown().getSpawn());
-            player.sendMessage(Msg.OK + "Warped to the spawn of " + getTown().getName() + getTown().getLevel().getSuffix());
+            new PopulaceTeleport(player, town.getSpawn(), player.getLocation(), Configuration.TELEPORT_WARMUP_TIME, Configuration.TELEPORT_COOLDOWN_TIME, false);
         }
         else if (raw == 49 && rank.isAtLeast(TownRank.RESIDENT) && getTown().getMapView() != null){
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);

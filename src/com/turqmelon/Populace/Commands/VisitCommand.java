@@ -24,7 +24,9 @@ import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownManager;
+import com.turqmelon.Populace.Utils.Configuration;
 import com.turqmelon.Populace.Utils.Msg;
+import com.turqmelon.Populace.Utils.PopulaceTeleport;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -57,8 +59,7 @@ public class VisitCommand implements CommandExecutor {
                 if (town != null){
 
                     if (town.canWarpToSpawn(resident, true)){
-                        player.teleport(town.getSpawn());
-                        player.sendMessage(Msg.OK + "Warped to the spawn of " + town.getName() + town.getLevel().getSuffix());
+                        new PopulaceTeleport(player, town.getSpawn(), player.getLocation(), Configuration.TELEPORT_WARMUP_TIME, Configuration.TELEPORT_COOLDOWN_TIME, false);
                     }
 
                 }

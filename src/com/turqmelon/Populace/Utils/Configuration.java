@@ -21,6 +21,12 @@ package com.turqmelon.Populace.Utils;
  ******************************************************************************/
 public class Configuration {
 
+    // The amount of seconds a player must wait before teleporting again
+    public static int TELEPORT_COOLDOWN_TIME = 10;
+
+    // The amount of seconds teleportations will take
+    public static int TELEPORT_WARMUP_TIME = 10;
+
     // If a resident doesn't login for this amount of days, their data will be deleted
     // NOTE: Users part of a town are exempt.
     public static int PURGE_USER_DATA_DAYS = 180;
