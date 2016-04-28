@@ -21,6 +21,10 @@ package com.turqmelon.Populace.Utils;
  ******************************************************************************/
 public class Configuration {
 
+    // If a resident doesn't login for this amount of days, their data will be deleted
+    // NOTE: Users part of a town are exempt.
+    public static int PURGE_USER_DATA_DAYS = 180;
+
     // Allows PVP in the wilderness
     public static boolean WILDERNESS_PVP = true;
 

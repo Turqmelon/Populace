@@ -12,6 +12,7 @@ import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownManager;
 import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.ClockUtil;
+import com.turqmelon.Populace.Utils.Configuration;
 import com.turqmelon.Populace.Utils.EnchantGlow;
 import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.Bukkit;
@@ -226,6 +227,25 @@ public class Populace extends JavaPlugin {
                 town.sendTownBroadcast(TownRank.ASSISTANT, "You may want to raise taxes or deposit " + getCurrency().getPlural() + " to avoid town destruction.");
             }
         }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                int days = Configuration.PURGE_USER_DATA_DAYS;
+                if (days > 0) {
+                    getLog().log(Level.INFO, "Purging old users...");
+                    int count = 0;
+                    for (int i = 0; i < ResidentManager.getResidents().size(); i++) {
+                        Resident resident = ResidentManager.getResidents().get(i);
+                        if (resident.getTown() == null && System.currentTimeMillis() - resident.getSeen() > TimeUnit.DAYS.toMillis(days)) {
+                            count++;
+                            ResidentManager.getResidents().remove(resident);
+                        }
+                    }
+                    getLog().log(Level.INFO, "Purged " + count + " user(s) who haven't logged in for " + days + " days.");
+                }
+            }
+        }.runTaskAsynchronously(this);
 
     }
 
