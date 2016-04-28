@@ -5,6 +5,15 @@ main: com.turqmelon.Populace.Populace
 depend: [MelonEco]
 description: A modern town system.
 commands:
+  jail:
+    usage: /jail <Player> [Time]
+    description: Sends a player to the town jail
+  unjail:
+    usage: /unjail <Player>
+    description: Frees a player from jail
+  setjail:
+    usage: /setjail
+    description: Sets the town jail to your current location
   allow:
     usage: /allow <Player>
     description: Adds a player to a plot allow list

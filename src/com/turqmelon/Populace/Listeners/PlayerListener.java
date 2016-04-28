@@ -17,6 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -62,6 +63,12 @@ public class PlayerListener implements Listener {
 
         Plot plot = PlotManager.getPlot(entity.getLocation().getChunk());
         Resident resident = ResidentManager.getResident(player);
+
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
 
         //don't allow interaction with item frames or armor stands in plots without build permission
         if(entity.getType() == EntityType.ARMOR_STAND || entity instanceof Hanging) {
@@ -131,6 +138,11 @@ public class PlayerListener implements Listener {
         Material clickedBlockType = clickedBlock != null ? clickedBlock.getType() : Material.AIR;
 
         if (action == Action.LEFT_CLICK_BLOCK && clickedBlock != null) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
             Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
             Block adjacentBlock = clickedBlock.getRelative(event.getBlockFace());
             byte lightLevel = adjacentBlock.getLightFromBlocks();
@@ -152,6 +164,11 @@ public class PlayerListener implements Listener {
                         clickedBlockType == Material.JUKEBOX ||
                         clickedBlockType == Material.ANVIL ||
                         clickedBlockType == Material.CAKE_BLOCK))) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
             Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
             if(plot != null)
             {
@@ -176,7 +193,11 @@ public class PlayerListener implements Listener {
                         clickedBlockType == Material.JUNGLE_FENCE_GATE   ||
                         clickedBlockType == Material.SPRUCE_FENCE_GATE   ||
                         clickedBlockType == Material.DARK_OAK_FENCE_GATE))) {
-
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
             Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
             if(plot != null)  {
                 if (resident == null || !plot.can(resident, PermissionSet.ACCESS)){
@@ -187,6 +208,11 @@ public class PlayerListener implements Listener {
 
         }
         else if(clickedBlock != null && (clickedBlockType == null || clickedBlockType == Material.STONE_BUTTON || clickedBlockType == Material.WOOD_BUTTON || clickedBlockType == Material.LEVER)) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
             Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
             if(plot != null)  {
                 if (resident == null || !plot.can(resident, PermissionSet.ACCESS)){
@@ -204,6 +230,11 @@ public class PlayerListener implements Listener {
                         clickedBlockType == Material.DAYLIGHT_DETECTOR_INVERTED ||
                         clickedBlockType == Material.REDSTONE_COMPARATOR_ON ||
                         clickedBlockType == Material.REDSTONE_COMPARATOR_OFF )) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
             Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
             if(plot != null)  {
                 if (resident == null || !plot.can(resident, PermissionSet.BUILD)){
@@ -216,6 +247,11 @@ public class PlayerListener implements Listener {
         else {
             //ignore all actions except right-click on a block or in the air
             if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+
+            if (resident != null && resident.isJailed()) {
+                event.setCancelled(true);
+                return;
+            }
 
             //what's the player holding?
             ItemStack itemInHand = player.getItemInHand();
@@ -268,6 +304,17 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         Player player = event.getPlayer();
+        Resident resident = ResidentManager.getResident(player);
+
+        if (resident != null && resident.isJailed()) {
+            Location to = event.getTo();
+            if (!to.getWorld().getName().equals(resident.getJailData().getJailLocation().getWorld().getName()) ||
+                    to.distanceSquared(resident.getJailData().getJailLocation()) >= (resident.getJailData().getRange() * resident.getJailData().getRange())) {
+                event.setTo(resident.getJailData().getJailLocation());
+                resident.getJailData().sendExplanation(resident);
+                return;
+            }
+        }
 
         // prevent players from using ender pearls to gain access to secured plots
         PlayerTeleportEvent.TeleportCause cause = event.getCause();
@@ -275,7 +322,6 @@ public class PlayerListener implements Listener {
             Plot toPlot = PlotManager.getPlot(event.getTo().getChunk());
             if(toPlot != null)
             {
-                Resident resident = ResidentManager.getResident(player);
                 if (resident == null || !toPlot.can(resident, PermissionSet.ENTRY) || !toPlot.can(resident, PermissionSet.ACCESS)){
                     event.setCancelled(true);
                     player.sendMessage(Msg.ERR + "You don't have permission to Ender Pearl to that area.");
@@ -287,8 +333,34 @@ public class PlayerListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        Resident resident = ResidentManager.getResident(player);
+        if (resident != null && resident.isJailed()) {
+            event.setKeepInventory(true);
+            event.setKeepLevel(true);
+            event.setDroppedExp(0);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        Resident resident = ResidentManager.getResident(player);
+        if (resident == null) {
+            return;
+        }
+        if (resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setRespawnLocation(resident.getJailData().getJailLocation());
+        } else if (resident.getTown() != null && resident.getTown().canWarpToSpawn(resident, false)) {
+            event.setRespawnLocation(resident.getTown().getSpawn());
+        }
+    }
+
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    void onPlayerPortal(PlayerPortalEvent event)
+    public void onPlayerPortal(PlayerPortalEvent event)
     {
         //if the player isn't going anywhere, take no action
         if(event.getTo() == null || event.getTo().getWorld() == null) return;

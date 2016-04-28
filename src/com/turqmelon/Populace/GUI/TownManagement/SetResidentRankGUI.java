@@ -53,7 +53,7 @@ public class SetResidentRankGUI extends TownGUI {
         int raw = event.getRawSlot();
 
         TownRank rank = getTown().getRank(getResident());
-        if (rank != TownRank.MAYOR){
+        if (!rank.isAtLeast(TownRank.MANAGER)) {
             player.closeInventory();
             return;
         }
@@ -65,17 +65,16 @@ public class SetResidentRankGUI extends TownGUI {
             return;
         }
 
-        if (getTown().getRank(getTarget()) == TownRank.MAYOR){
-            return;
-        }
-
-        if (raw == 40){
+        if (raw == 41) {
             player.closeInventory();
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             getResident().sendMessage(Msg.INFO + "Kicking out a resident will cause them to lose access to everything in the town.");
             getResident().setPendingAction(() -> getTown().kickOut(getTarget(), getResident(), null));
-        }
-        else{
+        } else if (raw == 39) {
+            player.closeInventory();
+            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.chat("/jail");
+        } else if (rank == TownRank.MANAGER) {
 
             ItemStack clicked = event.getCurrentItem();
             if (clicked != null && clicked.getType() != Material.AIR){
@@ -103,7 +102,11 @@ public class SetResidentRankGUI extends TownGUI {
 
         TownRank rank = getTown().getRank(getTarget());
 
-        if (rank != TownRank.MAYOR){
+        inv.setItem(39, new ItemBuilder(Material.IRON_FENCE).withCustomName("§7§lJail Resident").build());
+        inv.setItem(41, new ItemBuilder(Material.BARRIER).withCustomName("§c§lKick Resident").build());
+
+
+        if (getTown().getRank(getResident()) == TownRank.MAYOR && rank != TownRank.MAYOR) {
 
             if (rank == TownRank.RESIDENT){
                 inv.setItem(19, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.RESIDENT.getDyeColor())
@@ -132,7 +135,6 @@ public class SetResidentRankGUI extends TownGUI {
                         .withCustomName(TownRank.MANAGER.getPrefix()).withLore("§7Can assist with resident management.").tagWith("changerank", new NBTTagString(TownRank.MANAGER.name())).build());
             }
 
-            inv.setItem(40, new ItemBuilder(Material.BARRIER).withCustomName("§c§lKick Resident").build());
 
         }
 

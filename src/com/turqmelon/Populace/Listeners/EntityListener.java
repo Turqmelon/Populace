@@ -98,6 +98,11 @@ public class EntityListener implements Listener {
         //if the player doesn't have build permission, don't allow the breakage
         Player playerRemover = (Player)entityEvent.getRemover();
         Resident resident = ResidentManager.getResident(playerRemover);
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
         Plot plot = PlotManager.getPlot(event.getEntity().getLocation().getChunk());
 
         if (plot != null && (resident == null || !plot.can(resident, PermissionSet.BUILD))){
@@ -117,6 +122,11 @@ public class EntityListener implements Listener {
         Plot plot = PlotManager.getPlot(event.getEntity().getLocation().getChunk());
         Player player = event.getPlayer();
         Resident resident = ResidentManager.getResident(player);
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
 
         //if the player doesn't have permission, don't allow the placement
         if (plot != null && (resident == null || !plot.can(resident, PermissionSet.BUILD))){
@@ -157,6 +167,16 @@ public class EntityListener implements Listener {
             Projectile proj = (Projectile)damager;
             if ((proj.getShooter() instanceof Player)){
                 player2 = (Player)proj.getShooter();
+            }
+        }
+
+        // Jailed players can't attack anything
+        if (player2 != null) {
+            Resident resident = ResidentManager.getResident(player2);
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
             }
         }
 

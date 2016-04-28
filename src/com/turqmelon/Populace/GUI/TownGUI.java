@@ -178,7 +178,7 @@ public class TownGUI extends GUI {
                     Resident clicked = ResidentManager.getResident(UUID.fromString(nbt.toString().replace("\"", "")));
                     if (clicked != null){
 
-                        if (event.isRightClick() && rank == TownRank.MAYOR){
+                        if (event.isRightClick() && rank.isAtLeast(TownRank.MANAGER)) {
                             SetResidentRankGUI gui = new SetResidentRankGUI(getResident(), getTown(), clicked);
                             gui.open(player);
                             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
@@ -289,10 +289,13 @@ public class TownGUI extends GUI {
 
     protected ItemStack getIcon(Resident resident, boolean kickable){
         List<String> list = new ArrayList<>();
+        if (resident.isJailed()) {
+            list.add("§7§oJailed");
+        }
         if (kickable){
             list.add("§aLeft Click§f to kick from town.");
-            if (getTown().getRank(getResident()) == TownRank.MAYOR){
-                list.add("§aRight Click§f to change town rank.");
+            if (getTown().getRank(getResident()).isAtLeast(TownRank.MANAGER)) {
+                list.add("§aRight Click§f to change properties.");
             }
         }
         return new ItemBuilder(Material.SKULL_ITEM).withData((byte)3).asHeadOwner(resident.getName()).withCustomName(getTown().getRank(resident).getPrefix() + resident.getName()).withLore(list)

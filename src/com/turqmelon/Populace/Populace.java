@@ -315,6 +315,9 @@ public class Populace extends JavaPlugin {
         getCommand("notforsale").setExecutor(new NotForSaleCommand());
         getCommand("populace").setExecutor(new PopulaceCommand());
         getCommand("plot").setExecutor(new PlotCommand());
+        getCommand("jail").setExecutor(new JailCommand());
+        getCommand("setjail").setExecutor(new SetJailCommand());
+        getCommand("unjail").setExecutor(new UnjailCommand());
         getCommand("town").setExecutor(new TownCommand());
         getCommand("towns").setExecutor(new TownsCommand());
         getCommand("unclaim").setExecutor(new UnclaimCommand());

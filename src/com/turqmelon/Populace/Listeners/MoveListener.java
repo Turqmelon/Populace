@@ -97,6 +97,16 @@ public class MoveListener implements Listener {
                 HUDUtil.sendActionBar(player, msg);
             }
         }
+
+        if (resident.isJailed()) {
+            double range = resident.getJailData().getRange();
+            range = range * range;
+            if (player.getLocation().distanceSquared(resident.getJailData().getJailLocation()) > range) {
+                player.teleport(resident.getJailData().getJailLocation());
+                resident.getJailData().sendExplanation(resident);
+            }
+        }
+
     }
 
     public Vector calculateVelocity(Location loc1, Location loc2)

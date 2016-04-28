@@ -174,6 +174,11 @@ public class BlockListener implements Listener {
     public void onIngite(BlockIgniteEvent event){
         Player player = event.getPlayer();
         Resident resident = ResidentManager.getResident(player);
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
         Block block = event.getBlock();
         Plot plot = PlotManager.getPlot(block.getChunk());
 
@@ -301,6 +306,11 @@ public class BlockListener implements Listener {
     public void onSignChange(SignChangeEvent event){
         Player player = event.getPlayer();
         Resident resident = ResidentManager.getResident(player);
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
         Block block = event.getBlock();
         Plot plot = PlotManager.getPlot(block.getChunk());
 
@@ -322,6 +332,11 @@ public class BlockListener implements Listener {
     public void onDump(PlayerBucketFillEvent event){
         Player player = event.getPlayer();
         Resident resident = ResidentManager.getResident(player);
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
         Plot plot = PlotManager.getPlot(block.getChunk());
 
@@ -340,6 +355,11 @@ public class BlockListener implements Listener {
     public void onDump(PlayerBucketEmptyEvent event){
         Player player = event.getPlayer();
         Resident resident = ResidentManager.getResident(player);
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
         Plot plot = PlotManager.getPlot(block.getChunk());
 
@@ -382,6 +402,11 @@ public class BlockListener implements Listener {
     public void onBreak(BlockBreakEvent event){
         Player player = event.getPlayer();
         Resident resident = ResidentManager.getResident(player);
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
         Block block = event.getBlock();
         Plot plot = PlotManager.getPlot(block.getChunk());
 
@@ -403,6 +428,13 @@ public class BlockListener implements Listener {
     public void onBuild(BlockPlaceEvent event){
         Player player = event.getPlayer();
         Resident resident = ResidentManager.getResident(player);
+
+        if (resident != null && resident.isJailed()) {
+            resident.getJailData().sendExplanation(resident);
+            event.setCancelled(true);
+            return;
+        }
+
         Block block = event.getBlock();
         Plot plot = PlotManager.getPlot(block.getChunk());
 

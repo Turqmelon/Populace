@@ -54,11 +54,15 @@ public class JoinListener implements Listener {
 
         resident.setSeen(System.currentTimeMillis());
 
+        final Resident finalResident = resident;
         new BukkitRunnable(){
 
             @Override
             public void run() {
                 player.sendMessage(Msg.INFO + "This server runs §lPopulace§b by Turqmelon!");
+                if (finalResident.isJailed()) {
+                    finalResident.getJailData().sendExplanation(finalResident);
+                }
             }
         }.runTaskLater(Populace.getInstance(), 20L);
 

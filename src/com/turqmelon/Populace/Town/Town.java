@@ -75,6 +75,8 @@ public class Town implements Comparable {
     private MapView mv = null;
     private int mvid = -1;
 
+    private Location townJail = null;
+
     private List<TownAnnouncement> announcements = new ArrayList<>();
 
     public Town(UUID uuid, String name, TownLevel level) {
@@ -110,6 +112,20 @@ public class Town implements Comparable {
                 float yaw = Float.parseFloat(ds[4]);
                 float pitch = Float.parseFloat(ds[5]);
                 this.spawn = new Location(world, x, y, z, yaw, pitch);
+            }
+        }
+        Object jailData = object.getOrDefault("jail", null);
+        if (jailData != null) {
+            String jd = (String) jailData;
+            String[] ds = jd.split(",");
+            World world = Bukkit.getWorld(ds[0]);
+            if (world != null) {
+                double x = Double.parseDouble(ds[1]);
+                double y = Double.parseDouble(ds[2]);
+                double z = Double.parseDouble(ds[3]);
+                float yaw = Float.parseFloat(ds[4]);
+                float pitch = Float.parseFloat(ds[5]);
+                this.townJail = new Location(world, x, y, z, yaw, pitch);
             }
         }
 
@@ -150,6 +166,14 @@ public class Town implements Comparable {
         initializeMapView();
     }
 
+    public void setTownJail(Location townJail) {
+        this.townJail = townJail;
+    }
+
+    public Location getTownJail() {
+        return townJail;
+    }
+
     public JSONObject toJSON(){
         JSONObject object = new JSONObject();
 
@@ -164,6 +188,7 @@ public class Town implements Comparable {
         object.put("salestax", getSalesTax());
 
         object.put("spawn", getSpawn()!=null?getSpawn().getWorld().getName()+","+getSpawn().getX()+","+getSpawn().getY()+","+getSpawn().getZ()+","+getSpawn().getYaw()+","+getSpawn().getPitch():null);
+        object.put("jail", getTownJail() != null ? getTownJail().getWorld().getName() + "," + getTownJail().getX() + "," + getTownJail().getY() + "," + getTownJail().getZ() + "," + getTownJail().getYaw() + "," + getTownJail().getPitch() : null);
         object.put("founded", getFounded());
         object.put("bonusland", getBonusLand());
 
@@ -929,6 +954,16 @@ public class Town implements Comparable {
                 plot.getAllowList().clear();
             });
             resident.getPlotChunks().clear();
+
+            if (resident.isJailed()) {
+                resident.setJailData(null);
+                if (getSpawn() != null) {
+                    Player pl = Bukkit.getPlayer(resident.getUuid());
+                    if (pl != null && pl.isOnline()) {
+                        pl.teleport(getSpawn());
+                    }
+                }
+            }
 
             // If this change effected the town level, downgrade the town
             if (getResidents().size() < getLevel().getResidents()){

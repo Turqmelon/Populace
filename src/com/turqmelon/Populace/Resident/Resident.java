@@ -59,6 +59,8 @@ public class Resident implements Comparable {
     private long lastBuildWarning = 0;
     private long fallImmunity = 0;
 
+    private JailData jailData = null;
+
     public Resident(UUID uuid, String name) {
         this.uuid = uuid;
         this.name = name;
@@ -75,6 +77,10 @@ public class Resident implements Comparable {
             this.town = TownManager.getTown(UUID.fromString(townid));
         }
         this.displayEntity = new DisplayEntity();
+        Object jaildata = object.get("jaildata");
+        if (jaildata != null) {
+            this.jailData = new JailData((JSONObject) jaildata);
+        }
     }
 
     public JSONObject toJSON() {
@@ -85,6 +91,7 @@ public class Resident implements Comparable {
         object.put("joined", getJoined());
         object.put("seen", getSeen());
         object.put("town", getTown()!=null?getTown().getUuid().toString():null);
+        object.put("jaildata", getJailData() != null ? getJailData().toJSON() : null);
         return object;
     }
 
@@ -275,6 +282,42 @@ public class Resident implements Comparable {
 
     public Map<UUID, Resident> getTownInvites() {
         return townInvites;
+    }
+
+    public long getLastBuildWarning() {
+        return lastBuildWarning;
+    }
+
+    public boolean isJailed() {
+
+        JailData data = getJailData();
+        if (data != null) {
+            if (data.getExpiration() != -1 && System.currentTimeMillis() > data.getExpiration()) {
+                setJailData(null);
+
+                if (getTown() != null) {
+                    getTown().sendTownBroadcast(TownRank.RESIDENT, getName() + " is now free from jail.");
+                    if (getTown().getSpawn() != null) {
+                        Player pl = Bukkit.getPlayer(getUuid());
+                        if (pl != null && pl.isOnline()) {
+                            pl.teleport(getTown().getSpawn());
+                        }
+                    }
+                } else {
+                    sendMessage(Msg.OK + "You're now free from jail. Teleporting abilities have been restored.");
+                }
+            }
+        }
+
+        return getJailData() != null;
+    }
+
+    public void setJailData(JailData jailData) {
+        this.jailData = jailData;
+    }
+
+    public JailData getJailData() {
+        return jailData;
     }
 
     public Runnable getPendingAction() {
