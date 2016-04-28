@@ -54,12 +54,16 @@ public class ClaimCommand implements CommandExecutor {
                             }
                             Chunk c = player.getLocation().getChunk();
                             int claimed = 0;
-                            for (int x = -radius; x <= radius; x++) {
-                                for (int z = -radius; z <= radius; z++) {
-                                    PlotChunk pc = new PlotChunk(c.getWorld(), c.getX() + x, c.getZ() + z);
-                                    if (town.claimLand(resident, pc, true)) {
-                                        pc.visualize(player);
-                                        claimed++;
+                            for (int i = 0; i < radius; i++) {
+                                int minx = -1 * i;
+                                int minz = -1 * i;
+                                for (int x = minx; x <= i; x++) {
+                                    for (int z = minz; z <= i; z++) {
+                                        PlotChunk ch = new PlotChunk(c.getWorld(), c.getX() + x, c.getZ() + z);
+                                        if (town.claimLand(resident, ch, true)) {
+                                            ch.visualize(player);
+                                            claimed++;
+                                        }
                                     }
                                 }
                             }
