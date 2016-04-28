@@ -20,6 +20,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Dispenser;
 
@@ -410,11 +411,32 @@ public class BlockListener implements Listener {
             if (resident == null || !plot.can(resident, PermissionSet.BUILD)){
                 event.setCancelled(true);
                 player.sendMessage(Msg.ERR + "You can't build there.");
+                return;
             }
 
         }
         else if (resident != null){
             resident.warnForBuilding();
+        }
+
+        BlockFace[] faces = {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
+        for (BlockFace face : faces) {
+            Block b = block.getRelative(face);
+
+            UUID blockOwner = UUID.randomUUID();
+            Plot blockPlot = PlotManager.getPlot(block.getChunk());
+            if (blockPlot != null) {
+                blockOwner = blockPlot.getOwnerUUID();
+            }
+
+            if ((b.getState() instanceof InventoryHolder) && (block.getState() instanceof InventoryHolder)) {
+                plot = PlotManager.getPlot(b.getChunk());
+                if (plot != null && !plot.getOwnerUUID().equals(blockOwner)) {
+                    event.setCancelled(true);
+                    player.sendMessage(Msg.ERR + "You can't place that here.");
+                    return;
+                }
+            }
         }
 
     }

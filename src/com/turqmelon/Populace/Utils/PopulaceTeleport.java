@@ -99,7 +99,6 @@ public class PopulaceTeleport {
             @Override
             public void run() {
                 if (getPlayer() == null || !getPlayer().isOnline()) {
-                    setRunning(false);
                     this.cancel();
                 } else {
                     if (!isAllowMovement()) {
@@ -107,7 +106,6 @@ public class PopulaceTeleport {
                             getPlayer().sendMessage(Msg.ERR + "Teleport cancelled. You moved!");
                             getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_BASS, 1, 0);
                             this.cancel();
-                            setRunning(false);
                             return;
                         }
                     }
@@ -130,10 +128,9 @@ public class PopulaceTeleport {
                             nextTeleport.put(getPlayer().getUniqueId(), now + (getCooldown() * 1000));
                         }
 
-                        setRunning(false);
                         this.cancel();
                     } else {
-                        getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_BASS_DRUM, 1, 1);
+                        getPlayer().playSound(getPlayer().getLocation(), Sound.CLICK, 1, 0);
                         getPlayer().sendMessage(Msg.INFO + "Teleport in §l" + ClockUtil.formatDateDiff(teleportTime, true) + "§b...");
                     }
                 }
