@@ -1,7 +1,6 @@
 package com.turqmelon.Populace.Utils;
 
 import com.turqmelon.Populace.Populace;
-import net.minecraft.server.v1_8_R3.Material;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -100,6 +99,7 @@ public class PopulaceTeleport {
             @Override
             public void run() {
                 if (getPlayer() == null || !getPlayer().isOnline()) {
+                    setRunning(false);
                     this.cancel();
                 } else {
                     if (!isAllowMovement()) {
@@ -107,6 +107,7 @@ public class PopulaceTeleport {
                             getPlayer().sendMessage(Msg.ERR + "Teleport cancelled. You moved!");
                             getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_BASS, 1, 0);
                             this.cancel();
+                            setRunning(false);
                             return;
                         }
                     }
@@ -114,19 +115,22 @@ public class PopulaceTeleport {
                     long teleportTime = getStart() + (getWarmup() * 1000);
                     long now = System.currentTimeMillis();
                     if (now >= teleportTime) {
-                        Location[] loc = {getOrigin(), getOrigin().clone().add(0, 1, 0), getLocation(), getLocation().clone().add(0, 1, 0)};
-                        for (Location l : loc) {
-                            l.getWorld().playSound(l, Sound.PORTAL_TRAVEL, 1, 1);
-                            l.getWorld().playEffect(l, Effect.STEP_SOUND, Material.PORTAL);
-                        }
 
                         getPlayer().teleport(getLocation());
                         getPlayer().sendMessage(Msg.OK + "Teleporting!");
+
+                        Location[] loc = {getOrigin(), getOrigin().clone().add(0, 1, 0), getLocation(), getLocation().clone().add(0, 1, 0)};
+                        for (Location l : loc) {
+                            l.getWorld().playSound(l, Sound.PORTAL_TRAVEL, 1, 1);
+                            l.getWorld().playEffect(l, Effect.STEP_SOUND, org.bukkit.Material.PORTAL);
+                        }
+
 
                         if (getCooldown() > 0) {
                             nextTeleport.put(getPlayer().getUniqueId(), now + (getCooldown() * 1000));
                         }
 
+                        setRunning(false);
                         this.cancel();
                     } else {
                         getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_BASS_DRUM, 1, 1);
