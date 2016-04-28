@@ -107,29 +107,29 @@ public class SetResidentRankGUI extends TownGUI {
 
             if (rank == TownRank.RESIDENT){
                 inv.setItem(19, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.RESIDENT.getDyeColor())
-                .withCustomName(rank.getPrefix()).withLore(Arrays.asList("§aCurrent Rank")).makeItGlow().build());
+                        .withCustomName(TownRank.RESIDENT.getPrefix()).withLore(Arrays.asList("§aCurrent Rank")).makeItGlow().build());
             }
             else{
                 inv.setItem(19, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.RESIDENT.getDyeColor())
-                        .withCustomName(rank.getPrefix()).withLore("§7Grants no special abilities.").tagWith("changerank", new NBTTagString(TownRank.RESIDENT.name())).build());
+                        .withCustomName(TownRank.RESIDENT.getPrefix()).withLore("§7Grants no special abilities.").tagWith("changerank", new NBTTagString(TownRank.RESIDENT.name())).build());
             }
 
             if (rank == TownRank.ASSISTANT){
                 inv.setItem(22, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.ASSISTANT.getDyeColor())
-                        .withCustomName(rank.getPrefix()).withLore(Arrays.asList("§aCurrent Rank")).makeItGlow().build());
+                        .withCustomName(TownRank.ASSISTANT.getPrefix()).withLore(Arrays.asList("§aCurrent Rank")).makeItGlow().build());
             }
             else{
                 inv.setItem(22, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.ASSISTANT.getDyeColor())
-                        .withCustomName(rank.getPrefix()).withLore("§7Can assist with plot management.").tagWith("changerank", new NBTTagString(TownRank.ASSISTANT.name())).build());
+                        .withCustomName(TownRank.ASSISTANT.getPrefix()).withLore("§7Can assist with plot management.").tagWith("changerank", new NBTTagString(TownRank.ASSISTANT.name())).build());
             }
 
             if (rank == TownRank.MANAGER){
                 inv.setItem(25, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MANAGER.getDyeColor())
-                        .withCustomName(rank.getPrefix()).withLore(Arrays.asList("§aCurrent Rank")).makeItGlow().build());
+                        .withCustomName(TownRank.MANAGER.getPrefix()).withLore(Arrays.asList("§aCurrent Rank")).makeItGlow().build());
             }
             else{
                 inv.setItem(25, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MANAGER.getDyeColor())
-                        .withCustomName(rank.getPrefix()).withLore("§7Can assist with resident management.").tagWith("changerank", new NBTTagString(TownRank.MANAGER.name())).build());
+                        .withCustomName(TownRank.MANAGER.getPrefix()).withLore("§7Can assist with resident management.").tagWith("changerank", new NBTTagString(TownRank.MANAGER.name())).build());
             }
 
             inv.setItem(40, new ItemBuilder(Material.BARRIER).withCustomName("§c§lKick Resident").build());

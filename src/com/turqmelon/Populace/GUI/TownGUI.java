@@ -265,6 +265,7 @@ public class TownGUI extends GUI {
         int index = 18;
         for(Resident resident : display){
             inv.setItem(index, getIcon(resident, getTown().getRank(getResident()).getPermissionLevel()>= TownRank.MANAGER.getPermissionLevel()));
+            index++;
         }
 
         if (nextPage){

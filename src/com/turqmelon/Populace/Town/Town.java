@@ -349,8 +349,8 @@ public class Town implements Comparable {
         return set.getDefaultRank();
     }
 
-    public boolean claimLand(Resident resident, PlotChunk chunk){
-        return claimLand(resident, chunk, false);
+    public boolean claimLand(Resident resident, PlotChunk chunk, boolean silent) {
+        return claimLand(resident, chunk, false, silent);
     }
 
     private boolean buyChunk(Resident resident, PlotChunk chunk, boolean outpost){
@@ -398,8 +398,8 @@ public class Town implements Comparable {
                 this.mv = Bukkit.createMap(getPlots().get(0).getPlotChunk().getWorld());
                 this.mvid = getMapView().getId();
             }
+            getMapView().addRenderer(new TownMapRenderer(this));
         }
-        getMapView().addRenderer(new TownMapRenderer(this));
     }
 
     public boolean unclaimLand(Resident resident, Plot plot){
@@ -533,67 +533,64 @@ public class Town implements Comparable {
         return false;
     }
 
-    private boolean claimLand(Resident resident, PlotChunk chunk, boolean confirmed){
+    private boolean claimLand(Resident resident, PlotChunk chunk, boolean confirmed, boolean silent) {
         TownRank rank = getRank(resident);
-        if (rank.getPermissionLevel() >= TownRank.ASSISTANT.getPermissionLevel()){
 
-            ClaimFailureReason reason = canClaimLand(chunk);
-            switch(reason){
-                case ALL_LAND_USED:
-                    resident.sendMessage(Msg.ERR + "Town can't claim anymore land at it's current size.");
-                    if (rank == TownRank.MAYOR){
-                        resident.sendMessage(Msg.ERR + "Consider buying bonus land from your §f/town§c menu or inviting more residents.");
-                    }
-                    else{
-                        resident.sendMessage(Msg.ERR + "Consider asking the Mayor to buy bonus land.");
-                    }
-                    return false;
-                case ALREADY_CLAIMED:
+        ClaimFailureReason reason = canClaimLand(chunk);
+        switch (reason) {
+            case ALL_LAND_USED:
+                resident.sendMessage(Msg.ERR + "Town can't claim anymore land at it's current size.");
+                if (rank == TownRank.MAYOR) {
+                    resident.sendMessage(Msg.ERR + "Consider buying bonus land from your §f/town§c menu or inviting more residents.");
+                } else {
+                    resident.sendMessage(Msg.ERR + "Consider asking the Mayor to buy bonus land.");
+                }
+                return false;
+            case ALREADY_CLAIMED:
 
-                    Plot plot = PlotManager.getPlot(chunk);
-                    if (plot.getTown().getUuid().equals(getUuid()) && (plot.getInvited().contains(resident.getUuid())||plot.isForSale())){
-                        double price = plot.getPrice();
-                        if (confirmed){
-                            Account account = AccountManager.getAccount(resident.getUuid());
-                            if (price == 0 || (account != null && account.withdraw(Populace.getCurrency(), price))){
-                                setBank(getBank()+price);
-                                resident.getPlotChunks().add(chunk);
-                                plot.setOwner(resident);
-                                plot.setPrice(0);
-                                plot.setForSale(false);
-                                plot.getInvited().clear();
-                                if (price > 0){
-                                    sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " bought a plot for " + Populace.getCurrency().format(price) + "!");
-                                }
-                                else{
-                                    sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " accepted an invitation to claim a plot!");
-                                }
+                Plot plot = PlotManager.getPlot(chunk);
+                if (plot.getTown().getUuid().equals(getUuid()) && (plot.getInvited().contains(resident.getUuid()) || plot.isForSale())) {
+                    double price = plot.getPrice();
+                    if (confirmed) {
+                        Account account = AccountManager.getAccount(resident.getUuid());
+                        if (price == 0 || (account != null && account.withdraw(Populace.getCurrency(), price))) {
+                            setBank(getBank() + price);
+                            resident.getPlotChunks().add(chunk);
+                            plot.setOwner(resident);
+                            plot.setPrice(0);
+                            plot.setForSale(false);
+                            plot.getInvited().clear();
+                            if (price > 0) {
+                                sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " bought a plot for " + Populace.getCurrency().format(price) + "!");
                             }
                             else{
-                                resident.sendMessage(Msg.ERR + "You don't have enough " + Populace.getCurrency().getPlural() + "!");
+                                sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " accepted an invitation to claim a plot!");
                             }
                         }
                         else{
-                            if (price > 0){
-                                resident.sendMessage(Msg.INFO + "Purchase this plot from the town for " + Populace.getCurrency().format(price) + "?");
-                                resident.setPendingAction(() -> claimLand(resident, chunk, true));
-                            }
-                            else{
-                                resident.sendMessage(Msg.INFO + "Claim this plot as yours?");
-                                resident.setPendingAction(() -> claimLand(resident, chunk, true));
-                            }
-
+                            resident.sendMessage(Msg.ERR + "You don't have enough " + Populace.getCurrency().getPlural() + "!");
                         }
-                        return true;
-                    }else{
-                        resident.sendMessage(Msg.ERR + "That land is already claimed and not for sale.");
-                    }
-                    return false;
-                case TOO_CLOSE_TO_TOWN:
-                    resident.sendMessage(Msg.ERR + "You can't place your first claim here, as it's within " + Configuration.TOWN_MINIMUM_BUFFER + " blocks of another town's borders.");
-                    return false;
-                case REQUIRE_OUTPOST:
+                    } else {
+                        if (price > 0) {
+                            resident.sendMessage(Msg.INFO + "Purchase this plot from the town for " + Populace.getCurrency().format(price) + "?");
+                            resident.setPendingAction(() -> claimLand(resident, chunk, true, silent));
+                        } else {
+                            resident.sendMessage(Msg.INFO + "Claim this plot as yours?");
+                            resident.setPendingAction(() -> claimLand(resident, chunk, true, silent));
+                        }
 
+                    }
+                    return true;
+                } else {
+                    if (!silent) resident.sendMessage(Msg.ERR + "That land is already claimed and not for sale.");
+                }
+                return false;
+            case TOO_CLOSE_TO_TOWN:
+                resident.sendMessage(Msg.ERR + "You can't place your first claim here, as it's within " + Configuration.TOWN_MINIMUM_BUFFER + " blocks of another town's borders.");
+                return false;
+            case REQUIRE_OUTPOST:
+
+                if (getRank(resident).isAtLeast(TownRank.MANAGER)) {
                     if (getLevel().getResidents() >= TownLevel.CITY.getResidents()){
                         if (confirmed){
                             return buyChunk(resident, chunk, true);
@@ -601,7 +598,7 @@ public class Town implements Comparable {
                         else{
                             resident.sendMessage(Msg.INFO + "This land is not adjacent to any existing town claim, so it must be an outpost.");
                             resident.sendMessage(Msg.INFO + "Outposts have a higher daily upkeep than normal claims.");
-                            resident.setPendingAction(() -> claimLand(resident, chunk, true));
+                            resident.setPendingAction(() -> claimLand(resident, chunk, true, silent));
                         }
                         return true;
                     }
@@ -609,18 +606,24 @@ public class Town implements Comparable {
                         resident.sendMessage(Msg.ERR + "To claim an outpost, your town must be a City. (" + TownLevel.CITY.getResidents() + " Residents)");
                         resident.sendMessage(Msg.ERR + "Land claims must be adjacent to existing claims to not be considered outposts.");
                     }
+                } else {
+                    resident.sendMessage(Msg.ERR + "Only Managers can claim outposts.");
+                }
 
-                    return false;
-                default:
+
+                return false;
+            default:
+
+                if (getRank(resident).isAtLeast(TownRank.ASSISTANT)) {
                     return buyChunk(resident, chunk, false);
+                } else {
+                    resident.sendMessage(Msg.ERR + "Only Assistants can claim land.");
+                    return false;
+                }
 
-            }
 
         }
-        else{
-            resident.sendMessage(Msg.ERR + "Only town assistants can claim land.");
-        }
-        return false;
+
     }
 
     private ClaimFailureReason canClaimLand(PlotChunk chunk){
@@ -799,7 +802,7 @@ public class Town implements Comparable {
         }
 
         for(TownLevel level : TownLevel.values()){
-            if (level.getResidents() > getResidents().size()){
+            if (level.getResidents() > getLevel().getResidents()) {
                 return level;
             }
         }
@@ -872,23 +875,29 @@ public class Town implements Comparable {
         }
     }
 
-    private void joinTown(Resident resident){
-        if (resident.getTown() == null){
-            getResidents().put(resident, TownRank.RESIDENT);
-            resident.setTown(this);
-            if (getNextLevel() != null && getResidents().size() >= getNextLevel().getResidents()){
-                TownLevel newLevel = TownLevel.getAppropriateLevel(getResidents().size());
-                setLevel(newLevel);
-                sendTownBroadcast(TownRank.RESIDENT, getName() + " has leveled up to §f" + newLevel.getName() + "§d!");
-                sendTownBroadcast(TownRank.RESIDENT, "Maximum land has been increased for expansion.");
-            }
-            resident.sendMessage(Msg.OK + "Welcome to " + getName() + getLevel().getSuffix() + "!");
-            if (resident.getDailyTax() > 0){
-                resident.sendMessage(Msg.OK + "To live here, there is a daily tax of " + Populace.getCurrency().format(resident.getDailyTax()) + ".");
-                resident.sendMessage(Msg.OK + "If you cannot afford the tax, you will be kicked from the town.");
-                resident.sendMessage(Msg.OK + "The next collection time is in " + Populace.getNewDayCountdown() + ".");
-            }
+    private boolean joinTown(Resident resident) {
+        getResidents().put(resident, TownRank.RESIDENT);
+        resident.setTown(this);
+        ResidentJoinTownEvent event = new ResidentJoinTownEvent(this, resident, null);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            getResidents().remove(resident);
+            resident.setTown(null);
+            return false;
         }
+        resident.sendMessage(Msg.OK + "Welcome to " + getName() + getLevel().getSuffix() + "!");
+        if (getNextLevel() != null && getResidents().size() >= getNextLevel().getResidents()) {
+            TownLevel newLevel = TownLevel.getAppropriateLevel(getResidents().size());
+            setLevel(newLevel);
+            sendTownBroadcast(TownRank.RESIDENT, getName() + " has leveled up to §f" + newLevel.getName() + "§d!");
+            sendTownBroadcast(TownRank.RESIDENT, "Maximum land has been increased for expansion.");
+        }
+        if (resident.getDailyTax() > 0) {
+            resident.sendMessage(Msg.OK + "To live here, there is a daily tax of " + Populace.getCurrency().format(resident.getDailyTax()) + ".");
+            resident.sendMessage(Msg.OK + "If you cannot afford the tax, you will be kicked from the town.");
+            resident.sendMessage(Msg.OK + "The next collection time is in " + Populace.getNewDayCountdown() + ".");
+        }
+        return true;
     }
 
     // Called when a user is removed from a town
@@ -940,14 +949,9 @@ public class Town implements Comparable {
 
                 if (getPlots().size() > 0){
 
-                    ResidentJoinTownEvent event = new ResidentJoinTownEvent(this, resident, null);
-                    Bukkit.getPluginManager().callEvent(event);
-                    if (event.isCancelled()) {
-                        return;
+                    if (joinTown(resident)) {
+                        sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " joined " + getName() + getLevel().getSuffix() + "!");
                     }
-
-                    joinTown(resident);
-                    sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " joined "  + getName() + getLevel().getSuffix() + "!");
 
                 }
                 else{
@@ -972,15 +976,11 @@ public class Town implements Comparable {
 
                 if (getPlots().size() > 0) {
 
-                    ResidentJoinTownEvent event = new ResidentJoinTownEvent(this, resident, resident.getTownInvites().get(getUuid()));
-                    Bukkit.getPluginManager().callEvent(event);
-                    if (event.isCancelled()) {
-                        return;
-                    }
 
-                    joinTown(resident);
-                    sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " joined " + getName() + getLevel().getSuffix() + " on behalf of " + resident.getTownInvites().get(getUuid()).getName() + "'s invitation!");
-                    resident.getTownInvites().remove(getUuid());
+                    if (joinTown(resident)) {
+                        sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " joined " + getName() + getLevel().getSuffix() + " on behalf of " + resident.getTownInvites().get(getUuid()).getName() + "'s invitation!");
+                        resident.getTownInvites().remove(getUuid());
+                    }
 
                 }
                 else{
@@ -1005,11 +1005,11 @@ public class Town implements Comparable {
             return;
         }
 
-        TownRank rank = getRank(resident);
 
         if (kicker != null){
+            TownRank rank = getRank(resident);
             if (rank.getPermissionLevel() < getRank(kicker).getPermissionLevel()){
-                if (rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()){
+                if (getRank(kicker).getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()) {
                     ResidentKickedFromTownEvent event = new ResidentKickedFromTownEvent(this, resident, kicker);
                     Bukkit.getPluginManager().callEvent(event);
                     sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " was kicked by " + kicker.getName() + (reason!=null?" for " + reason + "!":"!"));

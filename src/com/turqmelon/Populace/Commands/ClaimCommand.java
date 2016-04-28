@@ -42,11 +42,44 @@ public class ClaimCommand implements CommandExecutor {
                 Town town = resident.getTown();
                 if (town != null){
 
-                    Chunk c = player.getLocation().getChunk();
-                    PlotChunk pc = new PlotChunk(c.getWorld(), c.getX(), c.getZ());
-                    if (town.claimLand(resident, pc)){
-                        pc.visualize(player);
+                    if (args.length == 1) {
+                        try {
+                            int radius = Integer.parseInt(args[0]);
+                            if (radius < 1) {
+                                throw new NumberFormatException();
+                            }
+                            if (radius > 5) {
+                                player.sendMessage(Msg.ERR + "Radius can't be larger than 5.");
+                                return true;
+                            }
+                            Chunk c = player.getLocation().getChunk();
+                            int claimed = 0;
+                            for (int x = -radius; x <= radius; x++) {
+                                for (int z = -radius; z <= radius; z++) {
+                                    PlotChunk pc = new PlotChunk(c.getWorld(), c.getX() + x, c.getZ() + z);
+                                    if (town.claimLand(resident, pc, true)) {
+                                        pc.visualize(player);
+                                        claimed++;
+                                    }
+                                }
+                            }
+                            if (claimed > 0) {
+                                sender.sendMessage(Msg.OK + "Claimed " + claimed + " chunk(s).");
+                            } else {
+                                sender.sendMessage(Msg.ERR + "Claimed no chunks.");
+                            }
+                        } catch (NumberFormatException ex) {
+                            sender.sendMessage(Msg.ERR + "Please enter a valid radius.");
+                        }
+                    } else {
+                        Chunk c = player.getLocation().getChunk();
+                        PlotChunk pc = new PlotChunk(c.getWorld(), c.getX(), c.getZ());
+                        if (town.claimLand(resident, pc, false)) {
+                            pc.visualize(player);
+                        }
                     }
+
+
 
                 }
                 else{
