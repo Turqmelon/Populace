@@ -99,8 +99,7 @@ public class TaxesGUI extends TownGUI {
             getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " changed the §fPlot Tax§d to " + Populace.getCurrency().format(getTown().getPlotTax()) + ".");
 
             repopulate();
-        }
-        else if (raw == 25){
+        } else if (raw == 25 && Populace.isPopulaceMarketLoaded()) {
             int modifier = event.isShiftClick() ? 5 : 1;
             double newPerc = getTown().getSalesTax();
 
@@ -162,22 +161,25 @@ public class TaxesGUI extends TownGUI {
                                 "§aLeft Click§f to increase by " + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)",
                                 "§aRight Click§f to decrease by " + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)")).build());
 
-        inv.setItem(25, new ItemBuilder(Material.DIAMOND).withCustomName("§b§lSales Tax")
-                .withLore(Arrays.asList("" +
-                                "§bSales Tax§7 is taken out of shop purchases within",
-                                "§7your town. Lower sales tax will encourage more merchants",
-                                "§7to live here.",
-                                "§7",
-                                "§9§lExample:",
-                                "§9An item is priced for " + Populace.getCurrency().format(200) + ".",
-                                "§9Your §bSales Tax§9 is " + new DecimalFormat("#.#").format(getTown().getSalesTax()) + "%.",
-                                "§9The town will receive " + (getTown().getSalesTax()==0?0:Populace.getCurrency().format((200*(getTown().getSalesTax()/100.0)))) + ".",
-                                "§9The merchant will receive " + (getTown().getSalesTax()==0?Populace.getCurrency().format(200):Populace.getCurrency().format((200*((100.0-getTown().getSalesTax())/100.0)))) + ".",
-                                "§7",
-                                "§fSales Tax §e" + new DecimalFormat("#.#").format(getTown().getSalesTax()) + "%",
-                                "§7",
-                                "§aLeft Click§f to increase by 1%. (§aShift§f for 5%.)",
-                                "§aRight Click§f to decrease by 1%. (§aShift§f for 5%.)")).build());
+        if (Populace.isPopulaceMarketLoaded()) {
+            inv.setItem(25, new ItemBuilder(Material.DIAMOND).withCustomName("§b§lSales Tax")
+                    .withLore(Arrays.asList("" +
+                                    "§bSales Tax§7 is taken out of shop purchases within",
+                            "§7your town. Lower sales tax will encourage more merchants",
+                            "§7to live here.",
+                            "§7",
+                            "§9§lExample:",
+                            "§9An item is priced for " + Populace.getCurrency().format(200) + ".",
+                            "§9Your §bSales Tax§9 is " + new DecimalFormat("#.#").format(getTown().getSalesTax()) + "%.",
+                            "§9The town will receive " + (getTown().getSalesTax() == 0 ? 0 : Populace.getCurrency().format((200 * (getTown().getSalesTax() / 100.0)))) + ".",
+                            "§9The merchant will receive " + (getTown().getSalesTax() == 0 ? Populace.getCurrency().format(200) : Populace.getCurrency().format((200 * ((100.0 - getTown().getSalesTax()) / 100.0)))) + ".",
+                            "§7",
+                            "§fSales Tax §e" + new DecimalFormat("#.#").format(getTown().getSalesTax()) + "%",
+                            "§7",
+                            "§aLeft Click§f to increase by 1%. (§aShift§f for 5%.)",
+                            "§aRight Click§f to decrease by 1%. (§aShift§f for 5%.)")).build());
+        }
+
 
     }
 }

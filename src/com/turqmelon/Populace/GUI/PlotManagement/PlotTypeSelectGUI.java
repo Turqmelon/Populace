@@ -101,20 +101,22 @@ public class PlotTypeSelectGUI extends PlotGUI {
             )).build());
         }
 
-        if (getPlot().getType() == PlotType.MERCHANT){
-            inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§a§lMerchant Plot").withLore(Arrays.asList("§7Selected!")).makeItGlow().build());
+        if (Populace.isPopulaceMarketLoaded()) {
+            if (getPlot().getType() == PlotType.MERCHANT) {
+                inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§a§lMerchant Plot").withLore(Arrays.asList("§7Selected!")).makeItGlow().build());
+            } else {
+                inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§b§lMerchant Plot").withLore(Arrays.asList(
+                        "§bMerchant Plots§7 offer the same protections",
+                        "§7as §bResidential Plots§7, with the extra ability",
+                        "§7to create shops within the plot.",
+                        "§7",
+                        "§fDaily Cost §e" + Populace.getCurrency().format(PlotType.MERCHANT.getDailyCost()),
+                        "§a",
+                        "§aLeft Click§f to change plot type."
+                )).build());
+            }
         }
-        else{
-            inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§b§lMerchant Plot").withLore(Arrays.asList(
-                    "§bMerchant Plots§7 offer the same protections",
-                    "§7as §bResidential Plots§7, with the extra ability",
-                    "§7to create shops within the plot.",
-                    "§7",
-                    "§fDaily Cost §e" + Populace.getCurrency().format(PlotType.MERCHANT.getDailyCost()),
-                    "§a",
-                    "§aLeft Click§f to change plot type."
-            )).build());
-        }
+
 
         if (getPlot().getType() == PlotType.BATTLE){
             inv.setItem(25, new ItemBuilder(Material.IRON_CHESTPLATE).withCustomName("§a§lBattle Plot").withLore(Arrays.asList("§7Selected!")).makeItGlow().build());

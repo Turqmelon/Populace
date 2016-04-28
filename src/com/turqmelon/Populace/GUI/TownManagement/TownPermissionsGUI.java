@@ -1,6 +1,7 @@
 package com.turqmelon.Populace.GUI.TownManagement;
 
 import com.turqmelon.Populace.GUI.TownGUI;
+import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Town.Town;
@@ -103,6 +104,7 @@ public class TownPermissionsGUI extends TownGUI {
 
         for(PermissionSet set : PermissionSet.values()){
             if (!set.isApplicableTo(PermissionSet.PermissionScope.TOWN))continue;
+            if (set == PermissionSet.SHOP && !Populace.isPopulaceMarketLoaded()) continue;
 
             TownRank setting = getTown().getRequiredRank(set);
 

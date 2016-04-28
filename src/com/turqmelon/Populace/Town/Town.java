@@ -749,7 +749,7 @@ public class Town implements Comparable {
                         "§6§l" + getName() + getLevel().getSuffix() + " Taxes",
                         "§fResident Tax §e" + Populace.getCurrency().format(getTax()),
                         "§fPlot Tax §e" + Populace.getCurrency().format(getPlotTax()),
-                        "§fSales Tax §e" + new DecimalFormat("#.#").format(getSalesTax())  + "%",
+                        (Populace.isPopulaceMarketLoaded() ? "§fSales Tax §e" + new DecimalFormat("#.#").format(getSalesTax()) + "%" : "§fSales Tax §8--%"),
                         "§a",
                         "§6§lUpkeep",
                         "§fDaily" + getLevel().getSuffix() + " Upkeep " + (getBank()>=getDailyUpkeep()?"§a":"§c") + Populace.getCurrency().format(getDailyUpkeep()),

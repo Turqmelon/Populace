@@ -22,6 +22,7 @@ package com.turqmelon.Populace.GUI.PlotManagement;
 
 import com.turqmelon.Populace.GUI.PlotGUI;
 import com.turqmelon.Populace.Plot.Plot;
+import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Town.TownRank;
@@ -99,6 +100,7 @@ public class PlotPermissionsGUI extends PlotGUI {
 
         for(PermissionSet set : PermissionSet.values()){
             if (!set.isApplicableTo(PermissionSet.PermissionScope.PLOT))continue;
+            if (set == PermissionSet.SHOP && !Populace.isPopulaceMarketLoaded()) continue;
 
             TownRank setting = getPlot().getRequiredRank(set);
 
