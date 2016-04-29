@@ -36,6 +36,7 @@ public abstract class GUI {
     private boolean allowDrag = false;
     private boolean allowShiftClicking = false;
     private BukkitRunnable updaterTask;
+    protected Player player = null;
 
     public GUI(String title, int size) {
         this.bukkitInventory = Bukkit.createInventory(null, getInvSizeForCount(size), title);
@@ -56,6 +57,7 @@ public abstract class GUI {
     }
 
     public final void open(Player p) {
+        this.player = p;
         try {
             if (!this.populated) {
                 this.populate();

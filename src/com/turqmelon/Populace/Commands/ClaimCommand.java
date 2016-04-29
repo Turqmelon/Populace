@@ -34,6 +34,11 @@ public class ClaimCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
 
+        if (!sender.hasPermission("populace.commands." + command.getName().toLowerCase())) {
+            sender.sendMessage(Msg.ERR + "You don't have permission for that.");
+            return true;
+        }
+
         if ((sender instanceof Player)){
             Player player = (Player)sender;
             Resident resident = ResidentManager.getResident(player);

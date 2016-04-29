@@ -35,7 +35,10 @@ import org.bukkit.entity.Player;
 public class VisitCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-
+        if (!sender.hasPermission("populace.commands." + command.getName().toLowerCase())) {
+            sender.sendMessage(Msg.ERR + "You don't have permission for that.");
+            return true;
+        }
         if ((sender instanceof Player)){
             Player player = (Player)sender;
             Resident resident = ResidentManager.getResident(player);
@@ -45,8 +48,7 @@ public class VisitCommand implements CommandExecutor {
 
                 if (args.length == 0 && resident.getTown() != null){
                     town = resident.getTown();
-                }
-                else if (args.length >= 1){
+                } else if (args.length >= 1 && sender.hasPermission("populace.commands.visit.other")) {
 
                     town = TownManager.getTown(args[0]);
 

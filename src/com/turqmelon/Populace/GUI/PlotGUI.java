@@ -4,6 +4,7 @@ import com.turqmelon.Populace.GUI.PlotManagement.PlotAllowListGUI;
 import com.turqmelon.Populace.GUI.PlotManagement.PlotPermissionsGUI;
 import com.turqmelon.Populace.GUI.PlotManagement.PlotTypeSelectGUI;
 import com.turqmelon.Populace.Plot.Plot;
+import com.turqmelon.Populace.Plot.PlotType;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Town.PermissionSet;
@@ -57,7 +58,7 @@ public class PlotGUI extends GUI {
 
         TownRank rank = getPlot().getTown().getRank(getResident());
 
-        if (raw == 19 && rank.isAtLeast(TownRank.MANAGER)){
+        if (raw == 19 && rank.isAtLeast(TownRank.MANAGER) && player.hasPermission("populace.commands.giveplot")) {
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             player.closeInventory();
             player.chat("/giveplot");
@@ -65,16 +66,14 @@ public class PlotGUI extends GUI {
         else if (raw == 21){
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             if (rank.isAtLeast(TownRank.ASSISTANT)){
-                if (getPlot().isForSale()){
+                if (getPlot().isForSale() && player.hasPermission("populace.commands.notforsale")) {
                     player.chat("/notforsale");
                     repopulate();
-                }
-                else{
+                } else if (player.hasPermission("populace.commands.forsale")) {
                     player.closeInventory();
                     player.chat("/forsale");
                 }
-            }
-            else{
+            } else if (player.hasPermission("populace.commands.claim")) {
                 player.closeInventory();
                 player.chat("/claim");
             }
@@ -83,8 +82,7 @@ public class PlotGUI extends GUI {
             PlotPermissionsGUI gui = new PlotPermissionsGUI(getResident(), getPlot());
             gui.open(player);
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
-        }
-        else if (raw == 25 && ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel())){
+        } else if (raw == 25 && player.hasPermission("populace.commands.allow") && ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel())) {
             if (event.isRightClick()){
                 player.playSound(player.getLocation(), Sound.EXPLODE, 1, 1);
                 getPlot().getAllowList().clear();
@@ -95,13 +93,11 @@ public class PlotGUI extends GUI {
                 gui.open(player);
                 player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             }
-        }
-        else if (raw == 37 && rank.isAtLeast(TownRank.MANAGER)){
+        } else if (raw == 37 && rank.isAtLeast(TownRank.MANAGER) && getPlot().getType() != PlotType.OUTPOST) {
             PlotTypeSelectGUI gui = new PlotTypeSelectGUI(getResident(), getPlot());
             gui.open(player);
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
-        }
-        else if (raw == 43 && ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel())){
+        } else if (raw == 43 && player.hasPermission("populace.commands.unclaim") && ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel())) {
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             player.closeInventory();
             player.chat("/unclaim");
@@ -120,7 +116,7 @@ public class PlotGUI extends GUI {
 
         List<String> ownerInfo = new ArrayList<>();
 
-        if (rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()){
+        if (rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel() && player.hasPermission("populace.commands.giveplot")) {
             ownerInfo.add("§7You can invite residents to");
             ownerInfo.add("§7claim this plot. Simply stand inside");
             ownerInfo.add("§7it, and type §f/givePlot <Resident>§7.");
@@ -131,7 +127,7 @@ public class PlotGUI extends GUI {
                 .withLore(ownerInfo).build());
 
         List<String> saleInfo = new ArrayList<>();
-        if (rank.getPermissionLevel() >= TownRank.ASSISTANT.getPermissionLevel()){
+        if (rank.getPermissionLevel() >= TownRank.ASSISTANT.getPermissionLevel() && (player.hasPermission("populace.commands.forsale") || player.hasPermission("populace.commands.notforsale"))) {
             saleInfo.add("§7");
             saleInfo.add("§6§lSell a Plot");
             saleInfo.add("§f/forSale <Price>");
@@ -140,15 +136,16 @@ public class PlotGUI extends GUI {
             saleInfo.add("§f/notForSale");
             saleInfo.add("§7");
             saleInfo.add("§7Sold plot profits go to the bank.");
-        }
-        else{
+        } else if (player.hasPermission("populace.commands.claim")) {
             saleInfo.add("§7Purchase plots for sale by standing");
             saleInfo.add("§7inside them and typing §f/claim§7.");
         }
 
-        inv.setItem(21, new ItemBuilder(Material.DIAMOND)
-                .withCustomName("§b§l" + (getPlot().isForSale()?"For Sale: " + Populace.getCurrency().format(getPlot().getPrice())
-                        :"Not for Sale")).withLore(saleInfo).build());
+        if (player.hasPermission("populace.commands.claim") && player.hasPermission("populace.commands.forsale") && player.hasPermission("populace.commands.notforsale")) {
+            inv.setItem(21, new ItemBuilder(Material.DIAMOND)
+                    .withCustomName("§b§l" + (getPlot().isForSale() ? "For Sale: " + Populace.getCurrency().format(getPlot().getPrice())
+                            : "Not for Sale")).withLore(saleInfo).build());
+        }
 
         List<String> list = new ArrayList<>();
 
@@ -176,7 +173,7 @@ public class PlotGUI extends GUI {
         allowList.add("§7the permission restrictions of the plot.");
         allowList.add("§7");
         allowList.add("§fAllow List §e" + getPlot().getAllowList().size());
-        if ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()){
+        if ((plot.getOwner() != null && player.hasPermission("populace.commands.allow") && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()) {
             allowList.add("§7");
             allowList.add("§6§lAdd a Resident to Allow List");
             allowList.add("§f/allow <Resident>");
@@ -188,10 +185,14 @@ public class PlotGUI extends GUI {
         inv.setItem(25, new ItemBuilder(Material.BOOK_AND_QUILL).withCustomName("§b§lAllow List").withLore(allowList).build());
 
         if (rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()){
-            inv.setItem(37, new ItemBuilder(Material.WORKBENCH).withCustomName("§b§lPlot Type: §f§l" + getPlot().getType().getName()).withLore(Arrays.asList("§aLeft Click§f to change.")).build());
+            if (plot.getType() == PlotType.OUTPOST) {
+                inv.setItem(37, new ItemBuilder(Material.WORKBENCH).withCustomName("§b§lPlot Type: §f§l" + getPlot().getType().getName()).build());
+            } else {
+                inv.setItem(37, new ItemBuilder(Material.WORKBENCH).withCustomName("§b§lPlot Type: §f§l" + getPlot().getType().getName()).withLore(Arrays.asList("§aLeft Click§f to change.")).build());
+            }
         }
 
-        if ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()) {
+        if ((plot.getOwner() != null && player.hasPermission("populace.commands.unclaim") && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()) {
             inv.setItem(43, new ItemBuilder(Material.BARRIER).withCustomName("§c§lUnclaim Plot").build());
 
         }

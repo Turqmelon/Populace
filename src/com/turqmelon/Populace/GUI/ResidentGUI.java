@@ -53,12 +53,11 @@ public class ResidentGUI extends GUI {
         Player player = (Player)event.getWhoClicked();
         int raw = event.getRawSlot();
 
-        if (raw == 45 && getPage() > 1){
+        if (raw == 45 && getPage() > 1 && player.hasPermission("populace.commands.resident.viewplots")) {
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             setPage(getPage()-1);
             repopulate();
-        }
-        else if (raw == 53 && hasNextPage){
+        } else if (raw == 53 && hasNextPage && player.hasPermission("populace.commands.resident.viewplots")) {
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             setPage(getPage()+1);
             repopulate();
@@ -73,44 +72,46 @@ public class ResidentGUI extends GUI {
 
         inv.setItem(4, getResident().getIcon());
 
-        List<PlotChunk> land = getResident().getPlotChunks();
+        if (player.hasPermission("populace.commands.resident.viewplots")) {
+            List<PlotChunk> land = getResident().getPlotChunks();
 
-        int itemsPerPage = 27;
-        int startIndex = 0;
-        int endIndex = (itemsPerPage-1);
+            int itemsPerPage = 27;
+            int startIndex = 0;
+            int endIndex = (itemsPerPage - 1);
 
-        boolean nextPage = true;
+            boolean nextPage = true;
 
-        List<Plot> display = new ArrayList<>();
+            List<Plot> display = new ArrayList<>();
 
-        for(int i = startIndex; i <= endIndex; i++){
-            if (i < land.size()){
-                Plot plot = PlotManager.getPlot(land.get(i));
-                if (plot!=null){
-                    display.add(plot);
+            for (int i = startIndex; i <= endIndex; i++) {
+                if (i < land.size()) {
+                    Plot plot = PlotManager.getPlot(land.get(i));
+                    if (plot != null) {
+                        display.add(plot);
+                    }
+                } else {
+                    nextPage = false;
+                    break;
                 }
             }
-            else{
-                nextPage = false;
-                break;
+
+            hasNextPage = nextPage;
+
+            int index = 18;
+            for (Plot plot : display) {
+                inv.setItem(index, plot.getIcon());
+                index++;
+            }
+
+            if (nextPage) {
+                inv.setItem(53, new ItemBuilder(Material.ARROW).withCustomName("§e§lNEXT >").build());
+            }
+
+            if (getPage() > 1) {
+                inv.setItem(45, new ItemBuilder(Material.ARROW).withCustomName("§e§l< BACK").build());
             }
         }
 
-        hasNextPage = nextPage;
-
-        int index = 18;
-        for(Plot plot : display){
-            inv.setItem(index, plot.getIcon());
-            index++;
-        }
-
-        if (nextPage){
-            inv.setItem(53, new ItemBuilder(Material.ARROW).withCustomName("§e§lNEXT >").build());
-        }
-
-        if (getPage() > 1){
-            inv.setItem(45, new ItemBuilder(Material.ARROW).withCustomName("§e§l< BACK").build());
-        }
 
     }
 

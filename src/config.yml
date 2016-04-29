@@ -1,0 +1,64 @@
+config:
+  teleportation-cooldown-time:
+    value: 10
+    description: 'The amount of seconds a player must wait before teleporting again'
+    notes: 'Give a player populace.teleportation.nocooldown to bypass'
+  teleportation-warmup-time:
+    value: 10
+    description: 'The amount of seconds teleportations will take'
+    notes: 'Give a player populace.teleportation.nowarmup to bypass'
+  purge-user-data-days:
+    value: 180
+    description: 'If a resident does not login for this amount of days their data will be purged'
+    notes: 'Users in a town are exempt. It is assumed that they are paying a form of daily tax to stay in one'
+  wilderness-pvp:
+    value: true
+    description: 'Whether or not Populace should allow PVP in the wilderness'
+  town-minimum-buffer:
+    value: 250
+    description: 'The minimum amount of blocks a town first claim must be from another town'
+  town-bank-default:
+    value: 100
+    description: 'The amount of currency that new town banks will have.'
+    notes: 'Make this less then the creation fee to avoid infinite money generation'
+  town-default-tax:
+    value: 0
+    description: 'The default resident tax for new towns'
+  town-default-sales-tax:
+    value: 0
+    description: 'The default sales tax for new towns. Requires PopulaceMarket.'
+  town-default-plot-tax:
+    value: 0
+    description: 'The default plot tax for new towns.'
+  town-minimum-upkeep:
+    value: 25
+    description: 'Added to the town daily upkeep regardless of anything else.'
+  town-grace-period-hours:
+    value: 24
+    description: 'The amount of hours the new town grace period lasts'
+    notes: 'Towns will never be charged a daily upkeep until the period expires'
+  new-day-interval:
+    value: 24
+    description: 'How often the new day code is run in hours'
+    notes: 'Each New Day taxes are collected from residents of towns and upkeep is collected from towns'
+  residential-daily-cost:
+    value: 10
+    description: 'The cost per day per residential plot a town has'
+  merchant-daily-cost:
+    value: 20
+    description: 'The cost per day per merchant plot a town has. Requires PopulaceMarket.'
+  battle-daily-cost:
+    value: 10
+    description: 'The cost per day per battle plot a town has'
+  outpost-daily-cost:
+    value: 50
+    description: 'The cost per day per outpost plot a town has'
+  plot-claim-cost:
+    value: 50
+    description: 'The required funds to claim a new chunk'
+  outpost-claim-cost:
+    value: 100
+    description: 'The required funds to claim a new outpost'
+  bonus-land-daily-cost:
+    value: 10
+    description: 'The cost per bonus land block per day a town has. Used bonus land chunks incurr the plot charges from above.'

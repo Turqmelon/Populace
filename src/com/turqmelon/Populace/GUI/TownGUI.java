@@ -106,18 +106,15 @@ public class TownGUI extends GUI {
                 player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             }
 
-        }
-        else if (raw == 50 && getTown().canWarpToSpawn(getResident(), false)){
+        } else if (raw == 50 && getTown().canWarpToSpawn(getResident(), false) && player.hasPermission("populace.commands.visit")) {
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             player.closeInventory();
             new PopulaceTeleport(player, town.getSpawn(), player.getLocation(), Configuration.TELEPORT_WARMUP_TIME, Configuration.TELEPORT_COOLDOWN_TIME, false);
-        }
-        else if (raw == 49 && rank.isAtLeast(TownRank.RESIDENT) && getTown().getMapView() != null){
+        } else if (raw == 49 && rank.isAtLeast(TownRank.RESIDENT) && getTown().getMapView() != null && player.hasPermission("populace.commands.map")) {
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             player.closeInventory();
             player.chat("/map");
-        }
-        else if (raw == 48 && rank.isAtLeast(TownRank.MANAGER)){
+        } else if (raw == 48 && rank.isAtLeast(TownRank.MANAGER) && player.hasPermission("populace.commands.invite")) {
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             player.closeInventory();
             player.chat("/invite");
@@ -228,7 +225,7 @@ public class TownGUI extends GUI {
         }
 
         TownRank rank = getTown().getRank(getResident());
-        if (rank.isAtLeast(TownRank.MANAGER) && !getTown().isOpen()){
+        if (rank.isAtLeast(TownRank.MANAGER) && !getTown().isOpen() && player.hasPermission("populace.commands.invite")) {
             inv.setItem(48, new ItemBuilder(Material.NAME_TAG)
             .withCustomName("§b§lInviting Residents")
             .withLore(Arrays.asList("§7Invite new residents to the town",
@@ -237,12 +234,12 @@ public class TownGUI extends GUI {
                     "§7town menu.")).build());
         }
 
-        if (getTown().canWarpToSpawn(getResident(), false)){
+        if (getTown().canWarpToSpawn(getResident(), false) && player.hasPermission("populace.commands.visit")) {
             inv.setItem(50, new ItemBuilder(Material.ENDER_PEARL)
             .withCustomName("§a§lTeleport to Spawn").build());
         }
 
-        if (rank.isAtLeast(TownRank.RESIDENT) && getTown().getMapView() != null){
+        if (rank.isAtLeast(TownRank.RESIDENT) && getTown().getMapView() != null && player.hasPermission("populace.commands.map")) {
             inv.setItem(49, new ItemBuilder(Material.MAP)
             .withCustomName("§a§lMap of " + getTown().getName() + getTown().getLevel().getSuffix())
             .withLore(Arrays.asList("§aLeft Click§f to receive it!")).build());

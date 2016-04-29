@@ -88,8 +88,7 @@ public class PlotTypeSelectGUI extends PlotGUI {
 
         if (getPlot().getType() == PlotType.RESIDENTIAL){
             inv.setItem(19, new ItemBuilder(Material.BED).withCustomName("§a§lResidential Plot").withLore(Arrays.asList("§7Selected!")).makeItGlow().build());
-        }
-        else{
+        } else if (player.hasPermission("populace.plottypes.residential")) {
             inv.setItem(19, new ItemBuilder(Material.BED).withCustomName("§b§lResidential Plot").withLore(Arrays.asList(
                     "§bResidential Plots§7 are the default plots. They",
                     "§7provide protection from outside players, offer",
@@ -104,7 +103,7 @@ public class PlotTypeSelectGUI extends PlotGUI {
         if (Populace.isPopulaceMarketLoaded()) {
             if (getPlot().getType() == PlotType.MERCHANT) {
                 inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§a§lMerchant Plot").withLore(Arrays.asList("§7Selected!")).makeItGlow().build());
-            } else {
+            } else if (player.hasPermission("populace.plottypes.merchant")) {
                 inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§b§lMerchant Plot").withLore(Arrays.asList(
                         "§bMerchant Plots§7 offer the same protections",
                         "§7as §bResidential Plots§7, with the extra ability",
@@ -120,8 +119,7 @@ public class PlotTypeSelectGUI extends PlotGUI {
 
         if (getPlot().getType() == PlotType.BATTLE){
             inv.setItem(25, new ItemBuilder(Material.IRON_CHESTPLATE).withCustomName("§a§lBattle Plot").withLore(Arrays.asList("§7Selected!")).makeItGlow().build());
-        }
-        else{
+        } else if (player.hasPermission("populace.plottypes.battle")) {
             inv.setItem(25, new ItemBuilder(Material.IRON_CHESTPLATE).withCustomName("§b§lBattle Plot").withLore(Arrays.asList(
                     "§bBattle Plots§7 offer the land protections of",
                     "§bResidential Plots§7, with the added ability of allowing",

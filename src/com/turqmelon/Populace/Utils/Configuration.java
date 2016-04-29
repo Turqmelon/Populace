@@ -52,9 +52,14 @@ public class Configuration {
     // The default plot tax for new towns
     public static double TOWN_DEFAULT_PLOT_TAX = 0;
 
+    public static double TOWN_MINIMUM_UPKEEP = 25;
+
     // The amount of hours a town grace period is
     // The grace period will never charge a town daily upkeep
     public static int TOWN_GRACE_PERIOD_HOURS = 24;
+
+    // How often the new day code runs (in hours)
+    public static int NEW_DAY_INTERVAL = 24;
 
     // The daily upkeep cost of a residential plot
     public static double RESIDENTIAL_DAILY_COST = 10;
@@ -67,6 +72,9 @@ public class Configuration {
 
     // The daily upkeep cost of an outpost
     public static double OUTPOST_DAILY_COST = 50;
+
+    public static double PLOT_CLAIM_COST = 50;
+    public static double OUTPOST_CLAIM_COST = 100;
 
     // The daily upkeep cost of each individual bonus plot a town buys
     public static double BONUS_LAND_DAILY_COST = 10;

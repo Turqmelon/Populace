@@ -329,7 +329,7 @@ public class Town implements Comparable {
         double cost = landCost + residentCost;
         cost = cost * getLevel().getUpkeepModifier();
 
-        return cost;
+        return cost + Configuration.TOWN_MINIMUM_UPKEEP;
     }
 
     public Location getSpawn() {
@@ -379,7 +379,7 @@ public class Town implements Comparable {
     }
 
     private boolean buyChunk(Resident resident, PlotChunk chunk, boolean outpost){
-        double price = outpost ? 100 : 50;
+        double price = outpost ? Configuration.OUTPOST_CLAIM_COST : Configuration.PLOT_CLAIM_COST;
         if (getBank() >= price){
 
             Plot plot = new Plot(UUID.randomUUID(), chunk, outpost ? PlotType.OUTPOST : PlotType.RESIDENTIAL, this);

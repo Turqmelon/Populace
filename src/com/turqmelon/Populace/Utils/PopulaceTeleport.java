@@ -78,7 +78,11 @@ public class PopulaceTeleport {
 
     private void initialize() {
 
-        if (nextTeleport.containsKey(getPlayer().getUniqueId())) {
+        if (player.hasPermission("populace.teleportation.nowarmup")) {
+            this.warmup = 0;
+        }
+
+        if (nextTeleport.containsKey(getPlayer().getUniqueId()) && !player.hasPermission("populace.teleportation.nocooldown")) {
             long next = nextTeleport.get(getPlayer().getUniqueId());
             long now = System.currentTimeMillis();
             if (now < next) {

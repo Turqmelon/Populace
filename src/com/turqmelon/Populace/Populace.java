@@ -356,7 +356,7 @@ public class Populace extends JavaPlugin {
         new BukkitRunnable(){
             @Override
             public void run() {
-                if (System.currentTimeMillis() - getLastNewDay() > TimeUnit.DAYS.toMillis(1)){
+                if (System.currentTimeMillis() - getLastNewDay() > TimeUnit.HOURS.toMillis(Configuration.NEW_DAY_INTERVAL)) {
                     newDay();
                     lastNewDay = System.currentTimeMillis();
                 }
