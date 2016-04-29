@@ -148,13 +148,18 @@ public class TownGUI extends GUI {
             }
 
             else if (event.isLeftClick() && rank == TownRank.GUEST){
-                player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
-                player.closeInventory();
-                if (getTown().isOpen()){
-                    getTown().joinByPublic(getResident());
+                if (player.hasPermission("populace.commands.join")) {
+                    player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                    player.closeInventory();
+                    if (getTown().isOpen()) {
+                        getTown().joinByPublic(getResident());
+                    } else {
+                        getTown().joinByInvite(getResident());
+                    }
                 }
                 else{
-                    getTown().joinByInvite(getResident());
+                    player.closeInventory();
+                    player.sendMessage(Msg.ERR + "You don't have permission.");
                 }
             }
             else if (event.isLeftClick() && rank.getPermissionLevel() < TownRank.MAYOR.getPermissionLevel()){

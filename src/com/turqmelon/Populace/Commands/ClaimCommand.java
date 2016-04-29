@@ -47,7 +47,7 @@ public class ClaimCommand implements CommandExecutor {
                 Town town = resident.getTown();
                 if (town != null){
 
-                    if (args.length == 1) {
+                    if (args.length == 1 && player.hasPermission("populace.commands.claim.radius")) {
                         try {
                             int radius = Integer.parseInt(args[0]);
                             if (radius < 1) {

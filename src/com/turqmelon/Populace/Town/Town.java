@@ -626,26 +626,30 @@ public class Town implements Comparable {
                 return false;
             case REQUIRE_OUTPOST:
 
-                if (getRank(resident).isAtLeast(TownRank.MANAGER)) {
-                    if (getLevel().getResidents() >= TownLevel.CITY.getResidents()){
-                        if (confirmed){
-                            return buyChunk(resident, chunk, true);
+                Player player = Bukkit.getPlayer(resident.getUuid());
+
+                if (player != null && player.hasMetadata("populace.plottypes.outpost")) {
+                    if (getRank(resident).isAtLeast(TownRank.MANAGER)) {
+                        if (getLevel().getResidents() >= TownLevel.CITY.getResidents()) {
+                            if (confirmed) {
+                                return buyChunk(resident, chunk, true);
+                            } else {
+                                resident.sendMessage(Msg.INFO + "This land is not adjacent to any existing town claim, so it must be an outpost.");
+                                resident.sendMessage(Msg.INFO + "Outposts have a higher daily upkeep than normal claims.");
+                                resident.setPendingAction(() -> claimLand(resident, chunk, true, silent));
+                            }
+                            return true;
                         }
                         else{
-                            resident.sendMessage(Msg.INFO + "This land is not adjacent to any existing town claim, so it must be an outpost.");
-                            resident.sendMessage(Msg.INFO + "Outposts have a higher daily upkeep than normal claims.");
-                            resident.setPendingAction(() -> claimLand(resident, chunk, true, silent));
+                            resident.sendMessage(Msg.ERR + "To claim an outpost, your town must be a City. (" + TownLevel.CITY.getResidents() + " Residents)");
+                            resident.sendMessage(Msg.ERR + "Land claims must be adjacent to existing claims to not be considered outposts.");
                         }
-                        return true;
+                    } else {
+                        resident.sendMessage(Msg.ERR + "Only Managers can claim outposts.");
                     }
-                    else{
-                        resident.sendMessage(Msg.ERR + "To claim an outpost, your town must be a City. (" + TownLevel.CITY.getResidents() + " Residents)");
-                        resident.sendMessage(Msg.ERR + "Land claims must be adjacent to existing claims to not be considered outposts.");
-                    }
-                } else {
-                    resident.sendMessage(Msg.ERR + "Only Managers can claim outposts.");
+                } else if (player != null) {
+                    player.sendMessage(Msg.ERR + "You don't have permission to claim outposts.");
                 }
-
 
                 return false;
             default:

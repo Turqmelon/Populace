@@ -1,5 +1,6 @@
 package com.turqmelon.Populace.GUI.TownManagement;
 
+import com.turqmelon.Populace.Events.Resident.ResidentRankChangedEvent;
 import com.turqmelon.Populace.GUI.TownGUI;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Town.Town;
@@ -9,6 +10,7 @@ import com.turqmelon.Populace.Utils.ItemUtil;
 import com.turqmelon.Populace.Utils.Msg;
 import net.minecraft.server.v1_8_R3.NBTBase;
 import net.minecraft.server.v1_8_R3.NBTTagString;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -74,7 +76,7 @@ public class SetResidentRankGUI extends TownGUI {
             player.closeInventory();
             player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
             player.chat("/jail");
-        } else if (rank == TownRank.MANAGER) {
+        } else if (rank == TownRank.MAYOR) {
 
             ItemStack clicked = event.getCurrentItem();
             if (clicked != null && clicked.getType() != Material.AIR){
@@ -84,6 +86,7 @@ public class SetResidentRankGUI extends TownGUI {
                     getTown().getResidents().put(getTarget(), newRank);
                     getTown().sendTownBroadcast(TownRank.RESIDENT, getTarget().getName() + "'s rank has been set to " + newRank.getPrefix() + "§dby the mayor.");
                     player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                    Bukkit.getPluginManager().callEvent(new ResidentRankChangedEvent(getTarget(), newRank));
                     repopulate();
                 }
             }
