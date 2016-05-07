@@ -33,7 +33,7 @@
 <h1>
 <a id="what-is-populace" class="anchor" href="#what-is-populace" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is Populace?</h1>
 
-<p>Populace is a town management plugin that works with <a href="https://github.com/Turqmelon/MelonEco">MelonEco</a>. I felt as though Towny was not only outdated, but difficult for new users to grasp, and this Populace was born.</p>
+<p>Populace is a town management plugin that works with <a href="https://github.com/Turqmelon/MelonEco">MelonEco</a>. I felt as though Towny was not only outdated, but difficult for new users to grasp, and thus Populace was born.</p>
 
 <h1>
 <a id="whats-different" class="anchor" href="#whats-different" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What's different?</h1>
@@ -46,7 +46,7 @@
 <p>As of now, Populace can:</p>
 
 <ul>
-<li>Allow your users to create towns, claim land, delegate permissions, and invite residents</li>
+<li>Allow your players to create towns, claim land, delegate permissions, and invite residents</li>
 <li>Provides a great anti-grief solution that protects against all known forms of griefing</li>
 <li>Creates thriving economies in survival servers</li>
 <li>Allows creation of unique shops using Ender Chests and an ingame UI <em>(Requires PopulaceMarket)</em>
@@ -54,16 +54,127 @@
 <li>Allows establishment of sales tax to bring in more income for town mayors <em>(Requires PopulaceMarket)</em>
 </li>
 <li>Includes a powerful GUI for viewing town information and making management of complex tasks easy</li>
-<li>Includes a simple commands for a very small learning curve for players</li>
+<li>Includes simple commands resulting in a very small learning curve for new players</li>
 <li>Provides a complex and intuitive chat channel system, including town specific chat <em>(Requires PopulaceChat)</em>
 </li>
-<li>Includes an in-depth API (including events and direct hooking to Populace interworkings) for 3rd party developers</li>
+<li>Includes an in-depth API (including events and direct hooking to Populace inner workings) for 3rd party developers</li>
 <li>Cleans up chat by only showing join and quit messages to fellow town members <em>(Requires PopulaceJoin)</em>
+</li>
+<li>Adds town rank and town to player names in TAB and above heads. <em>(Requires PopulaceScoreboards)</em>
 </li>
 <li>Allows selling of town plots to residents</li>
 <li>Jail system to allow town staff to punish naughty residents, while allowing the jailed individual to leave early by choosing to leave town</li>
 <li><em>Much more...</em></li>
 </ul>
+
+<h1>
+<a id="town-leveling" class="anchor" href="#town-leveling" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Town Leveling</h1>
+
+<p>As towns gain residents, they level up! THe higher the town level, the more land that can be claimed, and the more features that players unlock.</p>
+
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Residents Required</th>
+<th>Upkeep Modifier</th>
+<th>Max Land</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Settlement</td>
+<td>1</td>
+<td>1.0x</td>
+<td>16 Chunks</td>
+</tr>
+<tr>
+<td>Hamlet</td>
+<td>2</td>
+<td>1.0x</td>
+<td>32 Chunks</td>
+</tr>
+<tr>
+<td>Village</td>
+<td>6</td>
+<td>1.0x</td>
+<td>96 Chunks</td>
+</tr>
+<tr>
+<td>Town</td>
+<td>10</td>
+<td>1.0x</td>
+<td>160 Chunks</td>
+</tr>
+<tr>
+<td>Large Town</td>
+<td>15</td>
+<td>1.1x</td>
+<td>224 Chunks</td>
+</tr>
+<tr>
+<td>City</td>
+<td>25</td>
+<td>1.2x</td>
+<td>320 Chunks</td>
+</tr>
+<tr>
+<td>Large City</td>
+<td>30</td>
+<td>1.3x</td>
+<td>384 Chunks</td>
+</tr>
+<tr>
+<td>Metropolis</td>
+<td>50</td>
+<td>1.5x</td>
+<td>448 Chunks</td>
+</tr>
+</tbody>
+</table>
+
+<h1>
+<a id="land" class="anchor" href="#land" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Land</h1>
+
+<p>Towns can claim up to the amount of chunks listed for their level. If they need more land, they can purchase <strong>Bonus Land Chunks</strong>. Bonus Land Chunks trade off getting more land, at the cost of a higher daily upkeep. You can purchase Bonus Land Chunks up to the current level's cap. Example: <strong>Village</strong> can purchase up to <strong>96</strong> bonus land chunks, while <strong>Settlement</strong> can only buy <strong>16</strong>.</p>
+
+<h1>
+<a id="upkeep--taxes" class="anchor" href="#upkeep--taxes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Upkeep &amp; Taxes</h1>
+
+<p>Towns require a Daily Upkeep to stay alive. Every <strong>new day</strong> the daily upkeep is taken from the town bank. If a town can't afford the daily upkeep, it's deleted and the land is unclaimed.</p>
+
+<p>In order to help pay for the Daily Upkeep, towns can impose 3 different taxes on residents</p>
+
+<h2>
+<a id="residency-tax" class="anchor" href="#residency-tax" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Residency Tax</h2>
+
+<p>A base price that every resident of the town (except the Mayor) must pay. This amount doesn't change unless the Mayor does it.</p>
+
+<h2>
+<a id="plot-tax" class="anchor" href="#plot-tax" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plot Tax</h2>
+
+<p>A plot tax is paid for every plot you own within a town. If a plot tax was <strong>30 Coins</strong>, and you own <strong>4 Plots</strong>, you would owe <em>120 Coins</em>* plus any <strong>Residency Tax</strong> chosen by the Mayor.</p>
+
+<h2>
+<a id="sales-tax-only-available-with-populacemarket" class="anchor" href="#sales-tax-only-available-with-populacemarket" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sales Tax (Only available with PopulaceMarket)</h2>
+
+<p>Sales Tax is not paid by residents, but by merchants. When an item is sold to a player, or bought from a player in Town, a percentage of the profit is taken as a sales tax. For instance, a Diamond Sword is sold for <strong>100 Coins</strong> and the town has a <strong>4%</strong> sales tax. The merchant would receive <strong>96 Coins</strong> from the sale, and the town bank would receive <strong>4 Coins</strong>.</p>
+
+<p>If a resident cannot pay their taxes they are kicked from the town.</p>
+
+<h2>
+<a id="daily-upkeep" class="anchor" href="#daily-upkeep" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Daily Upkeep</h2>
+
+<p>Daily upkeep is calculated after taxes are collected from residents. Please note, when a town is created they are given a <strong>grace period</strong>. During this time, no daily upkeep is required of them.</p>
+
+<ul>
+<li>For every claimed chunk, a cost is assessed. This varies based off the plot type, and the server you're playing on.</li>
+<li>For every Resident in your town, a cost is assessed. The higher the rank of the resident, the more expensive.</li>
+<li>For every 4 residents in your town, land cost is multiplied by +0.3%.</li>
+<li>For every <strong>Bonus Land Chunk</strong> owned by your town, the Bonus Land cost price is assessed</li>
+</ul>
+
+<p>All those factors are added up to get your <strong>Daily Upkeep</strong>, then multiplied by the Town Level <strong>Upkeep Modifier</strong>. The Daily Upkeep can be seen at any time (as well as when it's next due) from the <strong>Economy</strong> tab of your <strong>/town</strong> menu.</p>
 
 <h1>
 <a id="what-are-the-commands" class="anchor" href="#what-are-the-commands" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What are the commands?</h1>
