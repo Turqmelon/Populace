@@ -102,7 +102,7 @@ public class TownsGUI extends GUI{
         int endIndex = startIndex+(townsPerPage-1);
 
         List<Town> towns = new ArrayList<>();
-        towns.addAll(TownManager.getTowns());
+        towns.addAll(TownManager.getTowns(false));
         Collections.sort(towns);
 
         List<Town> display = new ArrayList<>();

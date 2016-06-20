@@ -150,6 +150,31 @@ public class TownManager {
         return null;
     }
 
+    public static Warzone getWarzone() {
+        for (Town town : getTowns()) {
+            if ((town instanceof Warzone)) {
+                return (Warzone) town;
+            }
+        }
+        return null;
+    }
+
+    public static List<Town> getTowns(boolean includeWarzone) {
+        if (includeWarzone) {
+            return getTowns();
+        } else {
+            List<Town> list = new ArrayList<>();
+            list.addAll(getTowns());
+            for (int i = 0; i < list.size(); i++) {
+                Town town = list.get(i);
+                if ((town instanceof Warzone)) {
+                    list.remove(town);
+                }
+            }
+            return list;
+        }
+    }
+
     public static List<Town> getTowns() {
         return towns;
     }

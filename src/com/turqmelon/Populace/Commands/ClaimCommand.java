@@ -4,6 +4,7 @@ import com.turqmelon.Populace.Plot.PlotChunk;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
+import com.turqmelon.Populace.Town.TownManager;
 import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.Chunk;
 import org.bukkit.command.Command;
@@ -41,13 +42,24 @@ public class ClaimCommand implements CommandExecutor {
 
         if ((sender instanceof Player)){
             Player player = (Player)sender;
+
+            boolean warzone = false;
+            if (args.length > 0) {
+                warzone = args[args.length - 1].equalsIgnoreCase("warzone");
+            }
+
             Resident resident = ResidentManager.getResident(player);
             if (resident != null){
 
                 Town town = resident.getTown();
+
+                if (warzone) {
+                    town = TownManager.getWarzone();
+                }
+
                 if (town != null){
 
-                    if (args.length == 1 && player.hasPermission("populace.commands.claim.radius")) {
+                    if (args.length >= 1 && player.hasPermission("populace.commands.claim.radius")) {
                         try {
                             int radius = Integer.parseInt(args[0]);
                             if (radius < 1) {
@@ -65,7 +77,7 @@ public class ClaimCommand implements CommandExecutor {
                                 for (int x = minx; x <= i; x++) {
                                     for (int z = minz; z <= i; z++) {
                                         PlotChunk ch = new PlotChunk(c.getWorld(), c.getX() + x, c.getZ() + z);
-                                        if (town.claimLand(resident, ch, true)) {
+                                        if (town.claimLand(warzone ? null : resident, ch, true)) {
                                             ch.visualize(player);
                                             claimed++;
                                         }
@@ -73,7 +85,7 @@ public class ClaimCommand implements CommandExecutor {
                                 }
                             }
                             if (claimed > 0) {
-                                sender.sendMessage(Msg.OK + "Claimed " + claimed + " chunk(s).");
+                                sender.sendMessage(Msg.OK + "Claimed " + claimed + (warzone ? " war" : "") + " chunk(s).");
                             } else {
                                 sender.sendMessage(Msg.ERR + "Claimed no chunks.");
                             }
@@ -83,7 +95,7 @@ public class ClaimCommand implements CommandExecutor {
                     } else {
                         Chunk c = player.getLocation().getChunk();
                         PlotChunk pc = new PlotChunk(c.getWorld(), c.getX(), c.getZ());
-                        if (town.claimLand(resident, pc, false)) {
+                        if (town.claimLand(warzone ? null : resident, pc, false)) {
                             pc.visualize(player);
                         }
                     }

@@ -378,29 +378,37 @@ public class Town implements Comparable {
         return claimLand(resident, chunk, false, silent);
     }
 
-    private boolean buyChunk(Resident resident, PlotChunk chunk, boolean outpost){
+    protected boolean buyChunk(Resident resident, PlotChunk chunk, boolean outpost) {
+
+        // When the resident in null, this is the warzone claiming land
+
         double price = outpost ? Configuration.OUTPOST_CLAIM_COST : Configuration.PLOT_CLAIM_COST;
-        if (getBank() >= price){
+        if (resident == null || getBank() >= price) {
 
             Plot plot = new Plot(UUID.randomUUID(), chunk, outpost ? PlotType.OUTPOST : PlotType.RESIDENTIAL, this);
 
-            TownClaimLandEvent event = new TownClaimLandEvent(this, resident, plot);
-            Bukkit.getPluginManager().callEvent(event);
-            if (event.isCancelled()) {
-                return false;
+            if (resident != null) {
+                TownClaimLandEvent event = new TownClaimLandEvent(this, resident, plot);
+                Bukkit.getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
+                    return false;
+                }
+                setBank(getBank() - price);
+                sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " purchased " + (outpost ? "an outpost" : "a chunk") + " for the town.");
             }
 
-            setBank(getBank()-price);
-            sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " purchased " + (outpost?"an outpost":"a chunk") + " for the town.");
             getPlots().add(plot);
 
-            // For the first plot, set a town spawn so it can be warped back to
-            if (getPlots().size() == 1){
-                Player player = Bukkit.getPlayer(resident.getUuid());
-                if (player != null){
-                    setSpawn(player.getLocation());
+            if (resident != null) {
+                // For the first plot, set a town spawn so it can be warped back to
+                if (getPlots().size() == 1) {
+                    Player player = Bukkit.getPlayer(resident.getUuid());
+                    if (player != null) {
+                        setSpawn(player.getLocation());
+                    }
+                    initializeMapView();
+
                 }
-                initializeMapView();
 
             }
 

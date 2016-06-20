@@ -11,6 +11,7 @@ import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownManager;
 import com.turqmelon.Populace.Town.TownRank;
+import com.turqmelon.Populace.Town.Warzone;
 import com.turqmelon.Populace.Utils.ClockUtil;
 import com.turqmelon.Populace.Utils.Configuration;
 import com.turqmelon.Populace.Utils.EnchantGlow;
@@ -32,6 +33,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,6 +68,79 @@ public class Populace extends JavaPlugin {
 
     private static boolean populaceChatLoaded = false;
     private static boolean populaceMarketLoaded = false;
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void saveData() throws IOException {
+
+        getLog().log(Level.INFO, "Saving data...");
+
+        File dir = getInstance().getDataFolder();
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+
+        File file = new File(dir, "data.json");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        JSONObject data = new JSONObject();
+
+        JSONArray residents = new JSONArray();
+        for (Resident resident : ResidentManager.getResidents()) {
+            residents.add(resident.toJSON());
+        }
+
+        JSONArray towns = new JSONArray();
+        for (Town town : TownManager.getTowns()) {
+            towns.add(town.toJSON());
+        }
+
+        data.put("lastnewday", getLastNewDay());
+        data.put("residents", residents);
+        data.put("towns", towns);
+
+        FileWriter writer = new FileWriter(file);
+        writer.write(data.toJSONString());
+        writer.flush();
+        writer.close();
+
+        getLog().log(Level.INFO, "Saving complete.");
+
+    }
+
+    public static String getNewDayCountdown() {
+        long nextDay = getLastNewDay() + TimeUnit.DAYS.toMillis(1);
+        return ClockUtil.formatDateDiff(nextDay, false);
+    }
+
+    public static boolean isPopulaceChatLoaded() {
+        return populaceChatLoaded;
+    }
+
+    public static boolean isPopulaceMarketLoaded() {
+        return populaceMarketLoaded;
+    }
+
+    public static Logger getLog() {
+        return logger;
+    }
+
+    public static boolean isFullyEnabled() {
+        return fullyEnabled;
+    }
+
+    public static long getLastNewDay() {
+        return lastNewDay;
+    }
+
+    public static Currency getCurrency() {
+        return currency;
+    }
+
+    public static Populace getInstance() {
+        return instance;
+    }
 
     private void postSetup() {
         PluginManager pm = getServer().getPluginManager();
@@ -115,7 +190,13 @@ public class Populace extends JavaPlugin {
                 JSONArray townArray = (JSONArray) object.get("towns");
                 for(Object o : townArray){
                     JSONObject town = (JSONObject)o;
-                    TownManager.getTowns().add(new Town(town));
+                    String townName = (String) town.get("name");
+                    if (townName.equalsIgnoreCase("warzone")) {
+                        UUID uuid = UUID.fromString((String) town.get("uuid"));
+                        TownManager.getTowns().add(new Warzone(uuid));
+                    } else {
+                        TownManager.getTowns().add(new Town(town));
+                    }
                 }
 
                 getLog().log(Level.INFO, "Loaded " + TownManager.getTowns().size() + " towns.");
@@ -132,46 +213,6 @@ public class Populace extends JavaPlugin {
             getLog().log(Level.WARNING, "Populace directory doesn't exist. Nothing to load!");
         }
 
-
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void saveData() throws IOException {
-
-        getLog().log(Level.INFO, "Saving data...");
-
-        File dir = getInstance().getDataFolder();
-        if (!dir.exists()){
-            dir.mkdir();
-        }
-
-        File file = new File(dir, "data.json");
-        if (!file.exists()){
-            file.createNewFile();
-        }
-
-        JSONObject data = new JSONObject();
-
-        JSONArray residents = new JSONArray();
-        for(Resident resident : ResidentManager.getResidents()){
-            residents.add(resident.toJSON());
-        }
-
-        JSONArray towns = new JSONArray();
-        for(Town town : TownManager.getTowns()){
-            towns.add(town.toJSON());
-        }
-
-        data.put("lastnewday", getLastNewDay());
-        data.put("residents", residents);
-        data.put("towns", towns);
-
-        FileWriter writer = new FileWriter(file);
-        writer.write(data.toJSONString());
-        writer.flush();
-        writer.close();
-
-        getLog().log(Level.INFO, "Saving complete.");
 
     }
 
@@ -204,7 +245,7 @@ public class Populace extends JavaPlugin {
         }
 
         // Collect daily upkeep from towns
-        for(Town town : TownManager.getTowns()){
+        for (Town town : TownManager.getTowns(false)) {
             if (System.currentTimeMillis() < town.getGracePeriodExpiration()){
                 town.sendTownBroadcast(TownRank.RESIDENT, "Town was not charged daily upkeep since the grace period is still active.");
                 continue;
@@ -249,11 +290,6 @@ public class Populace extends JavaPlugin {
 
     }
 
-    public static String getNewDayCountdown(){
-        long nextDay = getLastNewDay()+TimeUnit.DAYS.toMillis(1);
-        return ClockUtil.formatDateDiff(nextDay, false);
-    }
-
     @Override
     public void onDisable() {
 
@@ -288,7 +324,15 @@ public class Populace extends JavaPlugin {
         lastNewDay = System.currentTimeMillis();
 
         try {
+
             loadData();
+
+            Town warzone = TownManager.getTown("Warzone");
+            if (warzone == null) {
+                warzone = new Warzone();
+                TownManager.getTowns().add(warzone);
+            }
+
         } catch (ParseException | IOException e) {
             getLogger().log(Level.SEVERE, "An error occurred while loading data.");
             e.printStackTrace();
@@ -363,33 +407,5 @@ public class Populace extends JavaPlugin {
             }
         }.runTaskTimer(this, 600L, 600L);
 
-    }
-
-    public static boolean isPopulaceChatLoaded() {
-        return populaceChatLoaded;
-    }
-
-    public static boolean isPopulaceMarketLoaded() {
-        return populaceMarketLoaded;
-    }
-
-    public static Logger getLog() {
-        return logger;
-    }
-
-    public static boolean isFullyEnabled() {
-        return fullyEnabled;
-    }
-
-    public static long getLastNewDay() {
-        return lastNewDay;
-    }
-
-    public static Currency getCurrency() {
-        return currency;
-    }
-
-    public static Populace getInstance() {
-        return instance;
     }
 }

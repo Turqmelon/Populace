@@ -10,6 +10,7 @@ import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownManager;
 import com.turqmelon.Populace.Town.TownRank;
+import com.turqmelon.Populace.Town.Warzone;
 import com.turqmelon.Populace.Utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -146,7 +147,11 @@ public class Resident implements Comparable {
             result = "§2§lWilderness" + (Configuration.WILDERNESS_PVP?" §4§l(PVP)":"");
         }
         else if (town != null && (lastTown == null || !lastTown.getUuid().equals(town.getUuid()))){
-            result = "§6§l" + town.getName() + town.getLevel().getSuffix();
+            if ((town instanceof Warzone)) {
+                result = "§c§lWarzone";
+            } else {
+                result = "§6§l" + town.getName() + town.getLevel().getSuffix();
+            }
         }
 
         if (plot != null && (lastPlot == null || !lastPlot.getUuid().equals(plot.getUuid()))){
@@ -224,10 +229,6 @@ public class Resident implements Comparable {
         return 0;
     }
 
-    public void setTown(Town town) {
-        this.town = town;
-    }
-
     public long getSeen() {
         return seen;
     }
@@ -260,10 +261,6 @@ public class Resident implements Comparable {
         if (player != null)player.sendMessage(message);
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public List<PlotChunk> getPlotChunks() {
         return plotChunks;
     }
@@ -276,8 +273,16 @@ public class Resident implements Comparable {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Town getTown() {
         return town;
+    }
+
+    public void setTown(Town town) {
+        this.town = town;
     }
 
     public Map<UUID, Resident> getTownInvites() {
@@ -312,12 +317,12 @@ public class Resident implements Comparable {
         return getJailData() != null;
     }
 
-    public void setJailData(JailData jailData) {
-        this.jailData = jailData;
-    }
-
     public JailData getJailData() {
         return jailData;
+    }
+
+    public void setJailData(JailData jailData) {
+        this.jailData = jailData;
     }
 
     public Runnable getPendingAction() {

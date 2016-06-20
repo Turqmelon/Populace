@@ -6,6 +6,7 @@ import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownRank;
+import com.turqmelon.Populace.Town.Warzone;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -104,11 +105,15 @@ public class Plot {
     }
 
     public PlotType getType() {
-        return type;
+        return isWarzoneLand() ? PlotType.BATTLE : type;
     }
 
     public void setType(PlotType type) {
         this.type = type;
+    }
+
+    public boolean isWarzoneLand() {
+        return ((getTown() instanceof Warzone));
     }
 
     public ItemStack getIcon(){
@@ -138,24 +143,38 @@ public class Plot {
 
     public boolean can(Resident resident, PermissionSet set) {
 
-        if (getOwner() != null && getOwner().getUuid().equals(resident.getUuid())) {
-            return true;
+        if (isWarzoneLand()) {
+            switch (set) {
+                case ENTRY:
+                case ACCESS:
+                case CONTAINER:
+                    return true;
+                case SHOP:
+                case BUILD:
+                    return false;
+                default:
+                    return false;
+            }
+        } else {
+            if (getOwner() != null && getOwner().getUuid().equals(resident.getUuid())) {
+                return true;
+            }
+
+            if (isOnAllowList(resident)) {
+                return true;
+            }
+
+            Player player = Bukkit.getPlayer(resident.getUuid());
+            if (player != null && player.hasPermission("populace.bypass")) {
+                return true;
+            }
+
+            TownRank rank = getTown().getRank(resident);
+            TownRank requiredPlot = getRequiredRank(set);
+            TownRank requiredTown = getTown().getRequiredRank(set);
+
+            return rank.isAtLeast(requiredPlot) || rank.isAtLeast(requiredTown) && set.isApplicableTo(PermissionSet.PermissionScope.TOWN);
         }
-
-        if (isOnAllowList(resident)) {
-            return true;
-        }
-
-        Player player = Bukkit.getPlayer(resident.getUuid());
-        if (player != null && player.hasPermission("populace.bypass")) {
-            return true;
-        }
-
-        TownRank rank = getTown().getRank(resident);
-        TownRank requiredPlot = getRequiredRank(set);
-        TownRank requiredTown = getTown().getRequiredRank(set);
-
-        return rank.isAtLeast(requiredPlot) || rank.isAtLeast(requiredTown) && set.isApplicableTo(PermissionSet.PermissionScope.TOWN);
 
     }
 
@@ -206,18 +225,6 @@ public class Plot {
         return permissions.containsKey(set) ? permissions.get(set) : set.getDefaultRank();
     }
 
-    public void setOwner(Resident owner) {
-        this.owner = owner;
-    }
-
-    public void setForSale(boolean forSale) {
-        this.forSale = forSale;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
     public UUID getUuid() {
         return uuid;
     }
@@ -234,11 +241,23 @@ public class Plot {
         return owner;
     }
 
+    public void setOwner(Resident owner) {
+        this.owner = owner;
+    }
+
     public boolean isForSale() {
         return getOwner() == null && forSale;
     }
 
+    public void setForSale(boolean forSale) {
+        this.forSale = forSale;
+    }
+
     public double getPrice() {
         return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 }
