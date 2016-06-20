@@ -59,12 +59,12 @@ public class PlotGUI extends GUI {
         TownRank rank = getPlot().getTown().getRank(getResident());
 
         if (raw == 19 && rank.isAtLeast(TownRank.MANAGER) && player.hasPermission("populace.commands.giveplot")) {
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             player.closeInventory();
             player.chat("/giveplot");
         }
         else if (raw == 21){
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             if (rank.isAtLeast(TownRank.ASSISTANT)){
                 if (getPlot().isForSale() && player.hasPermission("populace.commands.notforsale")) {
                     player.chat("/notforsale");
@@ -81,24 +81,24 @@ public class PlotGUI extends GUI {
         else if (raw == 23 && ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel())){
             PlotPermissionsGUI gui = new PlotPermissionsGUI(getResident(), getPlot());
             gui.open(player);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         } else if (raw == 25 && player.hasPermission("populace.commands.allow") && ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel())) {
             if (event.isRightClick()){
-                player.playSound(player.getLocation(), Sound.EXPLODE, 1, 1);
+                player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1, 1);
                 getPlot().getAllowList().clear();
                 repopulate();
             }
             else{
                 PlotAllowListGUI gui = new PlotAllowListGUI(getResident(), getPlot());
                 gui.open(player);
-                player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }
         } else if (raw == 37 && rank.isAtLeast(TownRank.MANAGER) && getPlot().getType() != PlotType.OUTPOST) {
             PlotTypeSelectGUI gui = new PlotTypeSelectGUI(getResident(), getPlot());
             gui.open(player);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         } else if (raw == 43 && player.hasPermission("populace.commands.unclaim") && ((plot.getOwner() != null && plot.getOwner().getUuid().equals(getResident().getUuid())) || rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel())) {
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             player.closeInventory();
             player.chat("/unclaim");
         }

@@ -74,7 +74,7 @@ public class MoveListener implements Listener {
                 } else {
                     player.teleport(player.getLocation().clone().add(16, 0, 0));
                 }
-                player.playSound(player.getLocation(), Sound.NOTE_BASS, 1, 0);
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
                 resident.setFallImmunity(System.currentTimeMillis());
                 plot.getPlotChunk().visualize(player, true);
                 HUDUtil.sendActionBar(player, "§c§lYou can't enter that area.");

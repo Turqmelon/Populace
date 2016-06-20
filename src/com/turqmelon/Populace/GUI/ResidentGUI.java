@@ -54,11 +54,11 @@ public class ResidentGUI extends GUI {
         int raw = event.getRawSlot();
 
         if (raw == 45 && getPage() > 1 && player.hasPermission("populace.commands.resident.viewplots")) {
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             setPage(getPage()-1);
             repopulate();
         } else if (raw == 53 && hasNextPage && player.hasPermission("populace.commands.resident.viewplots")) {
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             setPage(getPage()+1);
             repopulate();
         }

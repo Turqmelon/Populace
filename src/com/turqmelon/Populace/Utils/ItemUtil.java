@@ -2,13 +2,13 @@ package com.turqmelon.Populace.Utils;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import net.minecraft.server.v1_8_R3.MojangsonParseException;
-import net.minecraft.server.v1_8_R3.MojangsonParser;
-import net.minecraft.server.v1_8_R3.NBTBase;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import net.minecraft.server.v1_9_R2.MojangsonParseException;
+import net.minecraft.server.v1_9_R2.MojangsonParser;
+import net.minecraft.server.v1_9_R2.NBTBase;
+import net.minecraft.server.v1_9_R2.NBTTagCompound;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -397,7 +397,7 @@ public class ItemUtil {
 
     public static ItemStack JSONtoItemStack(String json) throws MojangsonParseException {
         if (json == null) return null;
-        ItemStack stack = CraftItemStack.asBukkitCopy(net.minecraft.server.v1_8_R3.ItemStack.createStack(MojangsonParser.parse(json)));
+        ItemStack stack = CraftItemStack.asBukkitCopy(net.minecraft.server.v1_9_R2.ItemStack.createStack(MojangsonParser.parse(json)));
         ItemMeta meta = stack.getItemMeta();
 
         if (hasName(stack))
@@ -415,7 +415,7 @@ public class ItemUtil {
 
     public static ItemStack addTag(ItemStack stack, String tagName, NBTBase tag) {
         NBTTagCompound base = new NBTTagCompound();
-        net.minecraft.server.v1_8_R3.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
+        net.minecraft.server.v1_9_R2.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
         nmsStack.save(base);
 
         base.getCompound("tag").set(tagName, tag);
@@ -427,7 +427,7 @@ public class ItemUtil {
 
     public static NBTBase getTag(ItemStack stack, String tagName) {
         NBTTagCompound base = new NBTTagCompound();
-        net.minecraft.server.v1_8_R3.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
+        net.minecraft.server.v1_9_R2.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
         nmsStack.save(base);
 
         return base.getCompound("tag").get(tagName);

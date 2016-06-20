@@ -16,7 +16,7 @@ import com.turqmelon.Populace.Utils.ClockUtil;
 import com.turqmelon.Populace.Utils.Configuration;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import com.turqmelon.Populace.Utils.Msg;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -166,12 +166,12 @@ public class Town implements Comparable {
         initializeMapView();
     }
 
-    public void setTownJail(Location townJail) {
-        this.townJail = townJail;
-    }
-
     public Location getTownJail() {
         return townJail;
+    }
+
+    public void setTownJail(Location townJail) {
+        this.townJail = townJail;
     }
 
     public JSONObject toJSON(){
@@ -1110,27 +1110,49 @@ public class Town implements Comparable {
         return level;
     }
 
+    public void setLevel(TownLevel level) {
+        this.level = level;
+    }
 
     public boolean isOpen() {
         return open;
+    }
+
+    public void setOpen(boolean open) {
+        this.open = open;
     }
 
     public double getBank() {
         return bank;
     }
 
+    public void setBank(double bank) {
+        this.bank = bank;
+    }
+
     public double getTax() {
         return tax;
+    }
+
+    public void setTax(double tax) {
+        this.tax = tax;
     }
 
     public double getPlotTax() {
         return plotTax;
     }
 
+    public void setPlotTax(double plotTax) {
+        this.plotTax = plotTax;
+    }
+
     public double getSalesTax() {
         return salesTax;
     }
 
+    public void setSalesTax(double salesTax) {
+        this.salesTax = salesTax;
+    }
 
     public List<Plot> getPlots() {
         return plots;
@@ -1145,30 +1167,6 @@ public class Town implements Comparable {
 
     public Map<Resident, TownRank> getResidents() {
         return residents;
-    }
-
-    public void setLevel(TownLevel level) {
-        this.level = level;
-    }
-
-    public void setOpen(boolean open) {
-        this.open = open;
-    }
-
-    public void setBank(double bank) {
-        this.bank = bank;
-    }
-
-    public void setTax(double tax) {
-        this.tax = tax;
-    }
-
-    public void setPlotTax(double plotTax) {
-        this.plotTax = plotTax;
-    }
-
-    public void setSalesTax(double salesTax) {
-        this.salesTax = salesTax;
     }
 
     @Override

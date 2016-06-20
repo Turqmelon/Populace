@@ -21,8 +21,8 @@ package com.turqmelon.Populace.Utils;
  ******************************************************************************/
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.server.v1_8_R3.NBTBase;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.server.v1_9_R2.NBTBase;
+import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;

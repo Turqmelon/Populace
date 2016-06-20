@@ -10,7 +10,7 @@ import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import com.turqmelon.Populace.Utils.ItemUtil;
 import com.turqmelon.Populace.Utils.Msg;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -57,12 +57,12 @@ public class BankGUI extends TownGUI {
         if (raw == 0){
             TownGUI gui = new TownGUI(getResident(), getTown(), 1);
             gui.open(player);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         }
         else if (raw == 4){
             TaxesGUI gui = new TaxesGUI(getResident(), getTown());
             gui.open(player);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         }
         else{
 
@@ -73,11 +73,11 @@ public class BankGUI extends TownGUI {
                 EcoAction action = EcoAction.valueOf(ItemUtil.getTag(clicked, "ecoaction").toString().replace("\"", ""));
 
                 if (performTransaction(getResident(), action, amt)){
-                    player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 1);
+                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
                     repopulate();
                 }
                 else{
-                    player.playSound(player.getLocation(), Sound.NOTE_BASS, 1, 0);
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
                 }
 
 

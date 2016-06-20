@@ -3,6 +3,7 @@ package com.turqmelon.Populace.GUI;
 import com.turqmelon.Populace.Populace;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -30,13 +31,13 @@ public abstract class GUI {
     }
 
     protected InventoryProxy inventory;
+    protected Player player = null;
     private Inventory bukkitInventory;
     private boolean populated = false;
     private boolean invCheckOverride = false;
     private boolean allowDrag = false;
     private boolean allowShiftClicking = false;
     private BukkitRunnable updaterTask;
-    protected Player player = null;
 
     public GUI(String title, int size) {
         this.bukkitInventory = Bukkit.createInventory(null, getInvSizeForCount(size), title);
@@ -317,6 +318,16 @@ public abstract class GUI {
             proxyInventory.setContents(itemStacks);
         }
 
+        @Override
+        public ItemStack[] getStorageContents() {
+            return new ItemStack[0];
+        }
+
+        @Override
+        public void setStorageContents(ItemStack[] itemStacks) throws IllegalArgumentException {
+
+        }
+
         public boolean contains(int i) {
             return proxyInventory.contains(i);
         }
@@ -415,6 +426,11 @@ public abstract class GUI {
 
         public ListIterator<ItemStack> iterator(int i) {
             return proxyInventory.iterator(i);
+        }
+
+        @Override
+        public Location getLocation() {
+            return null;
         }
     }
 }

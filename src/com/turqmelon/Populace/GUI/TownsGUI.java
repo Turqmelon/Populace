@@ -6,8 +6,8 @@ import com.turqmelon.Populace.Town.TownManager;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import com.turqmelon.Populace.Utils.ItemUtil;
 import com.turqmelon.Populace.Utils.Msg;
-import net.minecraft.server.v1_8_R3.NBTBase;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.server.v1_9_R2.NBTBase;
+import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -62,12 +62,12 @@ public class TownsGUI extends GUI{
 
         if (raw == 45 && getPage() > 1){
             this.page = getPage()-1;
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
         }
         else if (raw == 53 && hasNextPage){
             this.page = getPage()+1;
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
         }
         else if (clicked != null && clicked.getType() != Material.AIR){
@@ -78,7 +78,7 @@ public class TownsGUI extends GUI{
                 UUID townid = UUID.fromString(str.toString().replace("\"", ""));
                 Town town = TownManager.getTown(townid);
                 if (town != null){
-                    player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                     TownGUI gui = new TownGUI(getResident(), town);
                     gui.open(player);
                 }

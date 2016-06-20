@@ -9,8 +9,8 @@ import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.*;
-import net.minecraft.server.v1_8_R3.NBTBase;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.server.v1_9_R2.NBTBase;
+import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -71,13 +71,13 @@ public class TownGUI extends GUI {
         int raw = event.getRawSlot();
         if (raw == 45 && getPage() > 1){
             setPage(getPage()-1);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
             return;
         }
         else if (raw == 53 && event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR){
             setPage(getPage()+1);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
             return;
         }
@@ -90,32 +90,32 @@ public class TownGUI extends GUI {
                     Bukkit.getPluginManager().callEvent(e);
                     if (!e.isCancelled()) {
                         getTown().setSpawn(player.getLocation());
-                        player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                         player.closeInventory();
                         getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " has updated the town spawn!");
                     }
                 }
                 else{
                     player.sendMessage(Msg.ERR + "Town spawn can only be set within your land.");
-                    player.playSound(player.getLocation(), Sound.NOTE_BASS, 1, 0);
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
                 }
             }
             else{
                 TownPermissionsGUI gui = new TownPermissionsGUI(getResident(), getTown());
                 gui.open(player);
-                player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }
 
         } else if (raw == 50 && getTown().canWarpToSpawn(getResident(), false) && player.hasPermission("populace.commands.visit")) {
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             player.closeInventory();
             new PopulaceTeleport(player, town.getSpawn(), player.getLocation(), Configuration.TELEPORT_WARMUP_TIME, Configuration.TELEPORT_COOLDOWN_TIME, false);
         } else if (raw == 49 && rank.isAtLeast(TownRank.RESIDENT) && getTown().getMapView() != null && player.hasPermission("populace.commands.map")) {
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             player.closeInventory();
             player.chat("/map");
         } else if (raw == 48 && rank.isAtLeast(TownRank.MANAGER) && player.hasPermission("populace.commands.invite")) {
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             player.closeInventory();
             player.chat("/invite");
         }
@@ -128,28 +128,28 @@ public class TownGUI extends GUI {
                 TaxesGUI gui = new TaxesGUI(getResident(), getTown());
                 gui.open(player);
             }
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         }
         else if (raw == 4){
             if (event.isLeftClick() && rank == TownRank.MAYOR){
                 BonusLandGUI gui = new BonusLandGUI(getResident(), getTown());
                 gui.open(player);
-                player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }
             else if (event.isRightClick() && event.isShiftClick() && rank == TownRank.MAYOR){
-                player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                 player.closeInventory();
                 player.sendMessage(Msg.INFO + "If you destroy your town, everything will be lost.");
                 getResident().setPendingAction(() -> getTown().destroy(false));
             }
             else if (event.isRightClick() && rank == TownRank.MAYOR){
                 getTown().toggleStatus();
-                player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }
 
             else if (event.isLeftClick() && rank == TownRank.GUEST){
                 if (player.hasPermission("populace.commands.join")) {
-                    player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                     player.closeInventory();
                     if (getTown().isOpen()) {
                         getTown().joinByPublic(getResident());
@@ -163,7 +163,7 @@ public class TownGUI extends GUI {
                 }
             }
             else if (event.isLeftClick() && rank.getPermissionLevel() < TownRank.MAYOR.getPermissionLevel()){
-                player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                 player.closeInventory();
                 getResident().sendMessage(Msg.INFO + "If you leave the town, you will lose access to everything you own.");
                 getResident().setPendingAction(() -> getTown().leaveOnBehalf(getResident()));
@@ -183,11 +183,11 @@ public class TownGUI extends GUI {
                         if (event.isRightClick() && rank.isAtLeast(TownRank.MANAGER)) {
                             SetResidentRankGUI gui = new SetResidentRankGUI(getResident(), getTown(), clicked);
                             gui.open(player);
-                            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                         }
                         else{
                             player.closeInventory();
-                            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                             getResident().sendMessage(Msg.INFO + "Kicking out a resident will cause them to lose access to everything in the town.");
                             getResident().setPendingAction(() -> getTown().kickOut(clicked, getResident(), null));
                         }
@@ -195,7 +195,7 @@ public class TownGUI extends GUI {
                     }
                     else{
                         player.sendMessage(Msg.ERR + "Resident could not be identified.");
-                        player.playSound(player.getLocation(), Sound.NOTE_BASS, 1, 0);
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
                     }
                 }
 
@@ -304,7 +304,7 @@ public class TownGUI extends GUI {
                 .tagWith("residentid", new NBTTagString(resident.getUuid().toString())).build();
     }
 
-    public static enum IconType {
+    public enum IconType {
 
         MAIN,
         TREASURY,

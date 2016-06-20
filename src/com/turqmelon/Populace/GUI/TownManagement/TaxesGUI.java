@@ -54,14 +54,14 @@ public class TaxesGUI extends TownGUI {
         if (raw == 0){
             TownGUI gui = new TownGUI(getResident(), getTown(), 1);
             gui.open(player);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         }
         else if (raw == 4){
 
             if (event.isRightClick()){
                 BankGUI gui = new BankGUI(getResident(), getTown());
                 gui.open(player);
-                player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }
 
         }
@@ -78,7 +78,7 @@ public class TaxesGUI extends TownGUI {
                 getTown().setTax(0);
             }
 
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " changed the §fResident Tax§d to " + Populace.getCurrency().format(getTown().getTax()) + ".");
 
             repopulate();
@@ -95,7 +95,7 @@ public class TaxesGUI extends TownGUI {
                 getTown().setPlotTax(0);
             }
 
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " changed the §fPlot Tax§d to " + Populace.getCurrency().format(getTown().getPlotTax()) + ".");
 
             repopulate();
@@ -118,7 +118,7 @@ public class TaxesGUI extends TownGUI {
             }
 
             getTown().setSalesTax(newPerc);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " changed the §fSales Tax§d to " + new DecimalFormat("#.#").format(getTown().getSalesTax()) + "%.");
 
             repopulate();

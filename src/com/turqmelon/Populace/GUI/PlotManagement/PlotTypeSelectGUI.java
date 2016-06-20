@@ -26,7 +26,7 @@ import com.turqmelon.Populace.Plot.PlotType;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Utils.ItemBuilder;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -52,26 +52,26 @@ public class PlotTypeSelectGUI extends PlotGUI {
         if (raw == 0){
             PlotGUI gui = new PlotGUI(getPlot(), getResident());
             gui.open(player);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         }
         else if (raw == 19){
 
             getPlot().setType(PlotType.RESIDENTIAL);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
 
         }
         else if (raw == 22){
 
             getPlot().setType(PlotType.MERCHANT);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
 
         }
         else if (raw == 25){
 
             getPlot().setType(PlotType.BATTLE);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
 
         }

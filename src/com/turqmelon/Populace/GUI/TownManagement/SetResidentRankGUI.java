@@ -8,8 +8,8 @@ import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import com.turqmelon.Populace.Utils.ItemUtil;
 import com.turqmelon.Populace.Utils.Msg;
-import net.minecraft.server.v1_8_R3.NBTBase;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.server.v1_9_R2.NBTBase;
+import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -63,18 +63,18 @@ public class SetResidentRankGUI extends TownGUI {
         if (raw == 0){
             TownGUI gui = new TownGUI(getResident(), getTown());
             gui.open(player);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             return;
         }
 
         if (raw == 41) {
             player.closeInventory();
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             getResident().sendMessage(Msg.INFO + "Kicking out a resident will cause them to lose access to everything in the town.");
             getResident().setPendingAction(() -> getTown().kickOut(getTarget(), getResident(), null));
         } else if (raw == 39) {
             player.closeInventory();
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             player.chat("/jail");
         } else if (rank == TownRank.MAYOR) {
 
@@ -85,7 +85,7 @@ public class SetResidentRankGUI extends TownGUI {
                     TownRank newRank = TownRank.valueOf(nbt.toString().replace("\"", ""));
                     getTown().getResidents().put(getTarget(), newRank);
                     getTown().sendTownBroadcast(TownRank.RESIDENT, getTarget().getName() + "'s rank has been set to " + newRank.getPrefix() + "§dby the mayor.");
-                    player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                     Bukkit.getPluginManager().callEvent(new ResidentRankChangedEvent(getTarget(), newRank));
                     repopulate();
                 }

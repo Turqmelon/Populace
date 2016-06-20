@@ -76,6 +76,10 @@ public class PopulaceTeleport {
         initialize();
     }
 
+    public static Map<UUID, Long> getNextTeleport() {
+        return nextTeleport;
+    }
+
     private void initialize() {
 
         if (player.hasPermission("populace.teleportation.nowarmup")) {
@@ -108,7 +112,7 @@ public class PopulaceTeleport {
                     if (!isAllowMovement()) {
                         if (getPlayer().getLocation().distanceSquared(getOrigin()) > 1) {
                             getPlayer().sendMessage(Msg.ERR + "Teleport cancelled. You moved!");
-                            getPlayer().playSound(getPlayer().getLocation(), Sound.NOTE_BASS, 1, 0);
+                            getPlayer().playSound(getPlayer().getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
                             this.cancel();
                             return;
                         }
@@ -123,7 +127,7 @@ public class PopulaceTeleport {
 
                         Location[] loc = {getOrigin(), getOrigin().clone().add(0, 1, 0), getLocation(), getLocation().clone().add(0, 1, 0)};
                         for (Location l : loc) {
-                            l.getWorld().playSound(l, Sound.PORTAL_TRAVEL, 1, 1);
+                            l.getWorld().playSound(l, Sound.BLOCK_PORTAL_TRAVEL, 1, 1);
                             l.getWorld().playEffect(l, Effect.STEP_SOUND, org.bukkit.Material.PORTAL);
                         }
 
@@ -134,7 +138,7 @@ public class PopulaceTeleport {
 
                         this.cancel();
                     } else {
-                        getPlayer().playSound(getPlayer().getLocation(), Sound.CLICK, 1, 0);
+                        getPlayer().playSound(getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 1, 0);
                         getPlayer().sendMessage(Msg.INFO + "Teleport in §l" + ClockUtil.formatDateDiff(teleportTime, true) + "§b...");
                     }
                 }
@@ -152,10 +156,6 @@ public class PopulaceTeleport {
 
     public long getStart() {
         return start;
-    }
-
-    public static Map<UUID, Long> getNextTeleport() {
-        return nextTeleport;
     }
 
     public Player getPlayer() {

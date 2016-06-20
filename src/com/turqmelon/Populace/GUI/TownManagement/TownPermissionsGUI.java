@@ -8,8 +8,8 @@ import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import com.turqmelon.Populace.Utils.ItemUtil;
-import net.minecraft.server.v1_8_R3.NBTBase;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.server.v1_9_R2.NBTBase;
+import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -58,7 +58,7 @@ public class TownPermissionsGUI extends TownGUI {
         if (raw == 0){
             TownGUI gui = new TownGUI(getResident(), getTown());
             gui.open(player);
-            player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         }
         else{
 
@@ -72,7 +72,7 @@ public class TownPermissionsGUI extends TownGUI {
                     TownRank newRank = TownRank.valueOf(rankTag.toString().replace("\"", ""));
 
                     getTown().setRequiredRank(set, newRank);
-                    player.playSound(player.getLocation(), Sound.CLICK, 1, 1);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                     repopulate();
                 }
 
