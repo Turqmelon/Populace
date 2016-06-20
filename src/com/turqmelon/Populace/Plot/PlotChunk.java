@@ -131,6 +131,10 @@ public class PlotChunk {
 
     }
 
+    public Chunk asBukkitChunk() {
+        return getWorld().getChunkAt(getX(), getZ());
+    }
+
     public JSONObject toJSON(){
         JSONObject obj = new JSONObject();
         obj.put("world", getWorld().getName());
