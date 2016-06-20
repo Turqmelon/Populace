@@ -95,7 +95,7 @@ public class TownsGUI extends GUI{
 
         Inventory inv = getProxyInventory();
 
-        inv.setItem(4, new ItemBuilder(Material.SIGN).withCustomName("§e§lThere are " + TownManager.getTowns().size() + " towns.").build());
+        inv.setItem(4, new ItemBuilder(Material.SIGN).withCustomName("§e§lThere are " + TownManager.getTowns(false).size() + " towns.").build());
 
         int townsPerPage = 36;
         int startIndex = 0;

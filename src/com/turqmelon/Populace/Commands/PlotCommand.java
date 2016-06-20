@@ -46,6 +46,11 @@ public class PlotCommand implements CommandExecutor {
                 Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
                 if (plot != null){
 
+                    if (plot.getTown().isSpecial()) {
+                        sender.sendMessage(Msg.ERR + "Land within " + plot.getTown().getName() + " can't be inspected.");
+                        return true;
+                    }
+
                     PlotGUI gui = new PlotGUI(plot, resident);
                     gui.open(player);
 

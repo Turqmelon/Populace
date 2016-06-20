@@ -128,6 +128,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         Action action = event.getAction();
+
         if (action == Action.LEFT_CLICK_AIR) return;
         if (action == Action.PHYSICAL) return;
 
@@ -281,8 +282,158 @@ public class PlayerListener implements Listener {
 
     }
 
-    //determines whether a block type is an inventory holder.
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event) {
+        Action action = event.getAction();
+
+        if (action == Action.LEFT_CLICK_AIR) return;
+        if (action == Action.PHYSICAL) return;
+
+        Player player = event.getPlayer();
+        Resident resident = ResidentManager.getResident(player);
+
+        Block clickedBlock = event.getClickedBlock();
+        Material clickedBlockType = clickedBlock != null ? clickedBlock.getType() : Material.AIR;
+
+        if (action == Action.LEFT_CLICK_BLOCK && clickedBlock != null) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
+            Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
+            Block adjacentBlock = clickedBlock.getRelative(event.getBlockFace());
+            byte lightLevel = adjacentBlock.getLightFromBlocks();
+            if (lightLevel == 15 && adjacentBlock.getType() == Material.FIRE) {
+                if (plot != null) {
+                    if (resident == null || !plot.can(resident, PermissionSet.BUILD)) {
+                        player.sendMessage(Msg.ERR + "You can't put out fire here.");
+                        event.setCancelled(true);
+                        player.sendBlockChange(adjacentBlock.getLocation(), adjacentBlock.getTypeId(), adjacentBlock.getData());
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (clickedBlock != null && (event.getAction() == Action.RIGHT_CLICK_BLOCK && (
+                this.isInventoryHolder(clickedBlock) ||
+                        clickedBlockType == Material.CAULDRON ||
+                        clickedBlockType == Material.JUKEBOX ||
+                        clickedBlockType == Material.ANVIL ||
+                        clickedBlockType == Material.CAKE_BLOCK))) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
+            Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
+            if (plot != null) {
+                if (resident == null || !plot.can(resident, PermissionSet.CONTAINER)) {
+                    event.setCancelled(true);
+                    player.sendMessage(Msg.ERR + "You can't open that here.");
+                }
+            }
+        } else if (clickedBlock != null &&
+                ((clickedBlockType == Material.WOODEN_DOOR ||
+                        clickedBlockType == Material.ACACIA_DOOR ||
+                        clickedBlockType == Material.BIRCH_DOOR ||
+                        clickedBlockType == Material.JUNGLE_DOOR ||
+                        clickedBlockType == Material.SPRUCE_DOOR ||
+                        clickedBlockType == Material.DARK_OAK_DOOR ||
+                        clickedBlockType == Material.BED_BLOCK ||
+                        clickedBlockType == Material.TRAP_DOOR ||
+                        clickedBlockType == Material.FENCE_GATE ||
+                        clickedBlockType == Material.ACACIA_FENCE_GATE ||
+                        clickedBlockType == Material.BIRCH_FENCE_GATE ||
+                        clickedBlockType == Material.JUNGLE_FENCE_GATE ||
+                        clickedBlockType == Material.SPRUCE_FENCE_GATE ||
+                        clickedBlockType == Material.DARK_OAK_FENCE_GATE))) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
+            Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
+            if (plot != null) {
+                if (resident == null || !plot.can(resident, PermissionSet.ACCESS)) {
+                    event.setCancelled(true);
+                    player.sendMessage(Msg.ERR + "You can't use that here.");
+                }
+            }
+
+        } else if (clickedBlock != null && (clickedBlockType == null || clickedBlockType == Material.STONE_BUTTON || clickedBlockType == Material.WOOD_BUTTON || clickedBlockType == Material.LEVER)) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
+            Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
+            if (plot != null) {
+                if (resident == null || !plot.can(resident, PermissionSet.ACCESS)) {
+                    event.setCancelled(true);
+                    player.sendMessage(Msg.ERR + "You can't use that here.");
+                }
+            }
+        } else if (clickedBlock != null && (
+                clickedBlockType == Material.NOTE_BLOCK ||
+                        clickedBlockType == Material.DIODE_BLOCK_ON ||
+                        clickedBlockType == Material.DIODE_BLOCK_OFF ||
+                        clickedBlockType == Material.DRAGON_EGG ||
+                        clickedBlockType == Material.DAYLIGHT_DETECTOR ||
+                        clickedBlockType == Material.DAYLIGHT_DETECTOR_INVERTED ||
+                        clickedBlockType == Material.REDSTONE_COMPARATOR_ON ||
+                        clickedBlockType == Material.REDSTONE_COMPARATOR_OFF)) {
+            if (resident != null && resident.isJailed()) {
+                resident.getJailData().sendExplanation(resident);
+                event.setCancelled(true);
+                return;
+            }
+            Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
+            if (plot != null) {
+                if (resident == null || !plot.can(resident, PermissionSet.BUILD)) {
+                    event.setCancelled(true);
+                    player.sendMessage(Msg.ERR + "You can't change that here.");
+                }
+            }
+        } else {
+            //ignore all actions except right-click on a block or in the air
+            if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+
+            if (resident != null && resident.isJailed()) {
+                event.setCancelled(true);
+                return;
+            }
+
+            //what's the player holding?
+            ItemStack itemInHand = player.getItemInHand();
+            Material materialInHand = itemInHand != null ? itemInHand.getType() : Material.AIR;
+
+            //if it's bonemeal or armor stand or spawn egg, check for build permission (ink sac == bone meal, must be a Bukkit bug?)
+            if (clickedBlock != null && (materialInHand == Material.INK_SACK || materialInHand == Material.ARMOR_STAND || materialInHand == Material.MONSTER_EGG)) {
+                Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
+                if (plot != null) {
+                    if (resident == null || !plot.can(resident, PermissionSet.BUILD)) {
+                        event.setCancelled(true);
+                        player.sendMessage(Msg.ERR + "You can't use that here.");
+                    }
+                }
+            } else if (clickedBlock != null && materialInHand == Material.BOAT) {
+                Plot plot = PlotManager.getPlot(clickedBlock.getChunk());
+                if (plot != null) {
+                    if (resident == null || !plot.can(resident, PermissionSet.ACCESS)) {
+                        event.setCancelled(true);
+                        player.sendMessage(Msg.ERR + "You can't use that here.");
+                    }
+                }
+
+            }
+        }
+
+
+    }    //determines whether a block type is an inventory holder.
     private ConcurrentHashMap<Integer, Boolean> inventoryHolderCache = new ConcurrentHashMap<>();
+
     private boolean isInventoryHolder(Block clickedBlock)
     {
         @SuppressWarnings("deprecation")

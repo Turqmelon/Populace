@@ -7,10 +7,7 @@ import com.turqmelon.Populace.Plot.PlotChunk;
 import com.turqmelon.Populace.Plot.PlotManager;
 import com.turqmelon.Populace.Plot.PlotType;
 import com.turqmelon.Populace.Populace;
-import com.turqmelon.Populace.Town.Town;
-import com.turqmelon.Populace.Town.TownManager;
-import com.turqmelon.Populace.Town.TownRank;
-import com.turqmelon.Populace.Town.Warzone;
+import com.turqmelon.Populace.Town.*;
 import com.turqmelon.Populace.Utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -149,6 +146,8 @@ public class Resident implements Comparable {
         else if (town != null && (lastTown == null || !lastTown.getUuid().equals(town.getUuid()))){
             if ((town instanceof Warzone)) {
                 result = "§c§lWarzone";
+            } else if (town instanceof Spawn) {
+                result = "§a§lSpawn";
             } else {
                 result = "§6§l" + town.getName() + town.getLevel().getSuffix();
             }

@@ -150,6 +150,15 @@ public class TownManager {
         return null;
     }
 
+    public static Spawn getSpawn() {
+        for (Town town : getTowns()) {
+            if ((town instanceof Spawn)) {
+                return (Spawn) town;
+            }
+        }
+        return null;
+    }
+
     public static Warzone getWarzone() {
         for (Town town : getTowns()) {
             if ((town instanceof Warzone)) {
@@ -159,16 +168,14 @@ public class TownManager {
         return null;
     }
 
-    public static List<Town> getTowns(boolean includeWarzone) {
-        if (includeWarzone) {
+    public static List<Town> getTowns(boolean includeSpecial) {
+        if (includeSpecial) {
             return getTowns();
         } else {
             List<Town> list = new ArrayList<>();
-            list.addAll(getTowns());
-            for (int i = 0; i < list.size(); i++) {
-                Town town = list.get(i);
-                if ((town instanceof Warzone)) {
-                    list.remove(town);
+            for (Town town : getTowns()) {
+                if (!town.isSpecial()) {
+                    list.add(town);
                 }
             }
             return list;

@@ -3,10 +3,7 @@ package com.turqmelon.Populace.Plot;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
-import com.turqmelon.Populace.Town.PermissionSet;
-import com.turqmelon.Populace.Town.Town;
-import com.turqmelon.Populace.Town.TownRank;
-import com.turqmelon.Populace.Town.Warzone;
+import com.turqmelon.Populace.Town.*;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -105,11 +102,20 @@ public class Plot {
     }
 
     public PlotType getType() {
-        return isWarzoneLand() ? PlotType.BATTLE : type;
+        if (isWarzoneLand()) {
+            return PlotType.BATTLE;
+        } else if (isSpawnLand()) {
+            return PlotType.MERCHANT;
+        }
+        return type;
     }
 
     public void setType(PlotType type) {
         this.type = type;
+    }
+
+    public boolean isSpawnLand() {
+        return ((getTown() instanceof Spawn));
     }
 
     public boolean isWarzoneLand() {
@@ -151,6 +157,18 @@ public class Plot {
                     return true;
                 case SHOP:
                 case BUILD:
+                    return false;
+                default:
+                    return false;
+            }
+        } else if (isSpawnLand()) {
+            switch (set) {
+                case ENTRY:
+                case SHOP:
+                    return true;
+                case BUILD:
+                case ACCESS:
+                case CONTAINER:
                     return false;
                 default:
                     return false;

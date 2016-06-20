@@ -8,10 +8,7 @@ import com.turqmelon.Populace.Events.Core.PopulaceNewDayEvent;
 import com.turqmelon.Populace.Listeners.*;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
-import com.turqmelon.Populace.Town.Town;
-import com.turqmelon.Populace.Town.TownManager;
-import com.turqmelon.Populace.Town.TownRank;
-import com.turqmelon.Populace.Town.Warzone;
+import com.turqmelon.Populace.Town.*;
 import com.turqmelon.Populace.Utils.ClockUtil;
 import com.turqmelon.Populace.Utils.Configuration;
 import com.turqmelon.Populace.Utils.EnchantGlow;
@@ -191,9 +188,16 @@ public class Populace extends JavaPlugin {
                 for(Object o : townArray){
                     JSONObject town = (JSONObject)o;
                     String townName = (String) town.get("name");
-                    if (townName.equalsIgnoreCase("warzone")) {
+                    if (townName.equalsIgnoreCase("warzone") || townName.equalsIgnoreCase("spawn")) {
                         UUID uuid = UUID.fromString((String) town.get("uuid"));
-                        TownManager.getTowns().add(new Warzone(uuid));
+                        SpecialTown specialTown;
+                        if (townName.equalsIgnoreCase("warzone")) {
+                            specialTown = new Warzone(uuid);
+                        } else {
+                            specialTown = new Spawn(uuid);
+                        }
+                        specialTown.loadPlots(town);
+                        TownManager.getTowns().add(specialTown);
                     } else {
                         TownManager.getTowns().add(new Town(town));
                     }
@@ -331,6 +335,12 @@ public class Populace extends JavaPlugin {
             if (warzone == null) {
                 warzone = new Warzone();
                 TownManager.getTowns().add(warzone);
+            }
+
+            Town spawn = TownManager.getTown("spawn");
+            if (spawn == null) {
+                spawn = new Spawn();
+                TownManager.getTowns().add(spawn);
             }
 
         } catch (ParseException | IOException e) {

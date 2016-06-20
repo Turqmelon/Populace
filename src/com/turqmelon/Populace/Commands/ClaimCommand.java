@@ -44,8 +44,12 @@ public class ClaimCommand implements CommandExecutor {
             Player player = (Player)sender;
 
             boolean warzone = false;
-            if (args.length > 0) {
+            boolean spawn = false;
+            if (args.length > 0 && sender.hasPermission("populace.special.warzone.claim")) {
                 warzone = args[args.length - 1].equalsIgnoreCase("warzone");
+            }
+            if (args.length > 0 && sender.hasPermission("populace.special.spawn.claim")) {
+                spawn = args[args.length - 1].equalsIgnoreCase("spawn");
             }
 
             Resident resident = ResidentManager.getResident(player);
@@ -55,6 +59,8 @@ public class ClaimCommand implements CommandExecutor {
 
                 if (warzone) {
                     town = TownManager.getWarzone();
+                } else if (spawn) {
+                    town = TownManager.getSpawn();
                 }
 
                 if (town != null){
@@ -77,7 +83,7 @@ public class ClaimCommand implements CommandExecutor {
                                 for (int x = minx; x <= i; x++) {
                                     for (int z = minz; z <= i; z++) {
                                         PlotChunk ch = new PlotChunk(c.getWorld(), c.getX() + x, c.getZ() + z);
-                                        if (town.claimLand(warzone ? null : resident, ch, true)) {
+                                        if (town.claimLand(warzone || spawn ? null : resident, ch, true)) {
                                             ch.visualize(player);
                                             claimed++;
                                         }
@@ -85,7 +91,7 @@ public class ClaimCommand implements CommandExecutor {
                                 }
                             }
                             if (claimed > 0) {
-                                sender.sendMessage(Msg.OK + "Claimed " + claimed + (warzone ? " war" : "") + " chunk(s).");
+                                sender.sendMessage(Msg.OK + "Claimed " + claimed + (warzone || spawn ? " " + town.getName().toLowerCase() : "") + " chunk(s).");
                             } else {
                                 sender.sendMessage(Msg.ERR + "Claimed no chunks.");
                             }
@@ -95,7 +101,7 @@ public class ClaimCommand implements CommandExecutor {
                     } else {
                         Chunk c = player.getLocation().getChunk();
                         PlotChunk pc = new PlotChunk(c.getWorld(), c.getX(), c.getZ());
-                        if (town.claimLand(warzone ? null : resident, pc, false)) {
+                        if (town.claimLand(warzone || spawn ? null : resident, pc, false)) {
                             pc.visualize(player);
                         }
                     }

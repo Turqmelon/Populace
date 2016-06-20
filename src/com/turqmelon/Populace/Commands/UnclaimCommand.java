@@ -25,6 +25,7 @@ import com.turqmelon.Populace.Plot.PlotManager;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
+import com.turqmelon.Populace.Town.TownManager;
 import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.Chunk;
 import org.bukkit.command.Command;
@@ -44,12 +45,29 @@ public class UnclaimCommand implements CommandExecutor {
             Resident resident = ResidentManager.getResident(player);
             if (resident != null){
 
+                boolean warzone = false;
+                boolean spawn = false;
+                if (args.length > 0 && args[args.length - 1].equalsIgnoreCase("warzone") && sender.hasPermission("populace.special.warzone.unclaim")) {
+                    warzone = true;
+                } else if (args.length > 0 && args[args.length - 1].equalsIgnoreCase("spawn") && sender.hasPermission("populace.special.spawn.unclaim")) {
+                    spawn = true;
+                }
+
                 Town town = resident.getTown();
+
+                if (warzone) {
+                    town = TownManager.getWarzone();
+                } else if (spawn) {
+                    town = TownManager.getSpawn();
+                }
+
                 if (town != null){
 
                     Chunk c = player.getLocation().getChunk();
                     Plot plot = PlotManager.getPlot(c);
-                    town.unclaimLand(resident, plot);
+                    if (town.unclaimLand(warzone || spawn ? null : resident, plot) && (warzone || spawn)) {
+                        sender.sendMessage(Msg.OK + "Unclaimed " + town.getName().toLowerCase() + " plot.");
+                    }
 
                 }
                 else{

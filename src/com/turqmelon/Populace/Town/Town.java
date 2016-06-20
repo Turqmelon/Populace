@@ -152,6 +152,17 @@ public class Town implements Comparable {
             permissions.put(PermissionSet.valueOf(permData[0]), TownRank.valueOf(permData[1]));
         }
 
+        loadPlots(object);
+
+        this.level = TownLevel.getAppropriateLevel(getResidents().size());
+        initializeMapView();
+    }
+
+    public boolean isSpecial() {
+        return false;
+    }
+
+    public void loadPlots(JSONObject object) {
         JSONArray plots = (JSONArray)object.get("plots");
         for(Object o : plots){
             JSONObject obj = (JSONObject)o;
@@ -161,9 +172,6 @@ public class Town implements Comparable {
                 plot.getOwner().getPlotChunks().add(plot.getPlotChunk());
             }
         }
-
-        this.level = TownLevel.getAppropriateLevel(getResidents().size());
-        initializeMapView();
     }
 
     public Location getTownJail() {
@@ -469,6 +477,7 @@ public class Town implements Comparable {
     }
 
     private boolean unclaimLand(Resident resident, Plot plot, boolean confirmed){
+
         TownRank rank = getRank(resident);
         if (plot != null) {
 
@@ -495,7 +504,7 @@ public class Town implements Comparable {
             }
 
             // The owner asking to unclaim their plot won't really unclaim it, just relinquish ownership
-            if (plot.getOwner() != null && plot.getOwner().getUuid().equals(resident.getUuid())){
+            if (resident != null && plot.getOwner() != null && plot.getOwner().getUuid().equals(resident.getUuid())) {
 
                 if (confirmed){
                     plot.getOwner().getPlotChunks().remove(plot.getPlotChunk());
@@ -511,8 +520,7 @@ public class Town implements Comparable {
                 }
                 return true;
 
-            }
-            else if (plot.getOwner() != null && rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()){
+            } else if (resident != null && plot.getOwner() != null && rank.getPermissionLevel() >= TownRank.MANAGER.getPermissionLevel()) {
 
                 if (adjacent == 4){
                     resident.sendMessage(Msg.ERR + "You can't use that in the middle of town. Unclaiming must be done from the borders.");
@@ -542,28 +550,29 @@ public class Town implements Comparable {
                     resident.setPendingAction(() -> unclaimLand(resident, plot, true));
                 }
                 return true;
-            }
-            else if (rank.getPermissionLevel() >= TownRank.ASSISTANT.getPermissionLevel()){
+            } else if (resident == null || rank.getPermissionLevel() >= TownRank.ASSISTANT.getPermissionLevel()) {
 
-                if (adjacent == 4){
+                if (resident != null && adjacent == 4) {
                     resident.sendMessage(Msg.ERR + "You can't use that in the middle of town. Unclaiming must be done from the borders.");
                     return false;
                 }
 
-                if (getPlots().size() == 1){
+                if (resident != null && getPlots().size() == 1) {
                     resident.sendMessage(Msg.ERR + "Towns must have at least 1 claim.");
                     resident.sendMessage(Msg.ERR + "If you made a mistake, destroy your town and start over.");
                     return false;
                 }
 
-                TownUnclaimLandEvent event = new TownUnclaimLandEvent(this, resident, plot);
-                Bukkit.getPluginManager().callEvent(event);
-                if (event.isCancelled()) {
-                    return false;
+                if (resident != null) {
+                    TownUnclaimLandEvent event = new TownUnclaimLandEvent(this, resident, plot);
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.isCancelled()) {
+                        return false;
+                    }
+                    sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " unclaimed a plot in " + plot.getPlotChunk().getWorld().getName() + " @ X: " + plot.getPlotChunk().getX() + ", Z: " + plot.getPlotChunk().getZ());
                 }
 
                 getPlots().remove(plot);
-                sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " unclaimed a plot in " + plot.getPlotChunk().getWorld().getName() + " @ X: " + plot.getPlotChunk().getX() +", Z: " + plot.getPlotChunk().getZ());
                 return true;
             }
             else{
@@ -578,6 +587,7 @@ public class Town implements Comparable {
     }
 
     private boolean claimLand(Resident resident, PlotChunk chunk, boolean confirmed, boolean silent) {
+
         TownRank rank = getRank(resident);
 
         ClaimFailureReason reason = canClaimLand(chunk);
@@ -593,7 +603,7 @@ public class Town implements Comparable {
             case ALREADY_CLAIMED:
 
                 Plot plot = PlotManager.getPlot(chunk);
-                if (plot.getTown().getUuid().equals(getUuid()) && (plot.getInvited().contains(resident.getUuid()) || plot.isForSale())) {
+                if (plot.getTown().getUuid().equals(getUuid()) && ((resident != null && plot.getInvited().contains(resident.getUuid())) || plot.isForSale())) {
                     double price = plot.getPrice();
                     if (confirmed) {
                         Account account = AccountManager.getAccount(resident.getUuid());
@@ -662,7 +672,7 @@ public class Town implements Comparable {
                 return false;
             default:
 
-                if (getRank(resident).isAtLeast(TownRank.ASSISTANT)) {
+                if (resident == null || rank.isAtLeast(TownRank.ASSISTANT)) {
                     return buyChunk(resident, chunk, false);
                 } else {
                     resident.sendMessage(Msg.ERR + "Only Assistants can claim land.");
@@ -676,10 +686,13 @@ public class Town implements Comparable {
 
     private ClaimFailureReason canClaimLand(PlotChunk chunk){
 
-
         Plot p = PlotManager.getPlot(chunk);
         if (p != null){
             return ClaimFailureReason.ALREADY_CLAIMED;
+        }
+
+        if (isSpecial()) {
+            return ClaimFailureReason.NONE;
         }
 
         if (getPlots().size() >= getMaxLand()){

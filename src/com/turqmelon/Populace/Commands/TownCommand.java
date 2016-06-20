@@ -52,6 +52,11 @@ public class TownCommand implements CommandExecutor {
                     Town town = TownManager.getTown(args[0]);
                     if (town != null){
 
+                        if (town.isSpecial()) {
+                            sender.sendMessage(Msg.ERR + town.getName() + " can't be inspected.");
+                            return true;
+                        }
+
                         TownGUI gui = new TownGUI(resident, town);
                         gui.open(player);
 
