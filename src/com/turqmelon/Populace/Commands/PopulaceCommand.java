@@ -21,7 +21,10 @@ package com.turqmelon.Populace.Commands;
  ******************************************************************************/
 
 import com.turqmelon.Populace.Populace;
+import com.turqmelon.Populace.Resident.Resident;
+import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Utils.Msg;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -53,6 +56,10 @@ public class PopulaceCommand implements CommandExecutor {
                     player.sendMessage(Msg.ERR + e.getMessage() + " (Details in console.)");
                     e.printStackTrace();
                 }
+            } else if (args[0].equalsIgnoreCase("bypass") && player.hasPermission("populace.bypass")) {
+                Resident resident = ResidentManager.getResident(player);
+                resident.setBypassMode(!resident.isBypassMode());
+                resident.sendMessage(Msg.OK + "Bypass Mode: " + ChatColor.WHITE + (resident.isBypassMode() ? "Enabled. Be polite." : "Disabled"));
             }
 
 

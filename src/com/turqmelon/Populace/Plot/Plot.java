@@ -149,6 +149,10 @@ public class Plot {
 
     public boolean can(Resident resident, PermissionSet set) {
 
+        if (resident.isBypassMode()) {
+            return true;
+        }
+
         if (isWarzoneLand()) {
             switch (set) {
                 case ENTRY:

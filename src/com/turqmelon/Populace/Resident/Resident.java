@@ -57,6 +57,8 @@ public class Resident implements Comparable {
     private long lastBuildWarning = 0;
     private long fallImmunity = 0;
 
+    private boolean bypassMode = false;
+
     private JailData jailData = null;
 
     public Resident(UUID uuid, String name) {
@@ -91,6 +93,14 @@ public class Resident implements Comparable {
         object.put("town", getTown()!=null?getTown().getUuid().toString():null);
         object.put("jaildata", getJailData() != null ? getJailData().toJSON() : null);
         return object;
+    }
+
+    public boolean isBypassMode() {
+        return bypassMode;
+    }
+
+    public void setBypassMode(boolean bypassMode) {
+        this.bypassMode = bypassMode;
     }
 
     @Override
