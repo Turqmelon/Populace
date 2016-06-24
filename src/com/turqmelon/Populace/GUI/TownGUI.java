@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -300,8 +301,17 @@ public class TownGUI extends GUI {
                 list.add("§aRight Click§f to change properties.");
             }
         }
-        return new ItemBuilder(Material.SKULL_ITEM).withData((byte)3).asHeadOwner(resident.getName()).withCustomName(getTown().getRank(resident).getPrefix() + resident.getName()).withLore(list)
-                .tagWith("residentid", new NBTTagString(resident.getUuid().toString())).build();
+        ItemStack item = resident.getIcon();
+        ItemMeta meta = item.getItemMeta();
+        List<String> lore = meta.getLore();
+        if (list.size() > 0) {
+            lore.add("§8§m--------------------");
+            lore.addAll(list);
+        }
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+
+        return ItemUtil.addTag(item, "residentid", new NBTTagString(resident.getUuid().toString()));
     }
 
     public enum IconType {
