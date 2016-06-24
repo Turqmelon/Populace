@@ -507,11 +507,15 @@ public class Town implements Comparable {
             if (resident != null && plot.getOwner() != null && plot.getOwner().getUuid().equals(resident.getUuid())) {
 
                 if (confirmed){
-                    plot.getOwner().getPlotChunks().remove(plot.getPlotChunk());
+                    Resident owner = plot.getOwner();
+                    plot.getOwner().getPlotChunks().clear();
                     plot.setOwner(null);
                     plot.getAllowList().clear();
                     resident.sendMessage(Msg.OK + "You gave up ownership of this plot.");
                     sendTownBroadcast(TownRank.ASSISTANT, resident.getName() + " gave up ownership of a plot in " + plot.getPlotChunk().getWorld().getName() + " @ X: " + plot.getPlotChunk().getX() +", Z: " + plot.getPlotChunk().getZ());
+                    if (owner.getTown() != null) {
+                        owner.getTown().getPlots().stream().filter(p -> p.getOwner() != null && p.getOwner().getUuid().equals(resident.getUuid())).forEach(p -> owner.getPlotChunks().add(p.getPlotChunk()));
+                    }
                 }
                 else{
                     resident.sendMessage(Msg.INFO + "Are you sure you want to give up ownership of this plot?");
@@ -646,7 +650,7 @@ public class Town implements Comparable {
 
                 Player player = Bukkit.getPlayer(resident.getUuid());
 
-                if (player != null && player.hasMetadata("populace.plottypes.outpost")) {
+                if (player != null && player.hasPermission("populace.plottypes.outpost")) {
                     if (getRank(resident).isAtLeast(TownRank.MANAGER)) {
                         if (getLevel().getResidents() >= TownLevel.CITY.getResidents()) {
                             if (confirmed) {

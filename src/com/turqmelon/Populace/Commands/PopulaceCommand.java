@@ -42,8 +42,10 @@ public class PopulaceCommand implements CommandExecutor {
             if (args.length == 0){
                 player.sendMessage(Msg.INFO + "Populace Suite by (§3http://turqmelon.com§b)");
                 player.sendMessage(Msg.INFO + "Loaded Modules:");
+                player.sendMessage(Msg.INFO + " - " + ChatColor.WHITE + "PopulaceCore §c(Required)");
                 for (Plugin plugin : Populace.getInstance().getServer().getPluginManager().getPlugins()) {
                     if (plugin.getName().startsWith("Populace") && plugin.isEnabled()) {
+                        if (plugin.getName().equalsIgnoreCase("populace")) continue;
                         player.sendMessage(Msg.INFO + " - " + ChatColor.WHITE + plugin.getName());
                     }
                 }

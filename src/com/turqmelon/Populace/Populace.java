@@ -30,6 +30,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -280,12 +282,16 @@ public class Populace extends JavaPlugin {
                 if (days > 0) {
                     getLog().log(Level.INFO, "Purging old users...");
                     int count = 0;
+                    List<Resident> toRemove = new ArrayList<>();
                     for (int i = 0; i < ResidentManager.getResidents().size(); i++) {
                         Resident resident = ResidentManager.getResidents().get(i);
                         if (resident.getTown() == null && System.currentTimeMillis() - resident.getSeen() > TimeUnit.DAYS.toMillis(days)) {
                             count++;
-                            ResidentManager.getResidents().remove(resident);
+                            toRemove.add(resident);
                         }
+                    }
+                    for (Resident resident : toRemove) {
+                        ResidentManager.getResidents().remove(resident);
                     }
                     getLog().log(Level.INFO, "Purged " + count + " user(s) who haven't logged in for " + days + " days.");
                 }
