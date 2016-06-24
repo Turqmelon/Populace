@@ -2,6 +2,7 @@ package com.turqmelon.Populace.Resident;
 
 import com.turqmelon.MelonEco.utils.Account;
 import com.turqmelon.MelonEco.utils.AccountManager;
+import com.turqmelon.Populace.Events.Resident.ResidentPrefixUpdatedEvent;
 import com.turqmelon.Populace.Plot.Plot;
 import com.turqmelon.Populace.Plot.PlotChunk;
 import com.turqmelon.Populace.Plot.PlotManager;
@@ -247,6 +248,8 @@ public class Resident implements Comparable {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+        ResidentPrefixUpdatedEvent evt = new ResidentPrefixUpdatedEvent(null, prefix);
+        Bukkit.getPluginManager().callEvent(evt);
     }
 
     public long getSeen() {
