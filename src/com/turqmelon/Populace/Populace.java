@@ -235,11 +235,11 @@ public class Populace extends JavaPlugin {
             if (upkeep == 0)continue; // Players not in towns and mayors
             Account account = AccountManager.getAccount(resident.getUuid());
             if (account == null || !account.withdraw(Populace.getCurrency(), upkeep)){
-                // The resident could not afford their taxes
+                // The resident could not afford their taxes. AWAY WITH YOU!!! >=(
                 resident.getTown().kickOut(resident, null, "Unable to afford taxes.");
             }
             else{
-                // Good residents are good. Inform them of the deduction
+                // Good citizens pay their taxes. We need to be polite and thank them for their continued servitude.
                 resident.sendMessage(Msg.OK + Populace.getCurrency().format(upkeep) + " was deducted for your daily taxes. Thank you!");
             }
 
