@@ -41,28 +41,35 @@ public class TownManager {
         createTown(mayor, name, false);
     }
 
+    // Creates a new town on behalf of the supplied resident. Will validate the name. Passing "true"
+    // for the confirmation will ackowledge the town creation fee (if applicable)
     private static void createTown(Resident mayor, String name, boolean confirm){
 
+        // Prevents being in multiple towns at once
         if (mayor.getTown() != null){
             mayor.sendMessage(Msg.ERR + "You must leave your town to start one!");
             return;
         }
 
+        // Ensures names are at least 2 characters
         if (name.length() < 2){
             mayor.sendMessage(Msg.ERR + "Town name must be at least 2 characters.");
             return;
         }
 
+        // Ensures names don't exceed 16 characters
         if (name.length() > 16){
             mayor.sendMessage(Msg.ERR + "Town name can't exceed 16 characters.");
             return;
         }
 
+        // Ensures names only consist of letters
         if (!name.matches("[A-Za-z]+")){
             mayor.sendMessage(Msg.ERR + "Town names must be alphabetic. (No numbers, no symbols. Only letters.)");
             return;
         }
 
+        // Ensures the name is not in use
         if (getTown(name) != null){
             mayor.sendMessage(Msg.ERR + "There is already a town named \"" + name + "\".");
             return;
@@ -89,6 +96,8 @@ public class TownManager {
 
                 TownCreationEvent event = new TownCreationEvent(town, mayor);
                 Bukkit.getPluginManager().callEvent(event);
+
+                // Welcome messages. Introduces the new mayor to some basic commands.
 
                 new BukkitRunnable(){
 
@@ -132,6 +141,7 @@ public class TownManager {
 
     }
 
+    // Returns a town with the matching UUID
     public static Town getTown(UUID uuid){
         for(Town town : getTowns()){
             if (town.getUuid().equals(uuid)){
@@ -141,6 +151,7 @@ public class TownManager {
         return null;
     }
 
+    // Returns a town with the matching name (not case sensitive)
     public static Town getTown(String name){
         for(Town town : getTowns()){
             if (town.getName().equalsIgnoreCase(name)){
@@ -150,6 +161,7 @@ public class TownManager {
         return null;
     }
 
+    // Returns the "Spawn" town
     public static Spawn getSpawn() {
         for (Town town : getTowns()) {
             if ((town instanceof Spawn)) {
@@ -159,6 +171,7 @@ public class TownManager {
         return null;
     }
 
+    // Returns the "Warzone" town
     public static Warzone getWarzone() {
         for (Town town : getTowns()) {
             if ((town instanceof Warzone)) {
@@ -168,6 +181,7 @@ public class TownManager {
         return null;
     }
 
+    // If true, returns all towns. If false, returns all player towns.
     public static List<Town> getTowns(boolean includeSpecial) {
         if (includeSpecial) {
             return getTowns();

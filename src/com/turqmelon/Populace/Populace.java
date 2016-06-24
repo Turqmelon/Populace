@@ -68,6 +68,7 @@ public class Populace extends JavaPlugin {
     private static boolean populaceChatLoaded = false;
     private static boolean populaceMarketLoaded = false;
 
+    // Save all data to file
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void saveData() throws IOException {
 
@@ -108,6 +109,7 @@ public class Populace extends JavaPlugin {
 
     }
 
+    // Returns a friendly countdown until the next new day
     public static String getNewDayCountdown() {
         long nextDay = getLastNewDay() + TimeUnit.DAYS.toMillis(1);
         return ClockUtil.formatDateDiff(nextDay, false);
@@ -141,6 +143,7 @@ public class Populace extends JavaPlugin {
         return instance;
     }
 
+    // Hooks with other core Populace modules
     private void postSetup() {
         PluginManager pm = getServer().getPluginManager();
         Plugin chat = pm.getPlugin("PopulaceChat");
@@ -163,6 +166,7 @@ public class Populace extends JavaPlugin {
         }
     }
 
+    // Loads all data from file
     public void loadData() throws ParseException, IOException {
 
         getLog().log(Level.INFO, "Loading data...");
@@ -222,7 +226,7 @@ public class Populace extends JavaPlugin {
 
     }
 
-    // Runs daily, keeps everything working swell
+    // Runs daily, assesses taxes and runs old resident cleanup
     public void newDay() {
 
         Bukkit.broadcastMessage(Msg.OK + "A new day begins...");
@@ -317,6 +321,7 @@ public class Populace extends JavaPlugin {
     @Override
     public void onEnable() {
 
+        // Kicks all players in the event of a reload (which shouldn't happen >_>)
         for(Player player : Bukkit.getOnlinePlayers()){
             player.kickPlayer(Msg.ERR + "Reload detected!");
         }
@@ -324,6 +329,7 @@ public class Populace extends JavaPlugin {
         instance = this;
         logger = getLogger();
 
+        // Ensures there's a currency to use
         if (AccountManager.getDefaultCurrency() == null){
             getLogger().log(Level.SEVERE, "There is no default currency in MelonEco. Create one, then restart your server.");
             getServer().getPluginManager().disablePlugin(this);
@@ -336,6 +342,8 @@ public class Populace extends JavaPlugin {
         try {
 
             loadData();
+
+            // Create our fake warzone and spawn towns if they don't exist
 
             Town warzone = TownManager.getTown("Warzone");
             if (warzone == null) {
@@ -355,6 +363,8 @@ public class Populace extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
+        // Register ALL THE THINGS!
 
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
         getServer().getPluginManager().registerEvents(new CommandPreProcess(), this);
@@ -385,6 +395,8 @@ public class Populace extends JavaPlugin {
         getCommand("resident").setExecutor(new ResidentCommand());
         getCommand("visualize").setExecutor(new VisualizeCommand());
 
+        // Register our glow enchantment
+
         try {
             Field f = Enchantment.class.getDeclaredField("acceptingNew");
             f.setAccessible(true);
@@ -400,6 +412,7 @@ public class Populace extends JavaPlugin {
         // Will check for Chat and Market plugins after all plugins load
         getServer().getScheduler().scheduleSyncDelayedTask(this, this::postSetup);
 
+        // Starts autosave task in case of server crash
         new BukkitRunnable(){
             @Override
             public void run() {
@@ -413,6 +426,7 @@ public class Populace extends JavaPlugin {
             }
         }.runTaskTimerAsynchronously(this, TimeUnit.MINUTES.toMillis(5), TimeUnit.MINUTES.toMillis(5));
 
+        // Runs the new day code
         new BukkitRunnable(){
             @Override
             public void run() {

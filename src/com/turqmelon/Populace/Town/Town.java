@@ -64,20 +64,20 @@ public class Town implements Comparable {
 
     private Location spawn = null;
 
-    private long founded = 0;
+    private long founded = 0; // The timestamp of when a town was created
 
-    private long bonusLand = 0;
+    private long bonusLand = 0; // The amount of bonus land purchased by the town
 
-    private List<Plot> plots = new ArrayList<>();
-    private Map<Resident, TownRank> residents = new HashMap<>();
-    private Map<PermissionSet, TownRank> permissions = new HashMap<>();
+    private List<Plot> plots = new ArrayList<>(); // All the plots owned by the town
+    private Map<Resident, TownRank> residents = new HashMap<>(); // All the residents within the town (and their rank)
+    private Map<PermissionSet, TownRank> permissions = new HashMap<>(); // The permission settings for the town
 
-    private MapView mv = null;
+    private MapView mv = null; // The generated map for the town
     private int mvid = -1;
 
-    private Location townJail = null;
+    private Location townJail = null; // The jail point for the town
 
-    private List<TownAnnouncement> announcements = new ArrayList<>();
+    private List<TownAnnouncement> announcements = new ArrayList<>(); // Not yet used
 
     public Town(UUID uuid, String name, TownLevel level) {
         this.uuid = uuid;
@@ -158,6 +158,7 @@ public class Town implements Comparable {
         initializeMapView();
     }
 
+    // Overridden by warzone and spawn classes
     public boolean isSpecial() {
         return false;
     }
@@ -260,12 +261,16 @@ public class Town implements Comparable {
         return getLevel().getMaxland() + getBonusLand();
     }
 
+    // Calculates how many of the purchased bonus blocks are in used
+    // (Prevents selling bonus blocks when they're in use)
     public int getUsedBonusBlocks() {
         int claimed = getPlots().size();
         int levelLimit = getLevel().getMaxland();
         return claimed-levelLimit;
     }
 
+    // Sells bonus blocks on behalf of a resident.
+    // Validates to make sure they're unused, and calls associated event
     public boolean sellBonusBlocks(Resident resident, int amount) {
         long newAmount = getBonusLand()-amount;
         if (newAmount >= getUsedBonusBlocks()){
@@ -285,6 +290,8 @@ public class Town implements Comparable {
         return false;
     }
 
+    // Purchases bonus blocks on behalf of a user
+    // Validates that the town is of level to buy it
     public boolean buyBonusBlocks(Resident resident, int amount) {
 
         long newAmount = getBonusLand()+amount;
@@ -304,10 +311,14 @@ public class Town implements Comparable {
         return false;
     }
 
+    // Gets the timestamp that the town grace period expires
+    // During the grace period, no daily upkeep is collected from a town
     public long getGracePeriodExpiration() {
         return getFounded()+ TimeUnit.HOURS.toMillis(Configuration.TOWN_GRACE_PERIOD_HOURS);
     }
 
+    // Calculates the daily upkeep of the town - collected on each "new day".
+    // If a town can't pay, it's destroyed.
     public double getDailyUpkeep(){
 
         double landCost = 0;
@@ -348,6 +359,7 @@ public class Town implements Comparable {
         this.spawn = spawn;
     }
 
+    // Re
     public TownRank getPermissionLevel(Resident resident){
         if (getResidents().containsKey(resident)){
             return getResidents().get(resident);
@@ -762,6 +774,7 @@ public class Town implements Comparable {
                 list.addAll(Arrays.asList(
 
                         "§fMayor §e" + getMayor().getName(),
+                        "§fFounded §e" + ClockUtil.formatDateDiff(getFounded(), true) + " ago",
                         "§fLevel §e" + getLevel().getColor() + getLevel().getName() + (getNextLevel() != null ? " §7§o(Next level at " + getNextLevel().getResidents() + " Residents)" : ""),
                         "§fLand §e" + getPlots().size() + "§f/§e" + getMaxLand(),
                         "§fResidents §e" + getResidents().size(),

@@ -23,10 +23,19 @@ import org.bukkit.ChatColor;
  ******************************************************************************/
 public enum TownRank {
 
+    // Players who aren't part of a town have this permission level
     GUEST("Guest", ChatColor.GRAY + "[Guest] ", 0, 0, (byte)8),
+
+    // Default permission level for residents
     RESIDENT("Resident", ChatColor.YELLOW + "[Resident] ", 1, 5, (byte)4),
+
+    // Can manage the land
     ASSISTANT("Assistant", ChatColor.AQUA + "[Assistant] ", 2, 10, (byte)3),
+
+    // Can manage the users
     MANAGER("Manager", ChatColor.GOLD + "[Manager] ", 3, 20, (byte)1),
+
+    // Surpreme overlord
     MAYOR("Mayor", ChatColor.RED + "[Mayor] ", 4, 0, (byte)14);
 
     private String name;

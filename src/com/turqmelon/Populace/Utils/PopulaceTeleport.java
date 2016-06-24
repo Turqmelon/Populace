@@ -30,6 +30,8 @@ import java.util.UUID;
  * from Turqmelon.                                                            *
  * *
  ******************************************************************************/
+
+// Allows handling of teleport warmups and cooldowns
 public class PopulaceTeleport {
 
     private static Map<UUID, Long> nextTeleport = new HashMap<>();
@@ -82,10 +84,12 @@ public class PopulaceTeleport {
 
     private void initialize() {
 
+        // If the user has permission to bypass the warmup, don't make them wait
         if (player.hasPermission("populace.teleportation.nowarmup")) {
             this.warmup = 0;
         }
 
+        // If the user is on cooldown, and doesn't have permission to bypass it, make them wait
         if (nextTeleport.containsKey(getPlayer().getUniqueId()) && !player.hasPermission("populace.teleportation.nocooldown")) {
             long next = nextTeleport.get(getPlayer().getUniqueId());
             long now = System.currentTimeMillis();
@@ -95,20 +99,28 @@ public class PopulaceTeleport {
             }
         }
 
+        // mark the start of the teleport
         this.start = System.currentTimeMillis();
 
+        // If there's a warmup, inform them of the wait. If they can't move during it, tell them that to.
         if (getWarmup() > 0) {
             getPlayer().sendMessage(Msg.INFO + "You'll be teleported in " + ClockUtil.formatDateDiff(getStart() + (getWarmup() * 1000), true) +
                     (!isAllowMovement() ? ". §o(Don't move!)" : "."));
 
         }
 
+        // Start our repeating task
         new BukkitRunnable() {
             @Override
             public void run() {
+
+                // If the player left, this task is useless. Cancel it.
                 if (getPlayer() == null || !getPlayer().isOnline()) {
                     this.cancel();
                 } else {
+
+                    // If the player can't move, and they're more than 1 block from where they
+                    // requested the teleport, cancel the teleport.
                     if (!isAllowMovement()) {
                         if (getPlayer().getLocation().distanceSquared(getOrigin()) > 1) {
                             getPlayer().sendMessage(Msg.ERR + "Teleport cancelled. You moved!");
@@ -118,6 +130,7 @@ public class PopulaceTeleport {
                         }
                     }
 
+                    // If the required time has elapsed, teleport them.
                     long teleportTime = getStart() + (getWarmup() * 1000);
                     long now = System.currentTimeMillis();
                     if (now >= teleportTime) {

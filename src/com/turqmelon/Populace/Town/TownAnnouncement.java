@@ -21,6 +21,8 @@ import java.util.UUID;
  * from Turqmelon.                                                            *
  *                                                                            *
  ******************************************************************************/
+
+// Not yet used
 public class TownAnnouncement {
 
     private UUID uuid;
@@ -35,35 +37,35 @@ public class TownAnnouncement {
         this.posted = posted;
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public void setPosted(long posted) {
-        this.posted = posted;
-    }
-
     public UUID getUuid() {
         return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public String getTitle() {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getText() {
         return text;
     }
 
+    public void setText(String text) {
+        this.text = text;
+    }
+
     public long getPosted() {
         return posted;
+    }
+
+    public void setPosted(long posted) {
+        this.posted = posted;
     }
 }
