@@ -40,10 +40,11 @@ public class PopulaceCommand implements CommandExecutor {
             Player player = (Player)sender;
 
             if (args.length == 0){
-                player.sendMessage(Msg.INFO + "Populace Suite by (§3§nhttp://turqmelon.com§b)");
+                player.sendMessage(Msg.INFO + "Populace Suite by (§3http://turqmelon.com§b)");
+                player.sendMessage(Msg.INFO + "Loaded Modules:");
                 for (Plugin plugin : Populace.getInstance().getServer().getPluginManager().getPlugins()) {
                     if (plugin.getName().startsWith("Populace") && plugin.isEnabled()) {
-                        player.sendMessage(Msg.INFO + plugin.getName() + " version " + plugin.getDescription().getVersion());
+                        player.sendMessage(Msg.INFO + " - " + ChatColor.WHITE + plugin.getName());
                     }
                 }
             }
