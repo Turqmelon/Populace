@@ -165,6 +165,7 @@ public class PlayerListener implements Listener {
                 this.isInventoryHolder(clickedBlock) ||
                         clickedBlockType == Material.CAULDRON ||
                         clickedBlockType == Material.JUKEBOX ||
+                        clickedBlockType == Material.BEACON ||
                         clickedBlockType == Material.ANVIL ||
                         clickedBlockType == Material.CAKE_BLOCK))) {
             if (resident != null && resident.isJailed()) {
