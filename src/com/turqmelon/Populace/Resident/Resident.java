@@ -248,7 +248,7 @@ public class Resident implements Comparable {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
-        ResidentPrefixUpdatedEvent evt = new ResidentPrefixUpdatedEvent(null, prefix);
+        ResidentPrefixUpdatedEvent evt = new ResidentPrefixUpdatedEvent(this, prefix);
         Bukkit.getPluginManager().callEvent(evt);
     }
 
