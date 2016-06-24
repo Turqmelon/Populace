@@ -54,13 +54,13 @@ public class TownGUI extends GUI {
         super(town.getName(), 54);
         this.resident = resident;
         this.town = town;
-        setUpdateTicks(20, true);
+        setUpdateTicks(20, false);
     }
 
     public TownGUI(Resident resident, Town town, int page) {
         this(resident, town);
         this.page = page;
-        setUpdateTicks(20, true);
+        setUpdateTicks(20, false);
     }
 
     @Override

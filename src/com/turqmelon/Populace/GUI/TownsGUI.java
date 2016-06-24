@@ -50,7 +50,7 @@ public class TownsGUI extends GUI{
         super("Towns", 54);
         this.page = page;
         this.resident = resident;
-        setUpdateTicks(20, true);
+        setUpdateTicks(20, false);
     }
 
     @Override

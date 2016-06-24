@@ -44,7 +44,7 @@ public class ResidentGUI extends GUI {
     public ResidentGUI(Resident resident) {
         super(resident.getName(), 54);
         this.resident = resident;
-         setUpdateTicks(20, true);
+        setUpdateTicks(20, false);
     }
 
     @Override
