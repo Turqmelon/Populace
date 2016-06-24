@@ -60,6 +60,7 @@ public class Resident implements Comparable {
     private boolean bypassMode = false;
 
     private JailData jailData = null;
+    private String prefix = null;
 
     public Resident(UUID uuid, String name) {
         this.uuid = uuid;
@@ -81,6 +82,7 @@ public class Resident implements Comparable {
         if (jaildata != null) {
             this.jailData = new JailData((JSONObject) jaildata);
         }
+        this.prefix = (String) object.getOrDefault("prefix", null);
     }
 
     public JSONObject toJSON() {
@@ -92,6 +94,7 @@ public class Resident implements Comparable {
         object.put("seen", getSeen());
         object.put("town", getTown()!=null?getTown().getUuid().toString():null);
         object.put("jaildata", getJailData() != null ? getJailData().toJSON() : null);
+        object.put("prefix", getPrefix());
         return object;
     }
 
@@ -133,7 +136,7 @@ public class Resident implements Comparable {
         Player pl = Bukkit.getPlayer(getUuid());
         Account account = AccountManager.getAccount(getUuid());
         return new ItemBuilder(Material.SKULL_ITEM).withData((byte)3).asHeadOwner(getName())
-                .withCustomName("§a" + (getTown()!=null?getTown().getRank(this).getPrefix():"") + getName())
+                .withCustomName("§a" + (getPrefix() != null ? getPrefix() + " " : (getTown() != null ? getTown().getRank(this).getPrefix() : "")) + getName())
                 .withLore(Arrays.asList(
                         "§fJoined §e" + ClockUtil.formatDateDiff(getJoined(), true) + " ago",
                         "§fSeen §e" + (pl!=null&&pl.isOnline()?"§aOnline":ClockUtil.formatDateDiff(getSeen(), true) + " ago"),
@@ -236,6 +239,14 @@ public class Resident implements Comparable {
         }
 
         return 0;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
     public long getSeen() {
