@@ -23,7 +23,9 @@ package com.turqmelon.Populace.Commands;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
+import com.turqmelon.Populace.Town.TownManager;
 import com.turqmelon.Populace.Utils.Msg;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -48,6 +50,33 @@ public class PopulaceCommand implements CommandExecutor {
                         if (plugin.getName().equalsIgnoreCase("populace")) continue;
                         player.sendMessage(Msg.INFO + " - " + ChatColor.WHITE + plugin.getName());
                     }
+                }
+                player.sendMessage(Msg.INFO + "Stats:");
+                player.sendMessage(Msg.INFO + " - Residents: " + ChatColor.WHITE + ResidentManager.getResidents().size());
+                player.sendMessage(Msg.INFO + " - Towns: " + ChatColor.WHITE + TownManager.getTowns(false).size());
+
+            } else if (args[0].equalsIgnoreCase("prefix") && player.hasPermission("populace.meta.prefix")) {
+                if (args.length == 3) {
+                    Player target = Bukkit.getPlayer(args[1]);
+                    if (target != null) {
+                        Resident resident = ResidentManager.getResident(target);
+                        String prefix = args[2];
+                        if (prefix.length() <= 13) {
+                            if (prefix.equalsIgnoreCase("off")) {
+                                resident.setPrefix(null);
+                                player.sendMessage(Msg.OK + "Prefix removed.");
+                            } else {
+                                resident.setPrefix(prefix);
+                                player.sendMessage(Msg.OK + "Prefix set to \"" + prefix + "\".");
+                            }
+                        } else {
+                            player.sendMessage(Msg.ERR + "Prefix can't exceed 13 chars.");
+                        }
+                    } else {
+                        player.sendMessage(Msg.ERR + "Target not found.");
+                    }
+                } else {
+                    player.sendMessage(Msg.WARN + "Like this: §f/populace prefix <resident> <prefix|\"off\">");
                 }
             }
             else if (args[0].equalsIgnoreCase("save") && player.hasPermission("populace.save")){

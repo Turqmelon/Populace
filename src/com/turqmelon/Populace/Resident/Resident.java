@@ -137,7 +137,7 @@ public class Resident implements Comparable {
         Player pl = Bukkit.getPlayer(getUuid());
         Account account = AccountManager.getAccount(getUuid());
         return new ItemBuilder(Material.SKULL_ITEM).withData((byte)3).asHeadOwner(getName())
-                .withCustomName("§a" + (getPrefix() != null ? getPrefix() + " " : (getTown() != null ? getTown().getRank(this).getPrefix() : "")) + getName())
+                .withCustomName((getPrefix() != null ? "§6§l" + getPrefix() + " " : (getTown() != null ? getTown().getRank(this).getPrefix() : "§a")) + getName())
                 .withLore(Arrays.asList(
                         "§fJoined §e" + ClockUtil.formatDateDiff(getJoined(), true) + " ago",
                         "§fSeen §e" + (pl!=null&&pl.isOnline()?"§aOnline":ClockUtil.formatDateDiff(getSeen(), true) + " ago"),
