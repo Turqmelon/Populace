@@ -67,6 +67,7 @@ public class Populace extends JavaPlugin {
 
     private static boolean populaceChatLoaded = false;
     private static boolean populaceMarketLoaded = false;
+    private static boolean populaceWarzoneLoaded = false;
 
     // Save all data to file
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -115,6 +116,10 @@ public class Populace extends JavaPlugin {
         return ClockUtil.formatDateDiff(nextDay, false);
     }
 
+    public static boolean isPopulaceWarzoneLoaded() {
+        return populaceWarzoneLoaded;
+    }
+
     public static boolean isPopulaceChatLoaded() {
         return populaceChatLoaded;
     }
@@ -148,6 +153,7 @@ public class Populace extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         Plugin chat = pm.getPlugin("PopulaceChat");
         Plugin market = pm.getPlugin("PopulaceMarket");
+        Plugin warzone = pm.getPlugin("PopulaceWarzone");
 
         getLog().log(Level.INFO, "Looking for PopulaceChat...");
         if (chat != null && chat.isEnabled()) {
@@ -163,6 +169,13 @@ public class Populace extends JavaPlugin {
             populaceMarketLoaded = true;
         } else {
             getLog().log(Level.WARNING, "PopulaceMarket not found. Features using it won't be used.");
+        }
+        getLog().log(Level.INFO, "Looking for PopulaceWarzone...");
+        if (warzone != null && warzone.isEnabled()) {
+            getLog().log(Level.INFO, "PopulaceWarzone is here! Hooked!");
+            populaceWarzoneLoaded = true;
+        } else {
+            getLog().log(Level.WARNING, "PopulaceWarzone not found. Features using it won't be used.");
         }
     }
 

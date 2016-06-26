@@ -4,10 +4,12 @@ import com.turqmelon.Populace.Events.Resident.ResidentPlotEnterEvent;
 import com.turqmelon.Populace.Events.Resident.ResidentPlotLeaveEvent;
 import com.turqmelon.Populace.Plot.Plot;
 import com.turqmelon.Populace.Plot.PlotManager;
+import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Town.Town;
+import com.turqmelon.Populace.Utils.CombatHelper;
 import com.turqmelon.Populace.Utils.HUDUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,10 +54,11 @@ public class MoveListener implements Listener {
         if (resident == null) return;
 
         Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
+        Plot lastPlot;
 
         if (plot != null) {
 
-            Plot lastPlot = resident.getDisplayEntity().getPlot();
+            lastPlot = resident.getDisplayEntity().getPlot();
             boolean denyEntry = false;
             if (lastPlot == null || !lastPlot.getUuid().equals(plot.getUuid())) {
                 ResidentPlotEnterEvent enterEvent = new ResidentPlotEnterEvent(plot, resident);
@@ -80,10 +84,16 @@ public class MoveListener implements Listener {
             }
 
         } else {
-            Plot lastPlot = resident.getDisplayEntity().getPlot();
+            lastPlot = resident.getDisplayEntity().getPlot();
             if (lastPlot != null) {
                 Bukkit.getPluginManager().callEvent(new ResidentPlotLeaveEvent(lastPlot, resident));
             }
+        }
+
+        if (Populace.isPopulaceWarzoneLoaded() && CombatHelper.shouldBounceBack(player, plot, lastPlot) && lastSafePoint.containsKey(player.getUniqueId())) {
+            player.setVelocity(calculateVelocity(lastSafePoint.get(player.getUniqueId()), player.getLocation()));
+            HUDUtil.sendActionBar(player, "§c§lYou can't enter no-PVP areas while combat tagged.");
+            return;
         }
 
         lastSafePoint.put(player.getUniqueId(), player.getLocation());
@@ -106,6 +116,10 @@ public class MoveListener implements Listener {
             }
         }
 
+    }
+
+    private Vector calculateVelocity(Location loc1, Location loc2) {
+        return loc1.toVector().subtract(loc2.toVector()).normalize().multiply(1.3);
     }
 
 }
