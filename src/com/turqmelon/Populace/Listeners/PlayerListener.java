@@ -7,6 +7,8 @@ import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Utils.CheckForPortalTrapTask;
+import com.turqmelon.Populace.Utils.CombatHelper;
+import com.turqmelon.Populace.Utils.HUDUtil;
 import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -321,15 +323,21 @@ public class PlayerListener implements Listener {
         // prevent players from using ender pearls to gain access to secured plots
         PlayerTeleportEvent.TeleportCause cause = event.getCause();
         if(cause == PlayerTeleportEvent.TeleportCause.ENDER_PEARL)  {
+
+            if (Populace.isPopulaceWarzoneLoaded() && CombatHelper.isCombatTagged(player)) {
+                HUDUtil.sendActionBar(player, "§c§lCan't use ender pearls while combat tagged.");
+                player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
+                event.setCancelled(true);
+                return;
+            }
+
             Plot toPlot = PlotManager.getPlot(event.getTo().getChunk());
             if(toPlot != null)
             {
                 if (resident == null || !toPlot.can(resident, PermissionSet.ENTRY) || !toPlot.can(resident, PermissionSet.ACCESS)){
                     event.setCancelled(true);
                     player.sendMessage(Msg.ERR + "You don't have permission to Ender Pearl to that area.");
-                    if(cause == PlayerTeleportEvent.TeleportCause.ENDER_PEARL){
-                        player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
-                    }
+                    player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                 }
             }
         }
@@ -367,8 +375,14 @@ public class PlayerListener implements Listener {
         //if the player isn't going anywhere, take no action
         if(event.getTo() == null || event.getTo().getWorld() == null) return;
 
-
         Player player = event.getPlayer();
+
+        if (Populace.isPopulaceWarzoneLoaded() && CombatHelper.isCombatTagged(player)) {
+            HUDUtil.sendActionBar(player, "§c§lCan't travel through portals while combat tagged.");
+            event.setCancelled(true);
+            return;
+        }
+
 
         if(event.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL)
         {

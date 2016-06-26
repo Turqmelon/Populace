@@ -12,6 +12,10 @@ import org.bukkit.entity.Player;
  */
 public class CombatHelper {
 
+    public static boolean isCombatTagged(Player player) {
+        return CombatListener.getTag(player) != null;
+    }
+
     public static boolean shouldBounceBack(Player player, Plot to, Plot from) {
 
         CombatTag tag = CombatListener.getTag(player);
