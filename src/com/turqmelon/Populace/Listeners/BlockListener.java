@@ -186,21 +186,12 @@ public class BlockListener implements Listener {
 
             if (resident == null || !plot.can(resident, PermissionSet.BUILD)){
                 event.setCancelled(true);
-                player.sendMessage(Msg.ERR + "You can't ignite fires here.");
+                if (player != null && player.isOnline()) {
+                    player.sendMessage(Msg.ERR + "You can't ignite fires here.");
+                }
             }
             else if (plot.getType() != PlotType.BATTLE){
-                boolean playersFound = false;
-                for(Player p : block.getWorld().getPlayers()){
-                    if (p.getUniqueId().equals(player.getUniqueId()))continue;
-                    if (p.getLocation().distanceSquared(block.getLocation())<=(10*10)){
-                        Plot pl = PlotManager.getPlot(p.getLocation().getChunk());
-                        if (pl == null || pl.getType() == PlotType.BATTLE){
-                            playersFound = true;
-                            break;
-                        }
-                    }
-                }
-
+                boolean playersFound = nearbyPlayersInPVPlessArea(block.getLocation(), 10, player);
                 if (playersFound){
                     event.setCancelled(true);
                     player.sendMessage(Msg.ERR + "You can't ignite fire near other players.");
@@ -351,6 +342,19 @@ public class BlockListener implements Listener {
 
     }
 
+    private boolean nearbyPlayersInPVPlessArea(Location location, double range, Player dontMatch) {
+        for (Player p : location.getWorld().getPlayers()) {
+            if (p.getUniqueId().equals(dontMatch.getUniqueId())) continue;
+            if (p.getLocation().distanceSquared(location) <= (range * range)) {
+                Plot pl = PlotManager.getPlot(p.getLocation().getChunk());
+                if (pl == null || pl.getType() == PlotType.BATTLE) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @EventHandler
     public void onDump(PlayerBucketEmptyEvent event){
         Player player = event.getPlayer();
@@ -371,18 +375,7 @@ public class BlockListener implements Listener {
             }
             else if (plot.getType() != PlotType.BATTLE && event.getBucket() == Material.LAVA_BUCKET){
 
-                boolean playersFound = false;
-                for(Player p : block.getWorld().getPlayers()){
-                    if (p.getUniqueId().equals(player.getUniqueId()))continue;
-                    if (p.getLocation().distanceSquared(block.getLocation())<=(10*10)){
-                        Plot pl = PlotManager.getPlot(p.getLocation().getChunk());
-                        if (pl == null || pl.getType() == PlotType.BATTLE){
-                            playersFound = true;
-                            break;
-                        }
-                    }
-                }
-
+                boolean playersFound = nearbyPlayersInPVPlessArea(block.getLocation(), 10, player);
                 if (playersFound){
                     event.setCancelled(true);
                     player.sendMessage(Msg.ERR + "You can't dump lava near other players.");
