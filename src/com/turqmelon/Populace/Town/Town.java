@@ -938,7 +938,7 @@ public class Town implements Comparable {
 
         for (Plot plot : getPlots()) {
             if (isVulnerableToDestruction()) {
-                if (plot.getPlotChunk().asBukkitChunk().isLoaded()) {
+                if (plot.getPlotChunk().getWorld().isChunkLoaded(plot.getPlotChunk().getX(), plot.getPlotChunk().getZ())) {
                     RuinManager.blowup(plot.getPlotChunk(), Configuration.DESTRUCTIVE_UNCLAIM_EXPLOSIONS);
                 } else {
                     RuinManager.markRuined(plot.getPlotChunk());
