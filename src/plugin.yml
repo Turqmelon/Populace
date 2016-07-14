@@ -69,3 +69,6 @@ commands:
   populace:
     usage: /populace [save]
     description: Shows details about Populace
+  nextnewday:
+    usage: /nextnewday
+    description: Shows time until the next new day

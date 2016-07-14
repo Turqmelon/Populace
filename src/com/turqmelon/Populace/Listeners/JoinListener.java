@@ -47,24 +47,24 @@ public class JoinListener implements Listener {
             resident = new Resident(player.getUniqueId(), player.getName());
             resident.setJoined(System.currentTimeMillis());
             ResidentManager.getResidents().add(resident);
+            final Resident finalResident = resident;
+            new BukkitRunnable() {
+
+                @Override
+                public void run() {
+                    player.sendMessage(Msg.INFO + "This server runs §lPopulace§b by Turqmelon!");
+                    player.sendMessage(Msg.INFO + "§7§o(You'll only see this message once.)");
+                    if (finalResident.isJailed()) {
+                        finalResident.getJailData().sendExplanation(finalResident);
+                    }
+                }
+            }.runTaskLater(Populace.getInstance(), 20L);
         }
         else if (!resident.getName().equals(player.getName())){
             resident.setName(player.getName());
         }
 
         resident.setSeen(System.currentTimeMillis());
-
-        final Resident finalResident = resident;
-        new BukkitRunnable(){
-
-            @Override
-            public void run() {
-                player.sendMessage(Msg.INFO + "This server runs §lPopulace§b by Turqmelon!");
-                if (finalResident.isJailed()) {
-                    finalResident.getJailData().sendExplanation(finalResident);
-                }
-            }
-        }.runTaskLater(Populace.getInstance(), 20L);
 
     }
 

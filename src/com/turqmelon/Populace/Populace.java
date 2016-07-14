@@ -415,6 +415,7 @@ public class Populace extends JavaPlugin {
         getCommand("join").setExecutor(new JoinCommand());
         getCommand("map").setExecutor(new MapCommand());
         getCommand("newtown").setExecutor(new NewTownCommand());
+        getCommand("nextnewday").setExecutor(new NextNewDayCommand());
         getCommand("notforsale").setExecutor(new NotForSaleCommand());
         getCommand("populace").setExecutor(new PopulaceCommand());
         getCommand("plot").setExecutor(new PlotCommand());
