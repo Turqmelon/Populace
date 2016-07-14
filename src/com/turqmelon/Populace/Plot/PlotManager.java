@@ -25,7 +25,6 @@ import org.bukkit.World;
  *                                                                            *
  ******************************************************************************/
 public class PlotManager {
-
     public static Plot getPlot(PlotChunk chunk){
         return getPlot(chunk.getWorld(), chunk.getX(), chunk.getZ());
     }
@@ -45,5 +44,4 @@ public class PlotManager {
 
         return null;
     }
-
 }

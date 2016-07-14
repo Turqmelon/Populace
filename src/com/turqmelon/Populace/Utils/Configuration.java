@@ -79,4 +79,10 @@ public class Configuration {
     // The daily upkeep cost of each individual bonus plot a town buys
     public static double BONUS_LAND_DAILY_COST = 10;
 
+    // Towns that are at least an hour old (to prevent abuse) will be explosively destroyed
+    public static boolean DESTRUCTIVE_UNCLAIM = true;
+
+    // The amount of explosions to spawn in ruined chunks
+    public static int DESTRUCTIVE_UNCLAIM_EXPLOSIONS = 5;
+
 }

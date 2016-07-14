@@ -46,8 +46,6 @@ public class ExplosionListener implements Listener {
 
     private void handleExplosion(World world, List<Block> blocks) {
 
-        boolean applySurfaceRules = world.getEnvironment() == World.Environment.NORMAL;
-
         //make a list of blocks which were allowed to explode
         List<Block> explodedBlocks = new ArrayList<>();
 
@@ -59,9 +57,7 @@ public class ExplosionListener implements Listener {
             Plot plot = PlotManager.getPlot(block.getChunk());
 
             if (plot == null) {
-                if (!applySurfaceRules || block.getLocation().getBlockY() < block.getWorld().getSeaLevel()-7) {
-                    explodedBlocks.add(block);
-                }
+                explodedBlocks.add(block);
             }
         }
 

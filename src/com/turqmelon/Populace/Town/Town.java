@@ -595,8 +595,7 @@ public class Town implements Comparable {
                 resident.sendMessage(Msg.ERR + "You can't do that here.");
             }
 
-        }
-        else{
+        } else if (resident != null) {
             resident.sendMessage(Msg.ERR + "There's no plot here!");
         }
         return false;
@@ -907,6 +906,10 @@ public class Town implements Comparable {
         }
     }
 
+    public boolean isVulnerableToDestruction() {
+        return Configuration.DESTRUCTIVE_UNCLAIM && System.currentTimeMillis() - getFounded() > TimeUnit.HOURS.toMillis(1);
+    }
+
     public void destroy(boolean force){
 
         if (!force){
@@ -934,6 +937,13 @@ public class Town implements Comparable {
         }
 
         for (Plot plot : getPlots()) {
+            if (isVulnerableToDestruction()) {
+                if (plot.getPlotChunk().asBukkitChunk().isLoaded()) {
+                    RuinManager.blowup(plot.getPlotChunk(), Configuration.DESTRUCTIVE_UNCLAIM_EXPLOSIONS);
+                } else {
+                    RuinManager.markRuined(plot.getPlotChunk());
+                }
+            }
             Bukkit.getPluginManager().callEvent(new TownUnclaimLandEvent(this, null, plot));
         }
 

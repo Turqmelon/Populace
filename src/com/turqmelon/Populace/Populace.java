@@ -6,6 +6,8 @@ import com.turqmelon.MelonEco.utils.Currency;
 import com.turqmelon.Populace.Commands.*;
 import com.turqmelon.Populace.Events.Core.PopulaceNewDayEvent;
 import com.turqmelon.Populace.Listeners.*;
+import com.turqmelon.Populace.Plot.PlotChunk;
+import com.turqmelon.Populace.Plot.RuinManager;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.*;
@@ -97,9 +99,15 @@ public class Populace extends JavaPlugin {
             towns.add(town.toJSON());
         }
 
+        JSONArray ruins = new JSONArray();
+        for (PlotChunk plotChunk : RuinManager.getChunkList()) {
+            ruins.add(plotChunk.toJSON());
+        }
+
         data.put("lastnewday", getLastNewDay());
         data.put("residents", residents);
         data.put("towns", towns);
+        data.put("ruins", ruins);
 
         FileWriter writer = new FileWriter(file);
         writer.write(data.toJSONString());
@@ -222,7 +230,18 @@ public class Populace extends JavaPlugin {
                     }
                 }
 
+                JSONArray ruinArray = (JSONArray) object.getOrDefault("ruins", null);
+                if (ruinArray != null) {
+                    for (Object o : ruinArray) {
+                        RuinManager.getChunkList().add(new PlotChunk((JSONObject) o));
+                    }
+                }
+
                 getLog().log(Level.INFO, "Loaded " + TownManager.getTowns().size() + " towns.");
+
+                if (Configuration.DESTRUCTIVE_UNCLAIM) {
+                    getLog().log(Level.INFO, "Loaded " + RuinManager.getChunkList().size() + " chunks to ruin. Destruction will happen once they're loaded.");
+                }
 
                 lastNewDay = (long) object.get("lastnewday");
                 getLog().log(Level.INFO, "Next new day in " + getNewDayCountdown() + "!");
@@ -386,6 +405,7 @@ public class Populace extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EntityListener(), this);
         getServer().getPluginManager().registerEvents(new ExplosionListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+        getServer().getPluginManager().registerEvents(new WorldListener(), this);
 
         getCommand("allow").setExecutor(new AllowCommand());
         getCommand("claim").setExecutor(new ClaimCommand());

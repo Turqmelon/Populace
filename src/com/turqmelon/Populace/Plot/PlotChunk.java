@@ -131,6 +131,17 @@ public class PlotChunk {
 
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if ((obj instanceof PlotChunk)) {
+            PlotChunk chunk = (PlotChunk) obj;
+            return getWorld().getName().equals(chunk.getWorld().getName()) &&
+                    getX() == chunk.getX() &&
+                    getZ() == chunk.getZ();
+        }
+        return false;
+    }
+
     public Chunk asBukkitChunk() {
         return getWorld().getChunkAt(getX(), getZ());
     }
