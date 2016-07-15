@@ -151,7 +151,10 @@ public class TownGUI extends GUI {
             else if (event.isRightClick() && event.isShiftClick() && rank == TownRank.MAYOR){
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                 player.closeInventory();
-                player.sendMessage(Msg.INFO + "If you destroy your town, everything will be lost.");
+                player.sendMessage(Msg.WARN + "If you destroy your town, everything will be lost.");
+                if (getTown().isVulnerableToDestruction()) {
+                    player.sendMessage(Msg.ERR + "Your town will §lLITERALLY§6 be destroyed! Take any items and things you want to keep before confirming!");
+                }
                 getResident().setPendingAction(() -> getTown().destroy(false));
             }
             else if (event.isRightClick() && rank == TownRank.MAYOR){
