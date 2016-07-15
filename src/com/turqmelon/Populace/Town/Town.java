@@ -908,11 +908,12 @@ public class Town implements Comparable {
                             .withCustomName("§b§lVisitor Policies")
                             .withLore(list).build();
                 } else {
+                    TownLevel req = TownLevel.HAMLET;
                     list = new ArrayList<>();
                     list.add("§a");
-                    list.add("§7Editing town permissions will unlock once");
-                    list.add("§7" + getName() + getLevel().getSuffix() + " reaches \"Halmet\" level");
-                    list.add("§7(" + TownLevel.HAMLET.getResidents() + " residents).");
+                    list.add("§7Editing town permissions");
+                    list.add("§7will unlock once " + getName() + getLevel().getSuffix());
+                    list.add("§7becomes a " + req.getName() + " (" + req.getResidents() + " residents).");
 
                     return new ItemBuilder(Material.EYE_OF_ENDER)
                             .withCustomName("§c§lVisitor Policies")
@@ -945,11 +946,12 @@ public class Town implements Comparable {
                             .withCustomName("§b§lMessage Board")
                             .withLore(list).build();
                 } else {
+                    TownLevel req = TownLevel.VILLAGE;
                     list = new ArrayList<>();
                     list.add("§a");
-                    list.add("§7The message board will unlock once");
-                    list.add("§7" + getName() + getLevel().getSuffix() + " reaches \"Village\" level");
-                    list.add("§7(" + TownLevel.VILLAGE.getResidents() + " residents).");
+                    list.add("§7The town message board");
+                    list.add("§7will unlock once " + getName() + getLevel().getSuffix());
+                    list.add("§7becomes a " + req.getName() + " (" + req.getResidents() + " residents).");
 
                     return new ItemBuilder(Material.BOOK)
                             .withCustomName("§c§lMessage Board")

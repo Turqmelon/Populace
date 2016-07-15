@@ -25,6 +25,7 @@ import com.turqmelon.Populace.Plot.Plot;
 import com.turqmelon.Populace.Plot.PlotType;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
+import com.turqmelon.Populace.Town.TownLevel;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Material;
@@ -63,12 +64,22 @@ public class PlotTypeSelectGUI extends PlotGUI {
         }
         else if (raw == 22){
 
+            if (getPlot().getTown().getResidents().size() < TownLevel.TOWN.getResidents()) {
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+                return;
+            }
+
             getPlot().setType(PlotType.MERCHANT);
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
 
         }
         else if (raw == 25){
+
+            if (getPlot().getTown().getResidents().size() < TownLevel.LARGE_TOWN.getResidents()) {
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+                return;
+            }
 
             getPlot().setType(PlotType.BATTLE);
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
@@ -104,15 +115,30 @@ public class PlotTypeSelectGUI extends PlotGUI {
             if (getPlot().getType() == PlotType.MERCHANT) {
                 inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§a§lMerchant Plot").withLore(Arrays.asList("§7Selected!")).makeItGlow().build());
             } else if (player.hasPermission("populace.plottypes.merchant")) {
-                inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§b§lMerchant Plot").withLore(Arrays.asList(
-                        "§bMerchant Plots§7 offer the same protections",
-                        "§7as §bResidential Plots§7, with the extra ability",
-                        "§7to create shops within the plot.",
-                        "§7",
-                        "§fDaily Cost §e" + Populace.getCurrency().format(PlotType.MERCHANT.getDailyCost()),
-                        "§a",
-                        "§aLeft Click§f to change plot type."
-                )).build());
+                TownLevel req = TownLevel.TOWN;
+                if (getPlot().getTown().getResidents().size() < req.getResidents()) {
+                    inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§c§lMerchant Plot").withLore(Arrays.asList(
+                            "§bMerchant Plots§7 offer the same protections",
+                            "§7as §bResidential Plots§7, with the extra ability",
+                            "§7to create shops within the plot.",
+                            "§a",
+                            "§c§lLocked",
+                            "§cThis plot type will unlock",
+                            "§conce " + getPlot().getTown().getName() + getPlot().getTown().getLevel().getSuffix(),
+                            "§cbecomes a " + req.getName() + " (" + req.getResidents() + " residents)."
+                    )).build());
+                } else {
+                    inv.setItem(22, new ItemBuilder(Material.DIAMOND).withCustomName("§b§lMerchant Plot").withLore(Arrays.asList(
+                            "§bMerchant Plots§7 offer the same protections",
+                            "§7as §bResidential Plots§7, with the extra ability",
+                            "§7to create shops within the plot.",
+                            "§7",
+                            "§fDaily Cost §e" + Populace.getCurrency().format(PlotType.MERCHANT.getDailyCost()),
+                            "§a",
+                            "§aLeft Click§f to change plot type."
+                    )).build());
+                }
+
             }
         }
 
@@ -120,15 +146,30 @@ public class PlotTypeSelectGUI extends PlotGUI {
         if (getPlot().getType() == PlotType.BATTLE){
             inv.setItem(25, new ItemBuilder(Material.IRON_CHESTPLATE).withCustomName("§a§lBattle Plot").withLore(Arrays.asList("§7Selected!")).makeItGlow().build());
         } else if (player.hasPermission("populace.plottypes.battle")) {
-            inv.setItem(25, new ItemBuilder(Material.IRON_CHESTPLATE).withCustomName("§b§lBattle Plot").withLore(Arrays.asList(
-                    "§bBattle Plots§7 offer the land protections of",
-                    "§bResidential Plots§7, with the added ability of allowing",
-                    "§cPVP§7 within the area.",
-                    "§7",
-                    "§fDaily Cost §e" + Populace.getCurrency().format(PlotType.BATTLE.getDailyCost()),
-                    "§a",
-                    "§aLeft Click§f to change plot type."
-            )).build());
+            TownLevel req = TownLevel.LARGE_TOWN;
+            if (getPlot().getTown().getResidents().size() < req.getResidents()) {
+                inv.setItem(25, new ItemBuilder(Material.IRON_CHESTPLATE).withCustomName("§c§lBattle Plot").withLore(Arrays.asList(
+                        "§bBattle Plots§7 offer the land protections of",
+                        "§bResidential Plots§7, with the added ability of allowing",
+                        "§cPVP§7 within the area.",
+                        "§a",
+                        "§c§lLocked",
+                        "§cThis plot type will unlock",
+                        "§conce " + getPlot().getTown().getName() + getPlot().getTown().getLevel().getSuffix(),
+                        "§cbecomes a " + req.getName() + " (" + req.getResidents() + " residents)."
+                )).build());
+            } else {
+                inv.setItem(25, new ItemBuilder(Material.IRON_CHESTPLATE).withCustomName("§b§lBattle Plot").withLore(Arrays.asList(
+                        "§bBattle Plots§7 offer the land protections of",
+                        "§bResidential Plots§7, with the added ability of allowing",
+                        "§cPVP§7 within the area.",
+                        "§7",
+                        "§fDaily Cost §e" + Populace.getCurrency().format(PlotType.BATTLE.getDailyCost()),
+                        "§a",
+                        "§aLeft Click§f to change plot type."
+                )).build());
+            }
+
         }
 
     }
