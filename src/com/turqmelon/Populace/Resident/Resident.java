@@ -63,6 +63,8 @@ public class Resident implements Comparable {
     private JailData jailData = null;
     private String prefix = null;
 
+    private TownAnnouncement pendingAnnouncement = null;
+
     public Resident(UUID uuid, String name) {
         this.uuid = uuid;
         this.name = name;
@@ -338,6 +340,14 @@ public class Resident implements Comparable {
         }
 
         return getJailData() != null;
+    }
+
+    public TownAnnouncement getPendingAnnouncement() {
+        return pendingAnnouncement;
+    }
+
+    public void setPendingAnnouncement(TownAnnouncement pendingAnnouncement) {
+        this.pendingAnnouncement = pendingAnnouncement;
     }
 
     public JailData getJailData() {

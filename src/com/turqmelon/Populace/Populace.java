@@ -408,6 +408,7 @@ public class Populace extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new WorldListener(), this);
 
         getCommand("allow").setExecutor(new AllowCommand());
+        getCommand("board").setExecutor(new BoardCommand());
         getCommand("claim").setExecutor(new ClaimCommand());
         getCommand("forsale").setExecutor(new ForSaleCommand());
         getCommand("giveplot").setExecutor(new GivePlotCommand());

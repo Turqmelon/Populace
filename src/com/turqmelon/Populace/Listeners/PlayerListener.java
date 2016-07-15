@@ -1,11 +1,13 @@
 package com.turqmelon.Populace.Listeners;
 
+import com.turqmelon.Populace.GUI.TownManagement.TownNewBoardGUI;
 import com.turqmelon.Populace.Plot.Plot;
 import com.turqmelon.Populace.Plot.PlotManager;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.PermissionSet;
+import com.turqmelon.Populace.Town.TownAnnouncement;
 import com.turqmelon.Populace.Utils.CheckForPortalTrapTask;
 import com.turqmelon.Populace.Utils.CombatHelper;
 import com.turqmelon.Populace.Utils.HUDUtil;
@@ -49,6 +51,67 @@ public class PlayerListener implements Listener {
 
     //determines whether a block type is an inventory holder.
     private ConcurrentHashMap<Integer, Boolean> inventoryHolderCache = new ConcurrentHashMap<>();
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        Resident resident = ResidentManager.getResident(player);
+        if (resident == null) return;
+        String msg = event.getMessage();
+        if (resident.getPendingAnnouncement() != null) {
+            event.setCancelled(true);
+            if (msg.equalsIgnoreCase("cancel")) {
+                resident.setPendingAnnouncement(null);
+                resident.sendMessage(Msg.OK + "Cancelled!");
+                return;
+            }
+            TownAnnouncement pending = resident.getPendingAnnouncement();
+            if (pending.getTitle() == null) {
+                if (msg.length() >= 2 && msg.length() <= 32) {
+                    resident.getPendingAnnouncement().setTitle(msg);
+                    resident.sendMessage("§a");
+                    resident.sendMessage("§b - §f§l" + msg);
+                    resident.sendMessage("§b - §7§oStart typing...");
+                    resident.sendMessage("§a");
+                } else {
+                    resident.sendMessage(Msg.ERR + "Title must be at least 2, but no longer than 32 characters.");
+                }
+            } else {
+                if (msg.equalsIgnoreCase("done")) {
+                    if (pending.getText() != null) {
+                        if (pending.getText().length() > 0 && pending.getText().length() < 500) {
+                            TownNewBoardGUI gui = new TownNewBoardGUI(resident, resident.getTown(), pending);
+                            gui.open(player);
+                            resident.setPendingAnnouncement(null);
+                        } else {
+                            resident.sendMessage(Msg.ERR + "Text must be at least 1, but no longer than 500 characters.");
+                        }
+                    } else {
+                        resident.sendMessage(Msg.ERR + "You haven't typed anything!");
+                    }
+                } else if (msg.equalsIgnoreCase("clear")) {
+                    pending.setText("");
+                    resident.sendMessage("§a");
+                    resident.sendMessage("§b - §f§l" + pending.getTitle());
+                    resident.sendMessage("§b - §7§oStart typing...");
+                    resident.sendMessage("§a");
+                } else {
+                    if (pending.getText() == null) {
+                        pending.setText("");
+                    }
+                    pending.setText(pending.getText() + msg + " ");
+                    if (pending.getText().length() > 500) {
+                        pending.setText(pending.getText().substring(0, 499));
+                    }
+                    resident.sendMessage("§a");
+                    resident.sendMessage("§b - §f§l" + pending.getTitle());
+                    resident.sendMessage("§b - §f" + pending.getText() + " §7§o(" + pending.getText().length() + "/500)");
+                    resident.sendMessage("§b - Keep typing, or say \"done\", \"clear\", or \"cancel\".");
+                    resident.sendMessage("§a");
+                }
+            }
+        }
+    }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event)

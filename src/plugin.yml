@@ -14,6 +14,9 @@ commands:
   setjail:
     usage: /setjail
     description: Sets the town jail to your current location
+  board:
+    usage: /board
+    description: View your town message board
   allow:
     usage: /allow <Player>
     description: Adds a player to a plot allow list

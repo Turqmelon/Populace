@@ -7,6 +7,7 @@ import com.turqmelon.Populace.Plot.PlotManager;
 import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
+import com.turqmelon.Populace.Town.TownLevel;
 import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.*;
 import net.minecraft.server.v1_9_R2.NBTBase;
@@ -81,11 +82,10 @@ public class TownGUI extends GUI {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             repopulate();
             return;
-        }
-        else if (raw == 7 && rank == TownRank.MAYOR){
-            if (event.isRightClick()){
+        } else if (raw == 7 && rank == TownRank.MAYOR) {
+            if (event.isRightClick()) {
                 Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
-                if (plot != null && plot.getTown() != null && plot.getTown().getUuid().equals(getTown().getUuid())){
+                if (plot != null && plot.getTown() != null && plot.getTown().getUuid().equals(getTown().getUuid())) {
 
                     TownSpawnSetEvent e = new TownSpawnSetEvent(getTown(), getResident(), player.getLocation());
                     Bukkit.getPluginManager().callEvent(e);
@@ -95,18 +95,24 @@ public class TownGUI extends GUI {
                         player.closeInventory();
                         getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " has updated the town spawn!");
                     }
-                }
-                else{
+                } else {
                     player.sendMessage(Msg.ERR + "Town spawn can only be set within your land.");
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
                 }
-            }
-            else{
+            } else {
                 TownPermissionsGUI gui = new TownPermissionsGUI(getResident(), getTown());
                 gui.open(player);
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }
 
+        } else if (raw == 46 && rank.isAtLeast(TownRank.RESIDENT) && player.hasPermission("populace.commands.board")) {
+            if (getTown().getLevel().getResidents() >= TownLevel.VILLAGE.getResidents()) {
+                TownBoardGUI gui = new TownBoardGUI(getResident(), getTown());
+                gui.open(player);
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+            } else {
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+            }
         } else if (raw == 50 && getTown().canWarpToSpawn(getResident(), false) && player.hasPermission("populace.commands.visit")) {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             player.closeInventory();
@@ -231,6 +237,11 @@ public class TownGUI extends GUI {
         }
 
         TownRank rank = getTown().getRank(getResident());
+
+        if (rank.isAtLeast(TownRank.RESIDENT) && player.hasPermission("populace.commands.board")) {
+            inv.setItem(46, getTown().getIcon(IconType.MSGBOARD, getResident()));
+        }
+
         if (rank.isAtLeast(TownRank.MANAGER) && !getTown().isOpen() && player.hasPermission("populace.commands.invite")) {
             inv.setItem(48, new ItemBuilder(Material.NAME_TAG)
             .withCustomName("§b§lInviting Residents")
@@ -318,7 +329,8 @@ public class TownGUI extends GUI {
 
         MAIN,
         TREASURY,
-        TOURISM
+        TOURISM,
+        MSGBOARD
 
     }
 }

@@ -66,6 +66,10 @@ public class JoinListener implements Listener {
 
         resident.setSeen(System.currentTimeMillis());
 
+        if (resident.getTown() != null) {
+            resident.getTown().sendAnnouncementMOTD(resident);
+        }
+
     }
 
 }

@@ -77,7 +77,7 @@ public class Town implements Comparable {
 
     private Location townJail = null; // The jail point for the town
 
-    private List<TownAnnouncement> announcements = new ArrayList<>(); // Not yet used
+    private List<TownAnnouncement> announcements = new ArrayList<>();
 
     public Town(UUID uuid, String name, TownLevel level) {
         this.uuid = uuid;
@@ -131,6 +131,17 @@ public class Town implements Comparable {
 
         this.founded = (long) object.get("founded");
         this.bonusLand = (long) object.get("bonusland");
+
+        JSONArray announcements = (JSONArray) object.getOrDefault("announcements", null);
+        if (announcements != null) {
+            for (Object o : announcements) {
+                this.announcements.add(new TownAnnouncement((JSONObject) o));
+            }
+        }
+
+        if (this.announcements.size() > 0) {
+            Collections.sort(this.announcements);
+        }
 
         JSONArray res = (JSONArray) object.get("residents");
         for(Object o : res){
@@ -218,7 +229,35 @@ public class Town implements Comparable {
 
         object.put("mapid", this.mvid);
 
+        JSONArray announcements = new JSONArray();
+        for (TownAnnouncement announcement : getAnnouncements()) {
+            announcements.add(announcement.toJSON());
+        }
+
+        object.put("announcements", announcements);
+
         return object;
+    }
+
+    public void sendAnnouncementMOTD(Resident resident) {
+        if (getLevel().getResidents() < TownLevel.VILLAGE.getResidents()) return;
+        List<TownAnnouncement> toDisplay = new ArrayList<>();
+        for (TownAnnouncement announcement : getAnnouncements()) {
+            if (toDisplay.size() >= 5) break;
+            if (getRank(resident).isAtLeast(announcement.getRequiredRank())) {
+                toDisplay.add(announcement);
+            }
+        }
+
+        if (toDisplay.size() > 0) {
+            resident.sendMessage(" ");
+            resident.sendMessage(ChatColor.LIGHT_PURPLE + " --- " + ChatColor.BOLD + getName().toUpperCase() + " MESSAGE BOARD " + ChatColor.LIGHT_PURPLE + " ---------------");
+            for (TownAnnouncement announcement : toDisplay) {
+                resident.sendMessage(ChatColor.DARK_GRAY + " - " + announcement.getRequiredRank().getPrefix() + announcement.getTitle() + ChatColor.WHITE + " " + ClockUtil.formatDateDiff(announcement.getPosted(), true) + " ago");
+            }
+            resident.sendMessage(ChatColor.LIGHT_PURPLE + "Type " + ChatColor.WHITE + "/board" + ChatColor.LIGHT_PURPLE + " to view town board.");
+            resident.sendMessage(" ");
+        }
     }
 
     @Override
@@ -868,6 +907,44 @@ public class Town implements Comparable {
                 return new ItemBuilder(Material.EYE_OF_ENDER)
                         .withCustomName("§b§lVisitor Policies")
                         .withLore(list).build();
+            case MSGBOARD:
+
+                if (getResidents().size() >= TownLevel.VILLAGE.getResidents()) {
+                    list = new ArrayList<>();
+                    List<String> toDisplay = new ArrayList<>();
+                    for (TownAnnouncement announcement : getAnnouncements()) {
+                        if (toDisplay.size() > 5) {
+                            break;
+                        }
+                        if (getRank(resident).isAtLeast(announcement.getRequiredRank())) {
+                            toDisplay.add("§8 - §f" + announcement.getTitle());
+                        }
+                    }
+                    list.add("§a");
+                    if (toDisplay.size() > 0) {
+                        list.add("§eRecent Posts...");
+                        list.addAll(toDisplay);
+                    } else {
+                        list.add("§c§oNo items to display!");
+                    }
+                    list.add("§a");
+                    list.add("§aLeft Click§f to view town board.");
+
+                    return new ItemBuilder(Material.BOOK)
+                            .withCustomName("§b§lMessage Board")
+                            .withLore(list).build();
+                } else {
+                    list = new ArrayList<>();
+                    list.add("§a");
+                    list.add("§7The message board will unlock once");
+                    list.add("§7" + getName() + getLevel().getSuffix() + " reaches \"Village\" level");
+                    list.add("§7(" + TownLevel.VILLAGE.getResidents() + " residents).");
+
+                    return new ItemBuilder(Material.BOOK)
+                            .withCustomName("§c§lMessage Board")
+                            .withLore(list).build();
+                }
+
         }
 
         return null;
