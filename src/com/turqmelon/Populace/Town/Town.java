@@ -884,29 +884,40 @@ public class Town implements Comparable {
                     list.add("§aRight Click§f to deposit or withdraw from the bank.");
                 }
 
-
                 return new ItemBuilder(Material.GOLD_INGOT)
                         .withCustomName("§b§lBank Balance: §f§l" + Populace.getCurrency().format(getBank()))
                         .withLore(list).build();
             case TOURISM:
 
-                list = new ArrayList<>();
-                list.add("§7These policies control who can warp to");
-                list.add("§7" + getName() + getLevel().getSuffix() + ", and what they can do.");
-                list.add("§a");
-                for(PermissionSet set : PermissionSet.values()){
-                    if (!set.isApplicableTo(PermissionSet.PermissionScope.TOWN))continue;
-                    list.add("§fWho can " + set.getLoredescription() + "? " + getRequiredRank(set).getPrefix());
-                }
-                if (rank==TownRank.MAYOR){
+                if (getResidents().size() >= TownLevel.HAMLET.getResidents()) {
+                    list = new ArrayList<>();
+                    list.add("§7These policies control who can warp to");
+                    list.add("§7" + getName() + getLevel().getSuffix() + ", and what they can do.");
                     list.add("§a");
-                    list.add("§aLeft Click§f to change town permissions.");
-                    list.add("§aRight Click§f to update town spawn.");
-                }
+                    for (PermissionSet set : PermissionSet.values()) {
+                        if (!set.isApplicableTo(PermissionSet.PermissionScope.TOWN)) continue;
+                        list.add("§fWho can " + set.getLoredescription() + "? " + getRequiredRank(set).getPrefix());
+                    }
+                    if (rank == TownRank.MAYOR) {
+                        list.add("§a");
+                        list.add("§aLeft Click§f to change town permissions.");
+                        list.add("§aRight Click§f to update town spawn.");
+                    }
 
-                return new ItemBuilder(Material.EYE_OF_ENDER)
-                        .withCustomName("§b§lVisitor Policies")
-                        .withLore(list).build();
+                    return new ItemBuilder(Material.EYE_OF_ENDER)
+                            .withCustomName("§b§lVisitor Policies")
+                            .withLore(list).build();
+                } else {
+                    list = new ArrayList<>();
+                    list.add("§a");
+                    list.add("§7Editing town permissions will unlock once");
+                    list.add("§7" + getName() + getLevel().getSuffix() + " reaches \"Halmet\" level");
+                    list.add("§7(" + TownLevel.HAMLET.getResidents() + " residents).");
+
+                    return new ItemBuilder(Material.EYE_OF_ENDER)
+                            .withCustomName("§c§lVisitor Policies")
+                            .withLore(list).build();
+                }
             case MSGBOARD:
 
                 if (getResidents().size() >= TownLevel.VILLAGE.getResidents()) {
@@ -1052,10 +1063,26 @@ public class Town implements Comparable {
         }
         resident.sendMessage(Msg.OK + "Welcome to " + getName() + getLevel().getSuffix() + "!");
         if (getNextLevel() != null && getResidents().size() >= getNextLevel().getResidents()) {
+            TownLevel oldLevel = getLevel();
             TownLevel newLevel = TownLevel.getAppropriateLevel(getResidents().size());
             setLevel(newLevel);
+            DecimalFormat df = new DecimalFormat("#.#");
             sendTownBroadcast(TownRank.RESIDENT, getName() + " has leveled up to §f" + newLevel.getName() + "§d!");
-            sendTownBroadcast(TownRank.RESIDENT, "Maximum land has been increased for expansion.");
+            sendTownBroadcast(TownRank.RESIDENT, "Maximum Land: §f" + oldLevel.getMaxland() + " > " + newLevel.getMaxland());
+            if (oldLevel.getUpkeepModifier() != newLevel.getUpkeepModifier()) {
+                sendTownBroadcast(TownRank.RESIDENT, "Upkeep Multiplier: §f" + df.format(oldLevel.getUpkeepModifier()) + "x > " + df.format(newLevel.getUpkeepModifier()) + "x");
+            }
+            switch (newLevel) {
+                case HAMLET:
+                    sendTownBroadcast(TownRank.RESIDENT, "§aUNLOCKED:§d \"Visitor Policies\"! Click the Eye of Ender in your §f/town§d menu.");
+                    break;
+                case VILLAGE:
+                    sendTownBroadcast(TownRank.RESIDENT, "§aUNLOCKED:§d \"Message Board\"! Use §f/board§d to see the new feature.");
+                    break;
+                case CITY:
+                    sendTownBroadcast(TownRank.RESIDENT, "§aUNLOCKED:§d \"Outpost Claims\"! Land not adjacent to town land can now be claimed.");
+                    break;
+            }
         }
         if (resident.getDailyTax() > 0) {
             resident.sendMessage(Msg.OK + "To live here, there is a daily tax of " + Populace.getCurrency().format(resident.getDailyTax()) + ".");

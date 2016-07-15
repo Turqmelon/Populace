@@ -83,26 +83,31 @@ public class TownGUI extends GUI {
             repopulate();
             return;
         } else if (raw == 7 && rank == TownRank.MAYOR) {
-            if (event.isRightClick()) {
-                Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
-                if (plot != null && plot.getTown() != null && plot.getTown().getUuid().equals(getTown().getUuid())) {
+            if (getTown().getResidents().size() >= TownLevel.HAMLET.getResidents()) {
+                if (event.isRightClick()) {
+                    Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
+                    if (plot != null && plot.getTown() != null && plot.getTown().getUuid().equals(getTown().getUuid())) {
 
-                    TownSpawnSetEvent e = new TownSpawnSetEvent(getTown(), getResident(), player.getLocation());
-                    Bukkit.getPluginManager().callEvent(e);
-                    if (!e.isCancelled()) {
-                        getTown().setSpawn(player.getLocation());
-                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                        player.closeInventory();
-                        getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " has updated the town spawn!");
+                        TownSpawnSetEvent e = new TownSpawnSetEvent(getTown(), getResident(), player.getLocation());
+                        Bukkit.getPluginManager().callEvent(e);
+                        if (!e.isCancelled()) {
+                            getTown().setSpawn(player.getLocation());
+                            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+                            player.closeInventory();
+                            getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " has updated the town spawn!");
+                        }
+                    } else {
+                        player.sendMessage(Msg.ERR + "Town spawn can only be set within your land.");
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
                     }
                 } else {
-                    player.sendMessage(Msg.ERR + "Town spawn can only be set within your land.");
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+                    TownPermissionsGUI gui = new TownPermissionsGUI(getResident(), getTown());
+                    gui.open(player);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                 }
+
             } else {
-                TownPermissionsGUI gui = new TownPermissionsGUI(getResident(), getTown());
-                gui.open(player);
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
             }
 
         } else if (raw == 46 && rank.isAtLeast(TownRank.RESIDENT) && player.hasPermission("populace.commands.board")) {
