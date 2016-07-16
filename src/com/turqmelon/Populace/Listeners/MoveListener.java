@@ -63,15 +63,15 @@ public class MoveListener implements Listener {
             lastPlot = resident.getDisplayEntity().getPlot();
             boolean denyEntry = false;
             if (lastPlot == null || !lastPlot.getUuid().equals(plot.getUuid())) {
-                ResidentPlotEnterEvent enterEvent = new ResidentPlotEnterEvent(plot, resident);
-                Bukkit.getPluginManager().callEvent(enterEvent);
-                if (enterEvent.isCancelled()) {
-                    denyEntry = true;
-                }
                 if (lastPlot != null) {
                     ResidentPlotLeaveEvent exitEvent = new ResidentPlotLeaveEvent(lastPlot, resident);
                     Bukkit.getPluginManager().callEvent(exitEvent);
                     denyExit = exitEvent.isCancelled();
+                }
+                if (!denyExit) {
+                    ResidentPlotEnterEvent enterEvent = new ResidentPlotEnterEvent(plot, resident);
+                    Bukkit.getPluginManager().callEvent(enterEvent);
+                    denyEntry = enterEvent.isCancelled();
                 }
             }
             if (denyEntry || !plot.can(resident, PermissionSet.ENTRY)) {
