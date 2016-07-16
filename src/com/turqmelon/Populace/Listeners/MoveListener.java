@@ -56,6 +56,8 @@ public class MoveListener implements Listener {
         Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
         Plot lastPlot;
 
+        boolean denyExit = false;
+
         if (plot != null) {
 
             lastPlot = resident.getDisplayEntity().getPlot();
@@ -67,7 +69,9 @@ public class MoveListener implements Listener {
                     denyEntry = true;
                 }
                 if (lastPlot != null) {
-                    Bukkit.getPluginManager().callEvent(new ResidentPlotLeaveEvent(lastPlot, resident));
+                    ResidentPlotLeaveEvent exitEvent = new ResidentPlotLeaveEvent(lastPlot, resident);
+                    Bukkit.getPluginManager().callEvent(exitEvent);
+                    denyExit = exitEvent.isCancelled();
                 }
             }
             if (denyEntry || !plot.can(resident, PermissionSet.ENTRY)) {
@@ -86,8 +90,22 @@ public class MoveListener implements Listener {
         } else {
             lastPlot = resident.getDisplayEntity().getPlot();
             if (lastPlot != null) {
-                Bukkit.getPluginManager().callEvent(new ResidentPlotLeaveEvent(lastPlot, resident));
+
+                ResidentPlotLeaveEvent exitEvent = new ResidentPlotLeaveEvent(lastPlot, resident);
+                Bukkit.getPluginManager().callEvent(exitEvent);
+
+                denyExit = exitEvent.isCancelled();
+
             }
+        }
+
+        if (denyExit && lastSafePoint.containsKey(player.getUniqueId())) {
+            player.setVelocity(calculateVelocity(lastSafePoint.get(player.getUniqueId()), player.getLocation()));
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+            resident.setFallImmunity(System.currentTimeMillis());
+            lastPlot.getPlotChunk().visualize(player, true);
+            HUDUtil.sendActionBar(player, "§c§lYou can't exit this area.");
+            return;
         }
 
         if (Populace.isPopulaceWarzoneLoaded() && CombatHelper.shouldBounceBack(player, plot, lastPlot) && lastSafePoint.containsKey(player.getUniqueId())) {
