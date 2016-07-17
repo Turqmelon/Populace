@@ -195,9 +195,11 @@ public class TownGUI extends GUI {
                     Resident clicked = ResidentManager.getResident(UUID.fromString(nbt.toString().replace("\"", "")));
                     if (clicked != null){
 
-                        SetResidentRankGUI gui = new SetResidentRankGUI(getResident(), getTown(), clicked);
-                        gui.open(player);
-                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+                        if (clicked.getTown().getRank(clicked) != TownRank.MAYOR) {
+                            SetResidentRankGUI gui = new SetResidentRankGUI(getResident(), getTown(), clicked);
+                            gui.open(player);
+                            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+                        }
 
                     }
                     else{

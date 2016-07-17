@@ -7,6 +7,7 @@ import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import com.turqmelon.Populace.Utils.ItemUtil;
+import com.turqmelon.Populace.Utils.Msg;
 import net.minecraft.server.v1_9_R2.NBTBase;
 import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Bukkit;
@@ -71,11 +72,28 @@ public class SetResidentRankGUI extends TownGUI {
             NBTBase nbt = ItemUtil.getTag(clicked, "changerank");
             if (nbt != null) {
                 TownRank newRank = TownRank.valueOf(nbt.toString().replace("\"", ""));
-                getTown().getResidents().put(getTarget(), newRank);
-                getTown().sendTownBroadcast(TownRank.RESIDENT, getTarget().getName() + "'s rank has been set to " + newRank.getPrefix() + "§dby the mayor.");
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                Bukkit.getPluginManager().callEvent(new ResidentRankChangedEvent(getTarget(), newRank));
-                repopulate();
+                if (newRank == TownRank.MAYOR) {
+                    Player target = Bukkit.getPlayer(getTarget().getUuid());
+
+                    if (target != null && target.isOnline()) {
+                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+                        player.closeInventory();
+                        player.sendMessage(Msg.INFO + "Are you sure you want to give up " + getTown().getName() + getTown().getLevel().getSuffix() + "?");
+                        player.sendMessage(Msg.INFO + "This action is not reversible, and you will be giving " + getTarget().getName() + " full control of it.");
+                        player.sendMessage(Msg.INFO + "Upon confirmation, " + getTarget().getName() + " will be promoted and you will be made a Manager.");
+                        getResident().setPendingAction(() -> {
+                            getTown().transferOwnership(getTarget());
+                        });
+                    } else {
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+                    }
+                } else {
+                    getTown().getResidents().put(getTarget(), newRank);
+                    getTown().sendTownBroadcast(TownRank.RESIDENT, getTarget().getName() + "'s rank has been set to " + newRank.getPrefix() + "§dby the mayor.");
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+                    Bukkit.getPluginManager().callEvent(new ResidentRankChangedEvent(getTarget(), newRank));
+                    repopulate();
+                }
             }
         }
 
@@ -106,11 +124,11 @@ public class SetResidentRankGUI extends TownGUI {
             }
 
             if (rank == TownRank.ASSISTANT){
-                inv.setItem(22, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.ASSISTANT.getDyeColor())
+                inv.setItem(21, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.ASSISTANT.getDyeColor())
                         .withCustomName(TownRank.ASSISTANT.getPrefix()).withLore(Arrays.asList("§aCurrent Rank")).makeItGlow().build());
             }
             else{
-                inv.setItem(22, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.ASSISTANT.getDyeColor())
+                inv.setItem(21, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.ASSISTANT.getDyeColor())
                         .withCustomName(TownRank.ASSISTANT.getPrefix()).withLore(
                                 Arrays.asList(
                                         "§fBasic Permissions:",
@@ -124,11 +142,11 @@ public class SetResidentRankGUI extends TownGUI {
             }
 
             if (rank == TownRank.MANAGER){
-                inv.setItem(25, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MANAGER.getDyeColor())
+                inv.setItem(23, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MANAGER.getDyeColor())
                         .withCustomName(TownRank.MANAGER.getPrefix()).withLore(Arrays.asList("§aCurrent Rank")).makeItGlow().build());
             }
             else{
-                inv.setItem(25, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MANAGER.getDyeColor())
+                inv.setItem(23, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MANAGER.getDyeColor())
                         .withCustomName(TownRank.MANAGER.getPrefix()).withLore(
                                 Arrays.asList(
                                         "§fBasic Permissions:",
@@ -140,6 +158,26 @@ public class SetResidentRankGUI extends TownGUI {
                                         "§8 - §6Can revoke ownership of a plot"
                                 )
                         ).tagWith("changerank", new NBTTagString(TownRank.MANAGER.name())).build());
+            }
+
+            Player target = Bukkit.getPlayer(getTarget().getUuid());
+            if (target != null && target.isOnline()) {
+                inv.setItem(25, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MAYOR.getDyeColor())
+                        .withCustomName(TownRank.MAYOR.getPrefix()).withLore(
+                                Arrays.asList(
+                                        "§cThere can only be one mayor.",
+                                        "§7",
+                                        "§aLeft Click§f to transfer your mayor status."
+                                )
+                        ).tagWith("changerank", new NBTTagString(TownRank.MAYOR.name())).build());
+            } else {
+                inv.setItem(25, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MAYOR.getDyeColor())
+                        .withCustomName(TownRank.MAYOR.getPrefix()).withLore(
+                                Arrays.asList(
+                                        "§7" + getTarget().getName() + " must be online to transfer",
+                                        "§7mayor status to them."
+                                )
+                        ).build());
             }
 
 

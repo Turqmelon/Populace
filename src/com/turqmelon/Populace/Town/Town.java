@@ -563,6 +563,13 @@ public class Town implements Comparable {
         return false;
     }
 
+    public void transferOwnership(Resident newMayor) {
+        Resident currentMayor = getMayor();
+        getResidents().put(newMayor, TownRank.MAYOR);
+        getResidents().put(currentMayor, TownRank.MANAGER);
+        sendTownBroadcast(TownRank.RESIDENT, newMayor.getName() + " is the new mayor of " + getName() + getLevel().getSuffix() + "!");
+    }
+
     private boolean unclaimLand(Resident resident, Plot plot, boolean confirmed){
 
         TownRank rank = getRank(resident);
