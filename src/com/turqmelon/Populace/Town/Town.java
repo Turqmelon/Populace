@@ -907,8 +907,8 @@ public class Town implements Comparable {
                         if (System.currentTimeMillis() > nextJoin) {
                             list.add("§aLeft Click§f to join " + getName() + getLevel().getSuffix());
                         } else {
-                            list.add("§cYou recently left a town.");
-                            list.add("§fYou can join another in §e" + ClockUtil.formatDateDiff(nextJoin, true));
+                            list.add("§c§You recently left a town.");
+                            list.add("§7You can join this one in " + ClockUtil.formatDateDiff(nextJoin, true));
                         }
                     }
                     else if (rank == TownRank.MAYOR){

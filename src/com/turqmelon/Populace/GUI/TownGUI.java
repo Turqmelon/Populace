@@ -185,6 +185,7 @@ public class TownGUI extends GUI {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                 player.closeInventory();
                 getResident().sendMessage(Msg.INFO + "If you leave the town, you will lose access to everything you own.");
+                getResident().sendMessage(Msg.INFO + "You will not be able to join or create another town for 8 hours.");
                 getResident().setPendingAction(() -> getTown().leaveOnBehalf(getResident()));
             }
         }
