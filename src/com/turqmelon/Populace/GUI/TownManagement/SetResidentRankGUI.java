@@ -7,7 +7,6 @@ import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.ItemBuilder;
 import com.turqmelon.Populace.Utils.ItemUtil;
-import com.turqmelon.Populace.Utils.Msg;
 import net.minecraft.server.v1_9_R2.NBTBase;
 import net.minecraft.server.v1_9_R2.NBTTagString;
 import org.bukkit.Bukkit;
@@ -67,31 +66,17 @@ public class SetResidentRankGUI extends TownGUI {
             return;
         }
 
-        if (raw == 41) {
-            player.closeInventory();
-            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-            getResident().sendMessage(Msg.INFO + "Kicking out a resident will cause them to lose access to everything in the town.");
-            getResident().setPendingAction(() -> getTown().kickOut(getTarget(), getResident(), null));
-        } else if (raw == 39) {
-            player.closeInventory();
-            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-            player.chat("/jail");
-        } else if (rank == TownRank.MAYOR) {
-
-            ItemStack clicked = event.getCurrentItem();
-            if (clicked != null && clicked.getType() != Material.AIR){
-                NBTBase nbt = ItemUtil.getTag(clicked, "changerank");
-                if (nbt != null){
-                    TownRank newRank = TownRank.valueOf(nbt.toString().replace("\"", ""));
-                    getTown().getResidents().put(getTarget(), newRank);
-                    getTown().sendTownBroadcast(TownRank.RESIDENT, getTarget().getName() + "'s rank has been set to " + newRank.getPrefix() + "§dby the mayor.");
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    Bukkit.getPluginManager().callEvent(new ResidentRankChangedEvent(getTarget(), newRank));
-                    repopulate();
-                }
+        ItemStack clicked = event.getCurrentItem();
+        if (clicked != null && clicked.getType() != Material.AIR) {
+            NBTBase nbt = ItemUtil.getTag(clicked, "changerank");
+            if (nbt != null) {
+                TownRank newRank = TownRank.valueOf(nbt.toString().replace("\"", ""));
+                getTown().getResidents().put(getTarget(), newRank);
+                getTown().sendTownBroadcast(TownRank.RESIDENT, getTarget().getName() + "'s rank has been set to " + newRank.getPrefix() + "§dby the mayor.");
+                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+                Bukkit.getPluginManager().callEvent(new ResidentRankChangedEvent(getTarget(), newRank));
+                repopulate();
             }
-
-
         }
 
     }
@@ -101,13 +86,9 @@ public class SetResidentRankGUI extends TownGUI {
 
         Inventory inv = getProxyInventory();
         inv.setItem(0, new ItemBuilder(Material.PAPER).withCustomName("§e§l< BACK").build());
-        inv.setItem(4, getIcon(getTarget(), false));
+        inv.setItem(4, getIcon(getTarget()));
 
         TownRank rank = getTown().getRank(getTarget());
-
-        inv.setItem(39, new ItemBuilder(Material.IRON_FENCE).withCustomName("§7§lJail Resident").build());
-        inv.setItem(41, new ItemBuilder(Material.BARRIER).withCustomName("§c§lKick Resident").build());
-
 
         if (getTown().getRank(getResident()) == TownRank.MAYOR && rank != TownRank.MAYOR) {
 
@@ -117,7 +98,11 @@ public class SetResidentRankGUI extends TownGUI {
             }
             else{
                 inv.setItem(19, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.RESIDENT.getDyeColor())
-                        .withCustomName(TownRank.RESIDENT.getPrefix()).withLore("§7Grants no special abilities.").tagWith("changerank", new NBTTagString(TownRank.RESIDENT.name())).build());
+                        .withCustomName(TownRank.RESIDENT.getPrefix()).withLore(
+                                Arrays.asList(
+                                        "§fNo special permissions."
+                                )
+                        ).tagWith("changerank", new NBTTagString(TownRank.RESIDENT.name())).build());
             }
 
             if (rank == TownRank.ASSISTANT){
@@ -126,7 +111,16 @@ public class SetResidentRankGUI extends TownGUI {
             }
             else{
                 inv.setItem(22, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.ASSISTANT.getDyeColor())
-                        .withCustomName(TownRank.ASSISTANT.getPrefix()).withLore("§7Can assist with plot management.").tagWith("changerank", new NBTTagString(TownRank.ASSISTANT.name())).build());
+                        .withCustomName(TownRank.ASSISTANT.getPrefix()).withLore(
+                                Arrays.asList(
+                                        "§fBasic Permissions:",
+                                        "§8 - §eEverything from Resident",
+                                        "§8 - §bCan receive town staff alerts",
+                                        "§8 - §bCan mark plots for sale",
+                                        "§8 - §bCan claim land for the town",
+                                        "§8 - §bCan unclaim unowned town land"
+                                )
+                        ).tagWith("changerank", new NBTTagString(TownRank.ASSISTANT.name())).build());
             }
 
             if (rank == TownRank.MANAGER){
@@ -135,7 +129,17 @@ public class SetResidentRankGUI extends TownGUI {
             }
             else{
                 inv.setItem(25, new ItemBuilder(Material.STAINED_GLASS_PANE).withData(TownRank.MANAGER.getDyeColor())
-                        .withCustomName(TownRank.MANAGER.getPrefix()).withLore("§7Can assist with resident management.").tagWith("changerank", new NBTTagString(TownRank.MANAGER.name())).build());
+                        .withCustomName(TownRank.MANAGER.getPrefix()).withLore(
+                                Arrays.asList(
+                                        "§fBasic Permissions:",
+                                        "§8 - §bEverything from Assistant",
+                                        "§8 - §6Can invite new residents to town",
+                                        "§8 - §6Can give plots to specific residents",
+                                        "§8 - §6Can jail and unjail residents",
+                                        "§8 - §6Can claim outposts for the town",
+                                        "§8 - §6Can revoke ownership of a plot"
+                                )
+                        ).tagWith("changerank", new NBTTagString(TownRank.MANAGER.name())).build());
             }
 
 

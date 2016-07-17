@@ -57,10 +57,14 @@ public class Town implements Comparable {
     private TownLevel level;
     private boolean open = false; // Allows anyone to join the town
     private double bank = 0;
+    private double reserve = 0;
 
     private double tax = 0; // The daily tax on residents
     private double plotTax = 0; // The daily tax on each plot owned
     private double salesTax = 0; // Percentage added to shop prices
+
+    private double pendingTax = -1;
+    private double pendingPlotTax = -1;
 
     private Location spawn = null;
 
@@ -94,10 +98,14 @@ public class Town implements Comparable {
 
         this.open = (boolean) object.get("open");
         this.bank = (double) object.get("bank");
+        this.reserve = (double) object.getOrDefault("reserve", 0.0);
 
         this.tax = (double) object.get("tax");
         this.plotTax = (double) object.get("plottax");
         this.salesTax = (double) object.get("salestax");
+
+        this.pendingTax = (double) object.getOrDefault("pendingtax", -1.0);
+        this.pendingPlotTax = (double) object.getOrDefault("pendingplottax", -1.0);
 
         this.mvid = (int) ((long) object.get("mapid"));
 
@@ -169,6 +177,22 @@ public class Town implements Comparable {
         initializeMapView();
     }
 
+    public double getPendingTax() {
+        return pendingTax;
+    }
+
+    public void setPendingTax(double pendingTax) {
+        this.pendingTax = pendingTax;
+    }
+
+    public double getPendingPlotTax() {
+        return pendingPlotTax;
+    }
+
+    public void setPendingPlotTax(double pendingPlotTax) {
+        this.pendingPlotTax = pendingPlotTax;
+    }
+
     // Overridden by warzone and spawn classes
     public boolean isSpecial() {
         return false;
@@ -202,10 +226,14 @@ public class Town implements Comparable {
 
         object.put("open", isOpen());
         object.put("bank", getBank());
+        object.put("reserve", getReserve());
 
         object.put("tax", getTax());
         object.put("plottax", getPlotTax());
         object.put("salestax", getSalesTax());
+
+        object.put("pendingtax", getPendingTax());
+        object.put("pendingplottax", getPendingPlotTax());
 
         object.put("spawn", getSpawn()!=null?getSpawn().getWorld().getName()+","+getSpawn().getX()+","+getSpawn().getY()+","+getSpawn().getZ()+","+getSpawn().getYaw()+","+getSpawn().getPitch():null);
         object.put("jail", getTownJail() != null ? getTownJail().getWorld().getName() + "," + getTownJail().getX() + "," + getTownJail().getY() + "," + getTownJail().getZ() + "," + getTownJail().getYaw() + "," + getTownJail().getPitch() : null);
@@ -258,6 +286,14 @@ public class Town implements Comparable {
             resident.sendMessage(ChatColor.LIGHT_PURPLE + "Type " + ChatColor.WHITE + "/board" + ChatColor.LIGHT_PURPLE + " to view town board.");
             resident.sendMessage(" ");
         }
+    }
+
+    public double getReserve() {
+        return reserve;
+    }
+
+    public void setReserve(double reserve) {
+        this.reserve = reserve;
     }
 
     @Override
@@ -791,6 +827,45 @@ public class Town implements Comparable {
         return ClaimFailureReason.NONE;
     }
 
+    public void creditReserve(double amount) {
+        double newAmount = getReserve() + amount;
+        if (newAmount > getLevel().getReserveCap()) {
+
+            // Instead of wasting credit if the reserve is capped, give it to the normal bank
+            double excess = newAmount - getLevel().getReserveCap();
+            newAmount = getLevel().getReserveCap();
+            setBank(getBank() + excess);
+        }
+        if (newAmount != getReserve()) {
+            setReserve(newAmount);
+        }
+    }
+
+    public double getBankAndReserve() {
+        return getBank() + getReserve();
+    }
+
+    public double getDailyProfit() {
+        double profit = 0;
+        for (Resident resident : getResidents().keySet()) {
+            profit += resident.getDailyTax();
+        }
+        return profit;
+    }
+
+    public String renderTaxChange(double amount, double pending) {
+        String s = "";
+        if (pending != -1) {
+            double diff = pending - amount;
+            s += " §7§o(";
+            if (diff > 0) {
+                s += "+";
+            }
+            s += Populace.getCurrency().format(diff) + " in " + Populace.getNewDayCountdown() + ")";
+        }
+        return s;
+    }
+
     public ItemStack getIcon(TownGUI.IconType icon, Resident resident) {
         return getIcon(icon, resident, true);
     }
@@ -845,29 +920,18 @@ public class Town implements Comparable {
                         .withLore(list).tagWith("clickedtownid", new NBTTagString(getUuid().toString())).build();
             case TREASURY:
 
+                String resChange = renderTaxChange(getTax(), getPendingTax());
+                String plotChange = renderTaxChange(getPlotTax(), getPendingPlotTax());
+
                 list = new ArrayList<>();
                 list.addAll(Arrays.asList(
-                        "§7Taxes are selected by the mayor to keep ",
-                        "§7the town running. If the town can't afford ",
-                        "§7the §cDaily Upkeep§7, it will be destroyed.",
+                        "§bReserve §f" + Populace.getCurrency().format(getReserve()) + "§7/" + Populace.getCurrency().format(getLevel().getReserveCap()),
                         "§a",
                         "§6§l" + getName() + getLevel().getSuffix() + " Taxes",
-                        "§fResident Tax §e" + Populace.getCurrency().format(getTax()),
-                        "§fPlot Tax §e" + Populace.getCurrency().format(getPlotTax()),
-                        (Populace.isPopulaceMarketLoaded() ? "§fSales Tax §e" + new DecimalFormat("#.#").format(getSalesTax()) + "%" : "§fSales Tax §8--%"),
-                        "§a",
-                        "§6§lUpkeep",
-                        "§fDaily" + getLevel().getSuffix() + " Upkeep " + (getBank()>=getDailyUpkeep()?"§a":"§c") + Populace.getCurrency().format(getDailyUpkeep()),
-                        "§fLevel Multiplier §e" + getLevel().getUpkeepModifier()
+                        "§fResident Tax §e" + Populace.getCurrency().format(getTax()) + resChange,
+                        "§fPlot Tax §e" + Populace.getCurrency().format(getPlotTax()) + plotChange,
+                        (Populace.isPopulaceMarketLoaded() ? "§fSales Tax §e" + new DecimalFormat("#.#").format(getSalesTax()) + "%" : "§fSales Tax §8--%")
                 ));
-                if (System.currentTimeMillis() < getGracePeriodExpiration()){
-                    list.add("§fGrace Period §a" + ClockUtil.formatDateDiff(getGracePeriodExpiration(), true));
-                    list.add("§7Town will not be charged a daily upkeep");
-                    list.add("§7until the grace period expires.");
-                }
-                else{
-                    list.add("§fNext Upkeep Collection §e" + Populace.getNewDayCountdown());
-                }
 
                 if (rank.getPermissionLevel() > TownRank.GUEST.getPermissionLevel() && rank.getPermissionLevel() < TownRank.MAYOR.getPermissionLevel()) {
                     list.add("§a");
@@ -880,8 +944,21 @@ public class Town implements Comparable {
                 }
                 else if (rank==TownRank.MAYOR){
                     list.add("§a");
+                    list.add("§6§lUpkeep");
+                    list.add("§fDaily" + getLevel().getSuffix() + " Upkeep " + (getBankAndReserve() >= getDailyUpkeep() ? "§a" : "§c") + Populace.getCurrency().format(getDailyUpkeep()));
+                    list.add("§fDaily Profit §e" + Populace.getCurrency().format(getDailyProfit()));
+                    list.add("§fLevel Multiplier §e" + getLevel().getUpkeepModifier());
+                    if (System.currentTimeMillis() < getGracePeriodExpiration()) {
+                        list.add("§fNew Town Grace Period §a" + ClockUtil.formatDateDiff(getGracePeriodExpiration(), true));
+                    } else if (getBankAndReserve() < getDailyUpkeep()) {
+                        list.add("§c§lTown Destruction In §4§l" + Populace.getNewDayCountdown());
+                        list.add("§c" + getName() + getLevel().getSuffix() + " needs funding to stay alive!");
+                    } else {
+                        list.add("§fNext Upkeep Collection §e" + Populace.getNewDayCountdown());
+                    }
+                    list.add("§a");
                     list.add("§aLeft Click§f to change taxes.");
-                    list.add("§aRight Click§f to deposit or withdraw from the bank.");
+                    list.add("§aRight Click§f to manage the bank.");
                 }
 
                 return new ItemBuilder(Material.GOLD_INGOT)

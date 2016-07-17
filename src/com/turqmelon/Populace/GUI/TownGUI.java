@@ -195,17 +195,9 @@ public class TownGUI extends GUI {
                     Resident clicked = ResidentManager.getResident(UUID.fromString(nbt.toString().replace("\"", "")));
                     if (clicked != null){
 
-                        if (event.isRightClick() && rank.isAtLeast(TownRank.MANAGER)) {
-                            SetResidentRankGUI gui = new SetResidentRankGUI(getResident(), getTown(), clicked);
-                            gui.open(player);
-                            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                        }
-                        else{
-                            player.closeInventory();
-                            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                            getResident().sendMessage(Msg.INFO + "Kicking out a resident will cause them to lose access to everything in the town.");
-                            getResident().setPendingAction(() -> getTown().kickOut(clicked, getResident(), null));
-                        }
+                        SetResidentRankGUI gui = new SetResidentRankGUI(getResident(), getTown(), clicked);
+                        gui.open(player);
+                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
 
                     }
                     else{
@@ -283,7 +275,7 @@ public class TownGUI extends GUI {
 
         int index = 18;
         for(Resident resident : display){
-            inv.setItem(index, getIcon(resident, getTown().getRank(getResident()).getPermissionLevel()>= TownRank.MANAGER.getPermissionLevel()));
+            inv.setItem(index, getIcon(resident));
             index++;
         }
 
@@ -309,22 +301,19 @@ public class TownGUI extends GUI {
         return town;
     }
 
-    protected ItemStack getIcon(Resident resident, boolean kickable){
+    protected ItemStack getIcon(Resident resident) {
         List<String> list = new ArrayList<>();
         if (resident.isJailed()) {
             list.add("§7§oJailed");
         }
-        if (kickable){
-            list.add("§aLeft Click§f to kick from town.");
-            if (getTown().getRank(getResident()).isAtLeast(TownRank.MANAGER)) {
-                list.add("§aRight Click§f to change properties.");
-            }
+        if (getTown().getRank(getResident()).isAtLeast(TownRank.MANAGER)) {
+            list.add("§aLeft Click§f to change rank.");
         }
         ItemStack item = resident.getIcon();
         ItemMeta meta = item.getItemMeta();
         List<String> lore = meta.getLore();
         if (list.size() > 0) {
-            lore.add("§8§m--------------------");
+            lore.add("§8-");
             lore.addAll(list);
         }
         meta.setLore(lore);

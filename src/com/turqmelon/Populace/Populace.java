@@ -121,7 +121,7 @@ public class Populace extends JavaPlugin {
     // Returns a friendly countdown until the next new day
     public static String getNewDayCountdown() {
         long nextDay = getLastNewDay() + TimeUnit.DAYS.toMillis(1);
-        return ClockUtil.formatDateDiff(nextDay, false);
+        return ClockUtil.formatDateDiff(nextDay, true);
     }
 
     public static boolean isPopulaceWarzoneLoaded() {
@@ -262,9 +262,6 @@ public class Populace extends JavaPlugin {
     public void newDay() {
 
         Bukkit.broadcastMessage(Msg.OK + "A new day begins...");
-
-        Bukkit.getPluginManager().callEvent(new PopulaceNewDayEvent());
-
         // Collect taxes from all residents
         for(Resident resident : ResidentManager.getResidents()){
             double upkeep = resident.getDailyTax();
@@ -276,6 +273,14 @@ public class Populace extends JavaPlugin {
             }
             else{
                 // Good citizens pay their taxes. We need to be polite and thank them for their continued servitude.
+
+                double reserveDeposit = upkeep * 0.1;
+                double bankDeposit = upkeep - reserveDeposit;
+
+                Town town = resident.getTown();
+                town.setBank(town.getBank() + bankDeposit);
+                town.creditReserve(reserveDeposit);
+
                 resident.sendMessage(Msg.OK + Populace.getCurrency().format(upkeep) + " was deducted for your daily taxes. Thank you!");
             }
 
@@ -293,7 +298,7 @@ public class Populace extends JavaPlugin {
                 continue;
             }
             double upkeep = town.getDailyUpkeep();
-            double bank = town.getBank();
+            double bank = town.getBankAndReserve();
 
             if (bank < upkeep){
                 // The town can't afford their daily upkeep. Destroy it.
@@ -302,14 +307,36 @@ public class Populace extends JavaPlugin {
             }
             else{
                 // Take the daily upkeep from the bank. Their safe for another day.
-                town.setBank(town.getBank()-upkeep);
-                town.sendTownBroadcast(TownRank.RESIDENT, "The daily upkeep of " + getCurrency().format(upkeep) + " has been collected from the town bank. Thank you!");
+                town.sendTownBroadcast(TownRank.RESIDENT, "The daily town upkeep has been collected (" + getCurrency().format(upkeep) + ")!");
+                if (town.getBank() >= upkeep) {
+                    town.setBank(town.getBank() - upkeep);
+                } else {
+                    double remainingUpkeep = upkeep - town.getBank();
+                    town.setBank(0);
+                    town.setReserve(town.getReserve() - remainingUpkeep);
+                    town.sendTownBroadcast(TownRank.RESIDENT, getCurrency().format(remainingUpkeep) + " had to be drawn from the emergency reserve!");
+                }
             }
-            if (town.getBank() < upkeep){
+            if (town.getBankAndReserve() < upkeep) {
                 town.sendTownBroadcast(TownRank.ASSISTANT, town.getName() + town.getLevel().getSuffix() + " can't afford the daily upkeep for tomorrow.");
                 town.sendTownBroadcast(TownRank.ASSISTANT, "You may want to raise taxes or deposit " + getCurrency().getPlural() + " to avoid town destruction.");
             }
+
+            if (town.getPendingTax() != -1) {
+                town.setTax(town.getPendingTax());
+                town.setPendingTax(-1);
+                town.sendTownBroadcast(TownRank.RESIDENT, "The town §fResident Tax§d has changed to " + getCurrency().format(town.getTax()) + "§d for tomorrow.");
+            }
+
+            if (town.getPendingPlotTax() != -1) {
+                town.setPendingPlotTax(town.getPendingPlotTax());
+                town.setPendingPlotTax(-1);
+                town.sendTownBroadcast(TownRank.RESIDENT, "The town §fPlot Tax§d has changed to " + getCurrency().format(town.getPlotTax()) + "§d for tomorrow.");
+            }
+
         }
+
+        Bukkit.getPluginManager().callEvent(new PopulaceNewDayEvent());
 
         new BukkitRunnable() {
             @Override

@@ -18,6 +18,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Arrays;
+
 /******************************************************************************
  *                                                                            *
  * CONFIDENTIAL                                                               *
@@ -93,6 +95,24 @@ public class BankGUI extends TownGUI {
         Inventory inv = getProxyInventory();
         inv.setItem(0, new ItemBuilder(Material.PAPER).withCustomName("§e§l< BACK").build());
         inv.setItem(4, getTown().getIcon(IconType.TREASURY, getResident()));
+        inv.setItem(8, new ItemBuilder(Material.BOOK)
+                .withCustomName("§e§lTown Balances")
+                .withLore(Arrays.asList("" +
+                                "§fAll towns have two banks.",
+                        "§f",
+                        "§b§lTown Bank",
+                        "§fThe town bank receives the",
+                        "§fmajority of all funding. It can be",
+                        "§fused to purchase town upgrades.",
+                        "§cTaken from FIRST for daily upkeep.",
+                        "§f",
+                        "§b§lTown Reserve",
+                        "§fThe town reserve receives 10%",
+                        "§fof all bank deposits. §cThe reserve",
+                        "§ccannot be withdrawn from§f, and is in",
+                        "§fplace to protect towns from malicious",
+                        "§fmayors."))
+                .build());
 
         int[] d100 = {18, 19, 27, 36};
         int[] w100 = {20, 29, 38, 37};
@@ -134,11 +154,28 @@ public class BankGUI extends TownGUI {
     }
 
     private ItemStack getButton(EcoAction action, double amount){
-        return new ItemBuilder(Material.STAINED_GLASS_PANE)
-                .withData((byte)(action==EcoAction.WITHDRAW?14:5))
-                .withCustomName((action==EcoAction.WITHDRAW?"§c":"§a")+"§l"+action.getName() + " " + Populace.getCurrency().format(amount))
-                .tagWith("ecoamount", new NBTTagString(amount+""))
-                .tagWith("ecoaction", new NBTTagString(action.name())).build();
+        double reserveDebit = amount * (0.1);
+        double bankDebit = amount - reserveDebit;
+        switch (action) {
+            case DEPOSIT:
+                return new ItemBuilder(Material.STAINED_GLASS_PANE)
+                        .withData((byte) 5)
+                        .withCustomName("§a§l" + action.getName() + " " + Populace.getCurrency().format(amount))
+                        .withLore(Arrays.asList("" +
+                                        "§fBank will receive§e " + Populace.getCurrency().format(bankDebit),
+                                "§fReserve will receive§e " + Populace.getCurrency().format(reserveDebit)))
+                        .tagWith("ecoamount", new NBTTagString(amount + ""))
+                        .tagWith("ecoaction", new NBTTagString(action.name())).build();
+            case WITHDRAW:
+                return new ItemBuilder(Material.STAINED_GLASS_PANE)
+                        .withData((byte) 14)
+                        .withCustomName("§c§l" + action.getName() + " " + Populace.getCurrency().format(amount))
+                        .tagWith("ecoamount", new NBTTagString(amount + ""))
+                        .tagWith("ecoaction", new NBTTagString(action.name())).build();
+            default:
+                return null;
+        }
+
     }
 
     private boolean performTransaction(Resident resident, EcoAction action, double amount){
@@ -169,9 +206,13 @@ public class BankGUI extends TownGUI {
                 }
             case DEPOSIT:
 
+                double reserveDeposit = amount * 0.1;
+                double bankDeposit = amount - reserveDeposit;
+
                 if (account != null && account.withdraw(Populace.getCurrency(), amount)){
-                    getTown().setBank(getTown().getBank()+amount);
-                    getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + resident.getName() + " deposited " + Populace.getCurrency().format(amount) + " to the bank.");
+                    getTown().setBank(getTown().getBank() + bankDeposit);
+                    getTown().creditReserve(reserveDeposit);
+                    getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + resident.getName() + " deposited " + Populace.getCurrency().format(bankDeposit) + " to the bank. (+" + Populace.getCurrency().format(reserveDeposit) + " to Reserve)");
                     return true;
                 }
                 else{
@@ -186,7 +227,7 @@ public class BankGUI extends TownGUI {
 
     }
 
-    enum EcoAction {
+    private enum EcoAction {
         WITHDRAW("Withdraw"),
         DEPOSIT("Deposit");
 

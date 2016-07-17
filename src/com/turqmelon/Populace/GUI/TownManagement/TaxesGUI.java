@@ -6,6 +6,7 @@ import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownRank;
 import com.turqmelon.Populace.Utils.ItemBuilder;
+import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.Inventory;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 /******************************************************************************
  *                                                                            *
@@ -50,6 +52,8 @@ public class TaxesGUI extends TownGUI {
             return;
         }
 
+        boolean tooSoon = System.currentTimeMillis() - Populace.getLastNewDay() > TimeUnit.HOURS.toMillis(20);
+
         int raw = event.getRawSlot();
         if (raw == 0){
             TownGUI gui = new TownGUI(getResident(), getTown(), 1);
@@ -67,38 +71,80 @@ public class TaxesGUI extends TownGUI {
         }
         else if (raw == 19){
 
+            if (tooSoon) {
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+                player.closeInventory();
+                player.sendMessage(Msg.ERR + "You can't change resident tax within 4 hours of the next \"new day\".");
+                return;
+            }
+
             int modifier = event.isShiftClick() ? 100 : 10;
+
+            double pendingAmount = getTown().getPendingTax();
+            if (pendingAmount == -1) {
+                pendingAmount = getTown().getTax();
+            }
+
+            double newAmount = 0;
+
             if (event.isLeftClick()){
-                getTown().setTax(getTown().getTax() + modifier);
+                newAmount = pendingAmount + modifier;
             }
             else if (event.isRightClick()){
-                getTown().setTax(getTown().getTax() - modifier);
+                newAmount = pendingAmount - modifier;
             }
-            if (getTown().getTax() < 0){
-                getTown().setTax(0);
+
+            if (newAmount < 0) {
+                newAmount = 0;
             }
+
+            if (newAmount == getTown().getTax()) {
+                newAmount = -1;
+            }
+
+            getTown().setPendingTax(newAmount);
 
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-            getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " changed the §fResident Tax§d to " + Populace.getCurrency().format(getTown().getTax()) + ".");
-
             repopulate();
         }
         else if (raw == 22){
+
+            if (tooSoon) {
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+                player.closeInventory();
+                player.sendMessage(Msg.ERR + "You can't change plot tax within 4 hours of the next \"new day\".");
+                return;
+            }
+
             int modifier = event.isShiftClick() ? 100 : 10;
+
+            double pendingAmount = getTown().getPendingPlotTax();
+            if (pendingAmount == -1) {
+                pendingAmount = getTown().getPlotTax();
+            }
+
+            double newAmount = 0;
+
             if (event.isLeftClick()){
-                getTown().setPlotTax(getTown().getPlotTax() + modifier);
+                newAmount = pendingAmount + modifier;
             }
             else if (event.isRightClick()){
-                getTown().setPlotTax(getTown().getPlotTax() - modifier);
+                newAmount = pendingAmount - modifier;
             }
-            if (getTown().getPlotTax() < 0){
-                getTown().setPlotTax(0);
+
+            if (newAmount < 0) {
+                newAmount = 0;
             }
+
+            if (newAmount == getTown().getPlotTax()) {
+                newAmount = -1;
+            }
+
+            getTown().setPendingPlotTax(newAmount);
 
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-            getTown().sendTownBroadcast(TownRank.RESIDENT, "Mayor " + getResident().getName() + " changed the §fPlot Tax§d to " + Populace.getCurrency().format(getTown().getPlotTax()) + ".");
-
             repopulate();
+
         } else if (raw == 25 && Populace.isPopulaceMarketLoaded()) {
             int modifier = event.isShiftClick() ? 5 : 1;
             double newPerc = getTown().getSalesTax();
@@ -128,24 +174,29 @@ public class TaxesGUI extends TownGUI {
 
     @Override
     protected void populate() {
-
+        Town town = getTown();
         Inventory inv = getProxyInventory();
         inv.setItem(0, new ItemBuilder(Material.PAPER).withCustomName("§e§l< BACK").build());
-        inv.setItem(4, getTown().getIcon(IconType.TREASURY, getResident()));
+        inv.setItem(4, town.getIcon(IconType.TREASURY, getResident()));
+
+        String resChange = town.renderTaxChange(town.getTax(), town.getPendingTax());
 
         inv.setItem(19, new ItemBuilder(Material.SKULL_ITEM).withData((byte)3).withCustomName("§b§lResident Tax")
                 .withLore(Arrays.asList("" +
                         "§bResident Tax§7 is the minimum amount that",
-                        "§7every resident of " + getTown().getName() + getTown().getLevel().getSuffix() + " must pay",
+                        "§7every resident of " + town.getName() + town.getLevel().getSuffix() + " must pay",
                         "§7to the town bank every day.",
                         "§7",
                         "§cIf a resident can't afford their taxes, they",
                         "§care kicked from the town.",
                         "§7",
-                        "§fResident Tax §e" + Populace.getCurrency().format(getTown().getTax()),
+                        "§fResident Tax §e" + Populace.getCurrency().format(town.getTax()) + resChange,
                         "§7",
-                        "§aLeft Click§f to increase by " + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)",
-                        "§aRight Click§f to decrease by " + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)")).build());
+                        "§aLeft Click§f for +" + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)",
+                        "§aRight Click§f for -" + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)",
+                        "§6Changes take effect on the next new day.")).build());
+
+        String plotChange = town.renderTaxChange(town.getPlotTax(), town.getPendingPlotTax());
 
         inv.setItem(22, new ItemBuilder(Material.GRASS).withCustomName("§b§lPlot Tax")
                 .withLore(Arrays.asList("" +
@@ -156,10 +207,11 @@ public class TaxesGUI extends TownGUI {
                                 "§cIf a resident can't afford their taxes, they",
                                 "§care kicked from the town.",
                                 "§7",
-                                "§fPlot Tax §e" + Populace.getCurrency().format(getTown().getPlotTax()),
+                        "§fPlot Tax §e" + Populace.getCurrency().format(town.getPlotTax()) + plotChange,
                                 "§7",
-                                "§aLeft Click§f to increase by " + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)",
-                                "§aRight Click§f to decrease by " + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)")).build());
+                        "§aLeft Click§f for +" + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)",
+                        "§aRight Click§f for -" + Populace.getCurrency().format(10) + ". (§aShift§f for " + Populace.getCurrency().format(100) + ".)",
+                        "§6Changes take effect on the next new day.")).build());
 
         if (Populace.isPopulaceMarketLoaded()) {
             inv.setItem(25, new ItemBuilder(Material.DIAMOND).withCustomName("§b§lSales Tax")
@@ -170,14 +222,14 @@ public class TaxesGUI extends TownGUI {
                             "§7",
                             "§9§lExample:",
                             "§9An item is priced for " + Populace.getCurrency().format(200) + ".",
-                            "§9Your §bSales Tax§9 is " + new DecimalFormat("#.#").format(getTown().getSalesTax()) + "%.",
-                            "§9The town will receive " + (getTown().getSalesTax() == 0 ? 0 : Populace.getCurrency().format((200 * (getTown().getSalesTax() / 100.0)))) + ".",
-                            "§9The merchant will receive " + (getTown().getSalesTax() == 0 ? Populace.getCurrency().format(200) : Populace.getCurrency().format((200 * ((100.0 - getTown().getSalesTax()) / 100.0)))) + ".",
+                            "§9Your §bSales Tax§9 is " + new DecimalFormat("#.#").format(town.getSalesTax()) + "%.",
+                            "§9The town will receive " + (town.getSalesTax() == 0 ? 0 : Populace.getCurrency().format((200 * (town.getSalesTax() / 100.0)))) + ".",
+                            "§9The merchant will receive " + (town.getSalesTax() == 0 ? Populace.getCurrency().format(200) : Populace.getCurrency().format((200 * ((100.0 - town.getSalesTax()) / 100.0)))) + ".",
                             "§7",
-                            "§fSales Tax §e" + new DecimalFormat("#.#").format(getTown().getSalesTax()) + "%",
+                            "§fSales Tax §e" + new DecimalFormat("#.#").format(town.getSalesTax()) + "%",
                             "§7",
-                            "§aLeft Click§f to increase by 1%. (§aShift§f for 5%.)",
-                            "§aRight Click§f to decrease by 1%. (§aShift§f for 5%.)")).build());
+                            "§aLeft Click§f for +1%. (§aShift§f for 5%.)",
+                            "§aRight Click§f for -1%. (§aShift§f for 5%.)")).build());
         }
 
 
