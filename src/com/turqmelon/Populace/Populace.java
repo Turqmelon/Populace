@@ -479,6 +479,10 @@ public class Populace extends JavaPlugin {
             @Override
             public void run() {
                 if (!fullyEnabled)return;
+                TownManager.getTowns().stream().filter(town -> town.getBankAndReserve() < town.getDailyUpkeep()).forEach(town -> {
+                    town.sendTownBroadcast(TownRank.RESIDENT, town.getName() + town.getLevel().getSuffix() + " is unable to afford the upkeep cost (" + getCurrency().format(town.getDailyUpkeep()) + ")!");
+                    town.sendTownBroadcast(TownRank.RESIDENT, "If this doesn't change, it will face destruction in " + getNewDayCountdown() + ".");
+                });
                 getLog().log(Level.INFO, "Autosaving...");
                 try {
                     saveData();

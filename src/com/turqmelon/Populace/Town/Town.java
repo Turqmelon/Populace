@@ -960,6 +960,10 @@ public class Town implements Comparable {
                     list.add("§a");
                     list.add("§fYour Daily Tax §e" + Populace.getCurrency().format(resident.getDailyTax()));
                     list.add("§fNext Tax Collection §e" + Populace.getNewDayCountdown());
+                    list.add("§a");
+                    list.add("§aLeft Click§f to donate to town.");
+                    list.add("§7§o(Donations are optional. They are");
+                    list.add("§7§onot related to your daily costs.)");
                 }
                 else if (rank==TownRank.MAYOR){
                     list.add("§a");
