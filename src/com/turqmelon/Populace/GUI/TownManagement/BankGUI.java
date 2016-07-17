@@ -186,14 +186,14 @@ public class BankGUI extends TownGUI {
     private boolean performTransaction(Resident resident, EcoAction action, double amount){
 
         TownRank rank = getTown().getRank(resident);
-        if (rank != TownRank.MAYOR){
-            return false;
-        }
 
         Account account = AccountManager.getAccount(resident.getUuid());
 
         switch(action){
             case WITHDRAW:
+                if (rank != TownRank.MAYOR) {
+                    return false;
+                }
                 double withdrawAmt = amount;
                 if (withdrawAmt > getTown().getBank()){
                     withdrawAmt = getTown().getBank();
