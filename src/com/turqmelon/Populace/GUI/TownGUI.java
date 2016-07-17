@@ -130,7 +130,7 @@ public class TownGUI extends GUI {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             player.closeInventory();
             player.chat("/invite");
-        } else if (raw == 1) {
+        } else if (raw == 1 && rank.isAtLeast(TownRank.RESIDENT)) {
             if (event.isRightClick() || rank != TownRank.MAYOR) {
                 BankGUI gui = new BankGUI(getResident(), getTown());
                 gui.open(player);

@@ -153,7 +153,7 @@ public class BankGUI extends TownGUI {
         } else {
             inv.setItem(28, getButton(EcoAction.DEPOSIT, 100));
             inv.setItem(31, getButton(EcoAction.DEPOSIT, 1000));
-            inv.setItem(24, getButton(EcoAction.DEPOSIT, 10000));
+            inv.setItem(34, getButton(EcoAction.DEPOSIT, 10000));
         }
 
     }
