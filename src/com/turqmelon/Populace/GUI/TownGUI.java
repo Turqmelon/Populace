@@ -306,14 +306,14 @@ public class TownGUI extends GUI {
         if (resident.isJailed()) {
             list.add("§7§oJailed");
         }
-        if (getTown().getRank(getResident()).isAtLeast(TownRank.MANAGER)) {
+        if (getTown().getRank(resident) != TownRank.MAYOR && getTown().getRank(getResident()).isAtLeast(TownRank.MANAGER)) {
             list.add("§aLeft Click§f to change rank.");
         }
         ItemStack item = resident.getIcon();
         ItemMeta meta = item.getItemMeta();
         List<String> lore = meta.getLore();
         if (list.size() > 0) {
-            lore.add("§8-");
+            lore.add("§8");
             lore.addAll(list);
         }
         meta.setLore(lore);
