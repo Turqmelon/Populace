@@ -47,6 +47,7 @@ public class Resident implements Comparable {
 
     private long joined = 0;
     private long seen = 0;
+    private long lastLeave = 0;
 
     private Town town = null;
     private List<PlotChunk> plotChunks = new ArrayList<>();
@@ -76,6 +77,7 @@ public class Resident implements Comparable {
         this.name = (String) object.get("name");
         this.joined = (long) object.get("joined");
         this.seen = (long) object.get("seen");
+        this.lastLeave = (long) object.getOrDefault("lastleave", 0L);
         String townid = (String) object.get("town");
         if (townid != null){
             this.town = TownManager.getTown(UUID.fromString(townid));
@@ -95,10 +97,23 @@ public class Resident implements Comparable {
         object.put("name", getName());
         object.put("joined", getJoined());
         object.put("seen", getSeen());
+        object.put("lastleave", getLastLeave());
         object.put("town", getTown()!=null?getTown().getUuid().toString():null);
         object.put("jaildata", getJailData() != null ? getJailData().toJSON() : null);
         object.put("prefix", getPrefix());
         return object;
+    }
+
+    public long getNextJoinTime() {
+        return getLastLeave() + TimeUnit.HOURS.toMillis(8);
+    }
+
+    public long getLastLeave() {
+        return lastLeave;
+    }
+
+    public void setLastLeave(long lastLeave) {
+        this.lastLeave = lastLeave;
     }
 
     public boolean isBypassMode() {

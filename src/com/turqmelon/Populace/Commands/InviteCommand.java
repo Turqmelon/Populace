@@ -65,6 +65,12 @@ public class InviteCommand implements CommandExecutor {
                                             town.sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " invited " + target.getName() + " to join the town!");
                                             target.sendMessage(Msg.INFO + "You were invited to join " + town.getName() + town.getLevel().getSuffix() + " by " + resident.getName() + "!");
                                             target.sendMessage(Msg.INFO + "To accept this invitation, type §f/join " + town.getName() + "§b.");
+
+                                            long nextJoin = target.getNextJoinTime();
+                                            if (System.currentTimeMillis() < nextJoin) {
+                                                resident.sendMessage(Msg.INFO + target.getName() + " recently left a town. They won't be able to accept your invitation right away.");
+                                            }
+
                                         }
                                         else{
                                             target.getTownInvites().remove(town.getUuid());

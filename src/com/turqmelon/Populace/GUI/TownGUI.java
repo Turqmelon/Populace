@@ -149,13 +149,17 @@ public class TownGUI extends GUI {
                 player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }
             else if (event.isRightClick() && event.isShiftClick() && rank == TownRank.MAYOR){
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                player.closeInventory();
-                player.sendMessage(Msg.WARN + "If you destroy your town, everything will be lost.");
-                if (getTown().isVulnerableToDestruction()) {
-                    player.sendMessage(Msg.ERR + "Your town will §lLITERALLY§c be destroyed! Take any items and things you want to keep before confirming!");
+                if (getTown().getResidents().size() < TownLevel.VILLAGE.getResidents()) {
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+                    player.closeInventory();
+                    player.sendMessage(Msg.WARN + "If you destroy your town, everything will be lost.");
+                    if (getTown().isVulnerableToDestruction()) {
+                        player.sendMessage(Msg.ERR + "Your town will §lLITERALLY§c be destroyed! Take any items and things you want to keep before confirming!");
+                    }
+                    getResident().setPendingAction(() -> getTown().destroy(false));
+                } else {
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
                 }
-                getResident().setPendingAction(() -> getTown().destroy(false));
             }
             else if (event.isRightClick() && rank == TownRank.MAYOR){
                 getTown().toggleStatus();

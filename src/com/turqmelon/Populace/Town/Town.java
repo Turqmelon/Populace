@@ -903,13 +903,25 @@ public class Town implements Comparable {
                 if (onMenu){
                     if (rank == TownRank.GUEST && (isInvited(resident)||isOpen())){
                         list.add("§a");
-                        list.add("§aLeft Click§f to join " + getName() + getLevel().getSuffix());
+                        long nextJoin = resident.getNextJoinTime();
+                        if (System.currentTimeMillis() > nextJoin) {
+                            list.add("§aLeft Click§f to join " + getName() + getLevel().getSuffix());
+                        } else {
+                            list.add("§cYou recently left a town.");
+                            list.add("§fYou can join another in §e" + ClockUtil.formatDateDiff(nextJoin, true));
+                        }
                     }
                     else if (rank == TownRank.MAYOR){
                         list.add("§a");
                         list.add("§aLeft Click§f to buy or sell bonus land.");
                         list.add("§aRight Click§f to change your town status.");
-                        list.add("§cSneak Right Click§f to destroy the town.");
+                        if (getResidents().size() >= TownLevel.VILLAGE.getResidents()) {
+                            list.add("§c");
+                            list.add("§cTown destruction unavailable.§f Transfer your");
+                            list.add("§fmayor status if you wish to leave.");
+                        } else {
+                            list.add("§cSneak Right Click§f to destroy the town.");
+                        }
                     }
                     else if (rank.getPermissionLevel() >= TownRank.RESIDENT.getPermissionLevel()){
                         list.add("§a");
@@ -1207,6 +1219,8 @@ public class Town implements Comparable {
                 }
             }
 
+            resident.setLastLeave(System.currentTimeMillis());
+
             // If this change effected the town level, downgrade the town
             if (getResidents().size() < getLevel().getResidents()){
                 TownLevel newLevel = TownLevel.getAppropriateLevel(getResidents().size());
@@ -1235,6 +1249,12 @@ public class Town implements Comparable {
         if (resident.getTown() == null){
             if (isOpen()){
 
+                long nextJoin = resident.getNextJoinTime();
+                if (System.currentTimeMillis() < nextJoin) {
+                    resident.sendMessage(Msg.ERR + "You recently left a town. You can join another in " + ClockUtil.formatDateDiff(nextJoin, false) + ".");
+                    return;
+                }
+
                 if (getPlots().size() > 0){
 
                     if (joinTown(resident)) {
@@ -1261,6 +1281,12 @@ public class Town implements Comparable {
         if (resident.getTown() == null){
 
             if (resident.getTownInvites().containsKey(getUuid())){
+
+                long nextJoin = resident.getNextJoinTime();
+                if (System.currentTimeMillis() < nextJoin) {
+                    resident.sendMessage(Msg.ERR + "You recently left a town. You can join another in " + ClockUtil.formatDateDiff(nextJoin, false) + ".");
+                    return;
+                }
 
                 if (getPlots().size() > 0) {
 
