@@ -5,6 +5,7 @@ import com.turqmelon.MelonEco.utils.AccountManager;
 import com.turqmelon.Populace.Events.Town.TownCreationEvent;
 import com.turqmelon.Populace.Populace;
 import com.turqmelon.Populace.Resident.Resident;
+import com.turqmelon.Populace.Utils.ClockUtil;
 import com.turqmelon.Populace.Utils.Configuration;
 import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.Bukkit;
@@ -48,6 +49,13 @@ public class TownManager {
         // Prevents being in multiple towns at once
         if (mayor.getTown() != null){
             mayor.sendMessage(Msg.ERR + "You must leave your town to start one!");
+            return;
+        }
+
+        // Enforces the town leave cooldown
+        long nextJoin = mayor.getNextJoinTime();
+        if (System.currentTimeMillis() < nextJoin) {
+            mayor.sendMessage(Msg.ERR + "You recently left a town. Please wait " + ClockUtil.formatDateDiff(nextJoin, false) + ".");
             return;
         }
 
