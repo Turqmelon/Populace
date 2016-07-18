@@ -1102,15 +1102,6 @@ public class Town implements Comparable {
 
     public void destroy(boolean force){
 
-        if (!force){
-
-            if (getResidents().size() > 1){
-                getMayor().sendMessage(Msg.ERR + "Destroy failed. You must kick all residents first.");
-                return;
-            }
-
-        }
-
         TownDestructionEvent event = new TownDestructionEvent(this, force);
         Bukkit.getPluginManager().callEvent(event);
 
