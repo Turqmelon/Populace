@@ -54,9 +54,9 @@ public class UnjailCommand implements CommandExecutor {
 
                                 target.setJailData(null);
                                 if (resident.getTown().getSpawn() != null) {
-                                    Player pl = Bukkit.getPlayer(resident.getUuid());
+                                    Player pl = Bukkit.getPlayer(target.getUuid());
                                     if (pl != null && pl.isOnline()) {
-                                        pl.teleport(resident.getTown().getSpawn());
+                                        pl.teleport(target.getTown().getSpawn());
                                     }
                                 }
                                 resident.getTown().sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " released " + target.getName() + " from jail.");
