@@ -83,6 +83,6 @@ public class Configuration {
     public static boolean DESTRUCTIVE_UNCLAIM = true;
 
     // The amount of explosions to spawn in ruined chunks
-    public static int DESTRUCTIVE_UNCLAIM_EXPLOSIONS = 5;
+    public static int DESTRUCTIVE_UNCLAIM_EXPLOSIONS = 2;
 
 }

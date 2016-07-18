@@ -1113,8 +1113,9 @@ public class Town implements Comparable {
             setBank(0);
         }
 
-        for(Resident resident : getResidents().keySet()){
-            kickOut(resident, null, "Town has been destroyed.");
+        for (int i = 0; i < getResidents().size(); i++) {
+            Resident resident = (Resident) getResidents().keySet().toArray()[i];
+            kickOut(resident, null, "Town was destroyed.");
         }
 
         for (Plot plot : getPlots()) {
