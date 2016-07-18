@@ -1181,6 +1181,12 @@ public class Town implements Comparable {
                 case VILLAGE:
                     sendTownBroadcast(TownRank.RESIDENT, "§aUNLOCKED:§d \"Message Board\"! Use §f/board§d to see the new feature.");
                     break;
+                case TOWN:
+                    sendTownBroadcast(TownRank.RESIDENT, "§aUNLOCKED:§d \"Merchant Plots\"! Convert plots to merchant types using §f/plot§d and allow players to start selling!");
+                    break;
+                case LARGE_TOWN:
+                    sendTownBroadcast(TownRank.RESIDENT, "§aUNLOCKED:§d \"Battle Plots\"! Convert plots to battle types using §f/plot§d and allow players to build PVP arenas!");
+                    break;
                 case CITY:
                     sendTownBroadcast(TownRank.RESIDENT, "§aUNLOCKED:§d \"Outpost Claims\"! Land not adjacent to town land can now be claimed.");
                     break;
