@@ -71,6 +71,7 @@ public class JailCommand implements CommandExecutor {
                                             target.setJailData(new JailData(resident.getTown().getTownJail(), 16, expiration, resident.getUuid()));
                                             target.getJailData().sendExplanation(target);
                                             resident.getTown().sendTownBroadcast(TownRank.RESIDENT, resident.getName() + " jailed " + target.getName() + "!");
+                                            target.getJailData().sendExplanation(target);
                                         } else {
                                             sender.sendMessage(Msg.ERR + "Only the mayor can jail forever.");
                                             sender.sendMessage(Msg.ERR + "Please specify a time, or ask the mayor to do it.");

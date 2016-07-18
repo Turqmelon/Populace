@@ -70,6 +70,17 @@ public class JoinListener implements Listener {
             resident.getTown().sendAnnouncementMOTD(resident);
         }
 
+        if (resident.getJailData() != null) {
+            Resident finalResident1 = resident;
+            new BukkitRunnable() {
+
+                @Override
+                public void run() {
+                    finalResident1.getJailData().sendExplanation(finalResident1);
+                }
+            }.runTaskLater(Populace.getInstance(), 20L);
+        }
+
     }
 
 }
