@@ -58,8 +58,8 @@ public class Configuration {
     // The grace period will never charge a town daily upkeep
     public static int TOWN_GRACE_PERIOD_HOURS = 24;
 
-    // How often the new day code runs (in hours)
-    public static int NEW_DAY_INTERVAL = 24;
+    // The hour (on a 24 hour clock) that the new day code runs
+    public static int NEW_DAY_TIME = 20;
 
     // The daily upkeep cost of a residential plot
     public static double RESIDENTIAL_DAILY_COST = 10;

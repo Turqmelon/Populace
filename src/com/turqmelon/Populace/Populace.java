@@ -32,7 +32,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -118,10 +120,23 @@ public class Populace extends JavaPlugin {
 
     }
 
+    public static long getNextNewDayMillis() {
+        Calendar then = Calendar.getInstance();
+        then.set(Calendar.MINUTE, 0);
+        then.set(Calendar.SECOND, 0);
+        then.set(Calendar.MILLISECOND, 0);
+        then.set(Calendar.HOUR_OF_DAY, Configuration.NEW_DAY_TIME);
+        long now = System.currentTimeMillis();
+        if (now < then.getTimeInMillis()) {
+            return then.getTimeInMillis();
+        }
+        then.add(Calendar.DAY_OF_MONTH, 1);
+        return then.getTimeInMillis();
+    }
+
     // Returns a friendly countdown until the next new day
     public static String getNewDayCountdown() {
-        long nextDay = getLastNewDay() + TimeUnit.DAYS.toMillis(1);
-        return ClockUtil.formatDateDiff(nextDay, true);
+        return ClockUtil.formatDateDiff(getNextNewDayMillis(), true);
     }
 
     public static boolean isPopulaceWarzoneLoaded() {
@@ -496,12 +511,15 @@ public class Populace extends JavaPlugin {
         new BukkitRunnable(){
             @Override
             public void run() {
-                if (System.currentTimeMillis() - getLastNewDay() > TimeUnit.HOURS.toMillis(Configuration.NEW_DAY_INTERVAL)) {
+                long now = System.currentTimeMillis();
+                SimpleDateFormat df = new SimpleDateFormat("H");
+                int hour = Integer.parseInt(df.format(now));
+                if (System.currentTimeMillis() - getLastNewDay() > 2 && hour == Configuration.NEW_DAY_TIME) {
                     newDay();
                     lastNewDay = System.currentTimeMillis();
                 }
             }
-        }.runTaskTimer(this, 600L, 600L);
+        }.runTaskTimer(this, 20 * 60L, 20 * 60L);
 
     }
 }
