@@ -5,8 +5,10 @@ import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownManager;
+import com.turqmelon.Populace.Utils.Configuration;
 import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -42,6 +44,11 @@ public class ClaimCommand implements CommandExecutor {
 
         if ((sender instanceof Player)){
             Player player = (Player)sender;
+
+            if (!Configuration.ALLOW_SUPERNATURAL_DIMENSIONS && player.getWorld().getEnvironment() != World.Environment.NORMAL) {
+                sender.sendMessage(Msg.ERR + "Claiming land isn't permitted in this world.");
+                return true;
+            }
 
             boolean warzone = false;
             boolean spawn = false;

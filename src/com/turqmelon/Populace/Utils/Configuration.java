@@ -85,4 +85,7 @@ public class Configuration {
     // The amount of explosions to spawn in ruined chunks
     public static int DESTRUCTIVE_UNCLAIM_EXPLOSIONS = 2;
 
+    // Allows prevention of staking land claims in non-vanilla dimensions
+    public static boolean ALLOW_SUPERNATURAL_DIMENSIONS = false;
+
 }
