@@ -454,6 +454,7 @@ public class Populace extends JavaPlugin {
         getCommand("claim").setExecutor(new ClaimCommand());
         getCommand("forsale").setExecutor(new ForSaleCommand());
         getCommand("giveplot").setExecutor(new GivePlotCommand());
+        getCommand("grantflight").setExecutor(new GrantFlightCommand());
         getCommand("invite").setExecutor(new InviteCommand());
         getCommand("join").setExecutor(new JoinCommand());
         getCommand("map").setExecutor(new MapCommand());

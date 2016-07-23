@@ -17,6 +17,9 @@ commands:
   board:
     usage: /board
     description: View your town message board
+  grantflight:
+    usage: /grantflight <Town> <Time>
+    description: Grants a town the ability to fly within their land
   allow:
     usage: /allow <Player>
     description: Adds a player to a plot allow list

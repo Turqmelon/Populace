@@ -9,9 +9,11 @@ import com.turqmelon.Populace.Resident.Resident;
 import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Town.Town;
+import com.turqmelon.Populace.Town.TownFlag;
 import com.turqmelon.Populace.Utils.CombatHelper;
 import com.turqmelon.Populace.Utils.HUDUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -47,6 +49,24 @@ public class MoveListener implements Listener {
 
     private Map<UUID, Location> lastSafePoint = new HashMap<>();
 
+    private void toggleFlight(Player player, Resident resident, boolean grant) {
+        if (player.getGameMode() == GameMode.SPECTATOR || player.getGameMode() == GameMode.CREATIVE) return;
+        if (resident.isBypassMode()) return;
+        if (grant && !resident.isJailed()) {
+            if (!player.getAllowFlight()) {
+                player.setAllowFlight(true);
+                player.playSound(player.getLocation(), Sound.ENTITY_ENDERDRAGON_FLAP, 1, 1);
+            }
+        } else {
+            if (player.isFlying()) {
+                player.setFlying(false);
+            }
+            if (player.getAllowFlight()) {
+                player.setAllowFlight(false);
+            }
+        }
+    }
+
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
@@ -57,6 +77,7 @@ public class MoveListener implements Listener {
         Plot lastPlot;
 
         boolean denyExit = false;
+        boolean deniedForFlight = false;
 
         if (plot != null) {
 
@@ -67,6 +88,10 @@ public class MoveListener implements Listener {
                     ResidentPlotLeaveEvent exitEvent = new ResidentPlotLeaveEvent(lastPlot, resident);
                     Bukkit.getPluginManager().callEvent(exitEvent);
                     denyExit = exitEvent.isCancelled();
+                    if (!denyExit && player.isFlying() && !resident.isBypassMode() && !plot.getTown().getUuid().equals(lastPlot.getTown().getUuid())) {
+                        denyExit = true;
+                        deniedForFlight = true;
+                    }
                 }
                 if (!denyExit) {
                     ResidentPlotEnterEvent enterEvent = new ResidentPlotEnterEvent(plot, resident);
@@ -96,15 +121,27 @@ public class MoveListener implements Listener {
 
                 denyExit = exitEvent.isCancelled();
 
+                if (!denyExit && player.isFlying() && !resident.isBypassMode()) {
+                    deniedForFlight = true;
+                    denyExit = true;
+                }
             }
         }
 
-        if (denyExit && lastSafePoint.containsKey(player.getUniqueId())) {
-            player.setVelocity(calculateVelocity(lastSafePoint.get(player.getUniqueId()), player.getLocation()));
+        if (denyExit) {
+            if (lastSafePoint.containsKey(player.getUniqueId())) {
+                player.setVelocity(calculateVelocity(lastSafePoint.get(player.getUniqueId()), player.getLocation()));
+            } else {
+                event.setCancelled(true);
+            }
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
             resident.setFallImmunity(System.currentTimeMillis());
-            lastPlot.getPlotChunk().visualize(player, true);
-            HUDUtil.sendActionBar(player, "§c§lYou can't exit this area.");
+            lastPlot.getPlotChunk().visualize(player);
+            if (deniedForFlight) {
+                HUDUtil.sendActionBar(player, "§c§lYou must land before leaving town territory.");
+            } else {
+                HUDUtil.sendActionBar(player, "§c§lYou can't exit this area.");
+            }
             return;
         }
 
@@ -123,6 +160,7 @@ public class MoveListener implements Listener {
             if (msg.length() > 0) {
                 HUDUtil.sendActionBar(player, msg);
             }
+            toggleFlight(player, resident, town != null && town.isFlagActive(TownFlag.FLIGHT));
         }
 
         if (resident.isJailed()) {

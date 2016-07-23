@@ -182,6 +182,9 @@ public class Resident implements Comparable {
             } else {
                 result = "§6§l" + town.getName() + town.getLevel().getSuffix();
             }
+            if (town.isFlagActive(TownFlag.FLIGHT)) {
+                result += " §b§l(FLIGHT: " + ClockUtil.formatDateDiff(town.getActiveFlags().get(TownFlag.FLIGHT), true) + ")";
+            }
         }
 
         if (plot != null && (lastPlot == null || !lastPlot.getUuid().equals(plot.getUuid()))){

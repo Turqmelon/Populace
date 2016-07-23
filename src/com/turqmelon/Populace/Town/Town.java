@@ -83,6 +83,8 @@ public class Town implements Comparable {
 
     private List<TownAnnouncement> announcements = new ArrayList<>();
 
+    private Map<TownFlag, Long> activeFlags = new HashMap<>();
+
     public Town(UUID uuid, String name, TownLevel level) {
         this.uuid = uuid;
         this.name = name;
@@ -175,6 +177,18 @@ public class Town implements Comparable {
 
         this.level = TownLevel.getAppropriateLevel(getResidents().size());
         initializeMapView();
+
+        JSONArray flags = (JSONArray) object.getOrDefault("flags", new JSONArray());
+        for (Object o : flags) {
+            try {
+                JSONObject flag = (JSONObject) o;
+                TownFlag townFlag = TownFlag.valueOf((String) flag.get("flag"));
+                long expire = (long) flag.get("expiration");
+                getActiveFlags().put(townFlag, expire);
+            } catch (Exception ignored) {
+            }
+        }
+
     }
 
     public double getPendingTax() {
@@ -264,6 +278,15 @@ public class Town implements Comparable {
 
         object.put("announcements", announcements);
 
+        JSONArray flags = new JSONArray();
+        for (TownFlag flag : getActiveFlags().keySet()) {
+            JSONObject flagData = new JSONObject();
+            flagData.put("flag", flag.name());
+            flagData.put("expiration", getActiveFlags().get(flag));
+            flags.add(flagData);
+        }
+
+        object.put("flags", flags);
         return object;
     }
 
@@ -286,6 +309,14 @@ public class Town implements Comparable {
             resident.sendMessage(ChatColor.LIGHT_PURPLE + "Type " + ChatColor.WHITE + "/board" + ChatColor.LIGHT_PURPLE + " to view town board.");
             resident.sendMessage(" ");
         }
+    }
+
+    public boolean isFlagActive(TownFlag flag) {
+        return System.currentTimeMillis() < getActiveFlags().getOrDefault(flag, 0L);
+    }
+
+    public Map<TownFlag, Long> getActiveFlags() {
+        return activeFlags;
     }
 
     public double getReserve() {
@@ -900,6 +931,9 @@ public class Town implements Comparable {
                         "§fResidents §e" + getResidents().size(),
                         "§fBonus Land §e" + getBonusLand(),
                         "§fStatus §e" + (isOpen()?"§aAnybody can move in.":"§cNew residents must be invited.")));
+                if (isFlagActive(TownFlag.FLIGHT)) {
+                    list.add("§bOrb of Flight §a" + ClockUtil.formatDateDiff(getActiveFlags().get(TownFlag.FLIGHT), true));
+                }
                 if (onMenu){
                     if (rank == TownRank.GUEST && (isInvited(resident)||isOpen())){
                         list.add("§a");
