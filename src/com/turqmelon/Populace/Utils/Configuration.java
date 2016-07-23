@@ -1,5 +1,19 @@
 package com.turqmelon.Populace.Utils;
 
+import com.turqmelon.Populace.Populace;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+
 /******************************************************************************
  *                                                                            *
  * CONFIDENTIAL                                                               *
@@ -87,5 +101,94 @@ public class Configuration {
 
     // Allows prevention of staking land claims in non-vanilla dimensions
     public static boolean ALLOW_SUPERNATURAL_DIMENSIONS = false;
+
+    // Caps how high players can fly
+    public static int FLIGHT_MAXIMUM_OFFSET = 50;
+
+    public void load() throws IOException, ParseException, NoSuchFieldException, IllegalAccessException {
+        File dir = Populace.getInstance().getDataFolder();
+        if (!dir.exists()) {
+            return;
+        }
+        File file = new File(dir, "config.json");
+        if (!file.exists()) {
+            return;
+        }
+        JSONParser parser = new JSONParser();
+        JSONObject data = (JSONObject) parser.parse(new FileReader(file));
+        JSONArray prefs = (JSONArray) data.getOrDefault("settings", new JSONArray());
+        for (Object o : prefs) {
+            JSONObject pref = (JSONObject) o;
+            adjust((String) pref.get("key"), (String) pref.get("val"));
+        }
+    }
+
+    public void save() throws IOException, IllegalAccessException {
+        File dir = Populace.getInstance().getDataFolder();
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        File file = new File(dir, "config.json");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        JSONObject data = new JSONObject();
+        JSONArray settings = new JSONArray();
+        Map<String, Object> prefs = getAllSettings();
+        for (String setting : prefs.keySet()) {
+            Object val = prefs.get(setting);
+            JSONObject pref = new JSONObject();
+            pref.put("key", setting);
+            pref.put("val", val.toString());
+            settings.add(pref);
+        }
+        data.put("settings", settings);
+
+        FileWriter fw = new FileWriter(file);
+        fw.write(data.toJSONString());
+        fw.flush();
+        fw.close();
+    }
+
+    public Map<String, Object> getAllSettings() throws IllegalAccessException {
+        Map<String, Object> settings = new HashMap<>();
+        for (Field field : getClass().getDeclaredFields()) {
+            settings.put(field.getName(), field.get(this));
+        }
+        return settings;
+    }
+
+    public void adjust(String setting, String newValue) throws NoSuchFieldException, IllegalAccessException {
+        Field field = getClass().getDeclaredField(setting);
+        Object data = newValue;
+        if (newValue.equalsIgnoreCase("true")) {
+            data = true;
+        } else if (newValue.equalsIgnoreCase("false")) {
+            data = false;
+        } else if (isNumeric(newValue)) {
+            data = Integer.parseInt(newValue);
+        } else if (isDecimal(newValue)) {
+            data = Double.parseDouble(newValue);
+        }
+        field.set(this, data);
+    }
+
+    private boolean isDecimal(String val) {
+        try {
+            Double.parseDouble(val);
+            return true;
+        } catch (NumberFormatException ignored) {
+        }
+        return false;
+    }
+
+    private boolean isNumeric(String val) {
+        try {
+            Integer.parseInt(val);
+            return true;
+        } catch (NumberFormatException ignored) {
+        }
+        return false;
+    }
 
 }

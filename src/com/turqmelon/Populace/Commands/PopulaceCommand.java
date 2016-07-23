@@ -34,6 +34,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class PopulaceCommand implements CommandExecutor {
     @Override
@@ -78,8 +79,43 @@ public class PopulaceCommand implements CommandExecutor {
                 } else {
                     player.sendMessage(Msg.WARN + "Like this: §f/populace prefix <resident> <prefix|\"off\">");
                 }
-            }
-            else if (args[0].equalsIgnoreCase("save") && player.hasPermission("populace.save")){
+            } else if (args[0].equalsIgnoreCase("config") && player.hasPermission("populace.config")) {
+
+                if (args.length == 3) {
+                    String setting = args[1];
+                    String newValue = args[2];
+
+                    try {
+                        Populace.getInstance().getConfiguration().adjust(setting.toUpperCase(), newValue);
+                        player.sendMessage(Msg.OK + "Set \"" + setting + "\" to \"" + newValue + "\".");
+                        Populace.getInstance().getConfiguration().save();
+                    } catch (NoSuchFieldException e) {
+                        player.sendMessage(Msg.ERR + "Setting \"" + setting + "\" doesn't exist. Refer to \"/populace config\".");
+                    } catch (IllegalAccessException | IOException e) {
+                        player.sendMessage(Msg.ERR + "Error while updating config: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    try {
+                        player.sendMessage(Msg.INFO + "Populace Core Configuration:");
+                        Map<String, Object> settings = Populace.getInstance().getConfiguration().getAllSettings();
+                        for (String setting : settings.keySet()) {
+                            player.sendMessage(Msg.INFO + "- " + setting + ": " + settings.get(setting).toString());
+                        }
+                    } catch (IllegalAccessException e) {
+                        player.sendMessage(Msg.ERR + "Error while displaying config: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+
+
+
+            } else if (args[0].equalsIgnoreCase("bypass") && player.hasPermission("populace.bypass")) {
+                Resident resident = ResidentManager.getResident(player);
+                resident.setBypassMode(!resident.isBypassMode());
+                resident.sendMessage(Msg.OK + "Bypass Mode: " + ChatColor.WHITE + (resident.isBypassMode() ? "Enabled. Be polite." : "Disabled"));
+            } else if (args[0].equalsIgnoreCase("save") && player.hasPermission("populace.save")) {
                 player.sendMessage(Msg.OK + "Saving...");
                 try {
                     Populace.saveData();

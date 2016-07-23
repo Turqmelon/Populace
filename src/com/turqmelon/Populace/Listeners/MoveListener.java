@@ -11,6 +11,7 @@ import com.turqmelon.Populace.Town.PermissionSet;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownFlag;
 import com.turqmelon.Populace.Utils.CombatHelper;
+import com.turqmelon.Populace.Utils.Configuration;
 import com.turqmelon.Populace.Utils.HUDUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -72,6 +73,16 @@ public class MoveListener implements Listener {
         Player player = event.getPlayer();
         Resident resident = ResidentManager.getResident(player);
         if (resident == null) return;
+
+        if (player.isFlying() && !resident.isBypassMode()) {
+            int maxY = player.getWorld().getHighestBlockYAt(player.getLocation()) + Configuration.FLIGHT_MAXIMUM_OFFSET;
+            if (player.getLocation().getBlockY() > maxY) {
+                player.teleport(player.getLocation().clone().subtract(0, 3, 0));
+                HUDUtil.sendActionBar(player, "§c§lMaximum flight height for this area reached.");
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0);
+                return;
+            }
+        }
 
         Plot plot = PlotManager.getPlot(player.getLocation().getChunk());
         Plot lastPlot;

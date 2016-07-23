@@ -73,6 +73,8 @@ public class Populace extends JavaPlugin {
     private static boolean populaceMarketLoaded = false;
     private static boolean populaceWarzoneLoaded = false;
 
+    private Configuration configuration;
+
     // Save all data to file
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void saveData() throws IOException {
@@ -397,11 +399,18 @@ public class Populace extends JavaPlugin {
 
         // Kicks all players in the event of a reload (which shouldn't happen >_>)
         for(Player player : Bukkit.getOnlinePlayers()){
-            player.kickPlayer(Msg.ERR + "Reload detected!");
+            player.kickPlayer(Msg.ERR + "The server has been reloaded. You've been disconnected.");
         }
 
         instance = this;
         logger = getLogger();
+
+        this.configuration = new Configuration();
+        try {
+            getConfiguration().load();
+        } catch (IOException | ParseException | IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
 
         // Ensures there's a currency to use
         if (AccountManager.getDefaultCurrency() == null){
@@ -522,5 +531,9 @@ public class Populace extends JavaPlugin {
             }
         }.runTaskTimer(this, 20 * 60L, 20 * 60L);
 
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 }
