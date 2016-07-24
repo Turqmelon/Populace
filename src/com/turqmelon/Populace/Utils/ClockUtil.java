@@ -3,7 +3,6 @@ package com.turqmelon.Populace.Utils;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -152,7 +151,7 @@ public class ClockUtil {
         return sb.toString().trim();
     }
 
-    public static String[] getPeriodNames(boolean shrink) {
+    private static String[] getPeriodNames(boolean shrink) {
         if (shrink) {
             return new String[]{
                     "yr", "yr", "mo", "mo", "d", "d", "h", "h", "m", "m", "s", "s"
@@ -162,28 +161,6 @@ public class ClockUtil {
                     "year", "years", "month", "months", "day", "days", "hour", "hours", "minute", "minutes", "second", "seconds"
             };
         }
-    }
-
-    @Deprecated
-    public static String convertToClock(String format, long seconds) {
-        int day = (int) TimeUnit.SECONDS.toDays(seconds);
-        long hours = TimeUnit.SECONDS.toHours(seconds) -
-                TimeUnit.DAYS.toHours(day);
-        long minute = TimeUnit.SECONDS.toMinutes(seconds) -
-                TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(seconds));
-        long second = TimeUnit.SECONDS.toSeconds(seconds) -
-                TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds));
-        String daysText = (day >= 10 ? day + "" : "0" + day);
-        String hoursText = (hours >= 10 ? hours + "" : "0" + hours);
-        String minuteText = (minute >= 10 ? minute + "" : "0" + minute);
-        String secondText = (second >= 10 ? second + "" : "0" + second);
-
-        format = format.replace("%d", daysText);
-        format = format.replace("%h", hoursText);
-        format = format.replace("%m", minuteText);
-        format = format.replace("%s", secondText);
-
-        return format;
     }
 
 }
