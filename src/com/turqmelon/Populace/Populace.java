@@ -524,7 +524,7 @@ public class Populace extends JavaPlugin {
                 long now = System.currentTimeMillis();
                 SimpleDateFormat df = new SimpleDateFormat("H");
                 int hour = Integer.parseInt(df.format(now));
-                if (System.currentTimeMillis() - getLastNewDay() > 2 && hour == Configuration.NEW_DAY_TIME) {
+                if (System.currentTimeMillis() - getLastNewDay() > TimeUnit.HOURS.toMillis(2) && hour == Configuration.NEW_DAY_TIME) {
                     newDay();
                     lastNewDay = System.currentTimeMillis();
                 }
