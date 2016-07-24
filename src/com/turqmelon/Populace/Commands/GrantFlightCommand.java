@@ -20,8 +20,6 @@ package com.turqmelon.Populace.Commands;
  * *
  ******************************************************************************/
 
-import com.turqmelon.Populace.Resident.Resident;
-import com.turqmelon.Populace.Resident.ResidentManager;
 import com.turqmelon.Populace.Town.Town;
 import com.turqmelon.Populace.Town.TownFlag;
 import com.turqmelon.Populace.Town.TownManager;
@@ -31,7 +29,6 @@ import com.turqmelon.Populace.Utils.Msg;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public class GrantFlightCommand implements CommandExecutor {
     @Override
@@ -40,43 +37,29 @@ public class GrantFlightCommand implements CommandExecutor {
             sender.sendMessage(Msg.ERR + "You don't have permission for that.");
             return true;
         }
-        if ((sender instanceof Player)) {
-            Player player = (Player) sender;
-            Resident resident = ResidentManager.getResident(player);
-            if (resident != null) {
-
-                if (args.length == 2) {
-
-                    Town town = TownManager.getTown(args[0]);
-                    if (town != null) {
-
-                        if (!town.isFlagActive(TownFlag.FLIGHT)) {
-
-                            try {
-                                long expire = ClockUtil.parseDateDiff(args[1], true);
-                                town.getActiveFlags().put(TownFlag.FLIGHT, expire);
-                                player.sendMessage(Msg.OK + "Granted flight to " + town.getName() + town.getLevel().getSuffix() + ".");
-                                town.sendTownBroadcast(TownRank.RESIDENT, "You can fly within town borders! Granted by " + player.getName() + " for " + args[1] + ".");
-                            } catch (Exception e) {
-                                player.sendMessage(Msg.ERR + "Incorrect time format.");
-                            }
-
-                        } else {
-                            player.sendMessage(Msg.ERR + town.getName() + town.getLevel().getSuffix() + " already has the ability to fly.");
-                        }
-
-                    } else {
-                        player.sendMessage(Msg.ERR + "Town could not be found.");
+        if (args.length == 2) {
+            Town town = TownManager.getTown(args[0]);
+            if (town != null) {
+                if (!town.isFlagActive(TownFlag.FLIGHT)) {
+                    try {
+                        long expire = ClockUtil.parseDateDiff(args[1], true);
+                        town.getActiveFlags().put(TownFlag.FLIGHT, expire);
+                        sender.sendMessage(Msg.OK + "Granted flight to " + town.getName() + town.getLevel().getSuffix() + ".");
+                        town.sendTownBroadcast(TownRank.RESIDENT, "You can fly within town borders! Granted by " + sender.getName() + " for " + args[1] + ".");
+                    } catch (Exception e) {
+                        sender.sendMessage(Msg.ERR + "Incorrect time format.");
                     }
 
                 } else {
-                    player.sendMessage(Msg.WARN + "Like this: §f/grantFlight <Town> <Time>");
+                    sender.sendMessage(Msg.ERR + town.getName() + town.getLevel().getSuffix() + " already has the ability to fly.");
                 }
 
             } else {
-                player.sendMessage(Msg.ERR + "No resident data.");
+                sender.sendMessage(Msg.ERR + "Town could not be found.");
             }
 
+        } else {
+            sender.sendMessage(Msg.WARN + "Like this: §f/grantFlight <Town> <Time>");
         }
 
         return true;
