@@ -508,6 +508,18 @@ public class Populace extends JavaPlugin {
                     town.sendTownBroadcast(TownRank.RESIDENT, town.getName() + town.getLevel().getSuffix() + " is unable to afford the upkeep cost (" + getCurrency().format(town.getDailyUpkeep()) + ")!");
                     town.sendTownBroadcast(TownRank.RESIDENT, "If this doesn't change, it will face destruction in " + getNewDayCountdown() + ".");
                 });
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    Resident resident = ResidentManager.getResident(player);
+                    if (resident == null || resident.getTown() == null || resident.getTown().getRank(resident) == TownRank.MAYOR)
+                        continue;
+                    double tax = resident.getDailyTax();
+                    if (tax <= 0) continue;
+                    Account account = AccountManager.getAccount(player);
+                    if (account == null || account.getBalance(getCurrency()) < tax) {
+                        resident.sendMessage(Msg.ERR + "You don't have enough " + getCurrency().getPlural() + " to afford your taxes.");
+                        resident.sendMessage(Msg.ERR + "You must have at least " + getCurrency().format(tax) + " within " + getNewDayCountdown() + " or you'll be kicked from " + resident.getTown().getName() + "!");
+                    }
+                }
                 getLog().log(Level.INFO, "Autosaving...");
                 try {
                     saveData();
