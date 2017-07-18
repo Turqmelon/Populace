@@ -22,7 +22,7 @@ Currently Populace only offers flatfile storage, but this can be adapted should 
 
 ### Features
 + Intuitive in-game GUIs and commands for players
-+ Developer-first API
++ Developer-first API (Docs: https://github.com/Turqmelon/Populace-API)
 + Virtually grief proof for players not part of a town
 + Per-plot permission systems
 + Town banking system
