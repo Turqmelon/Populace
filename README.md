@@ -1,3 +1,6 @@
+**This project is not maintained.**
+It was made about 3 years ago for an experiment/test project.
+
 # Populace
 Town management for the modern world.
 
