@@ -10,10 +10,10 @@ Populace was originally designed for a survival server before development was ha
 + MelonEco
 
 ### Soft Dependencies
-+ PopulaceMarket (Enables plot shops, commercial plots, and sales tax)
++ [PopulaceMarket](https://github.com/Turqmelon/PopulaceMarket) (Enables plot shops, commercial plots, and sales tax)
 + PopulaceBadges (Adds custom chat prefixes, purely cosmetic)
-+ PopulaceChat (Adds chat channels and town chat)
-+ PopulaceJoin (Makes join and quit messages town-specific)
++ [PopulaceChat](https://github.com/Turqmelon/PopulaceChat) (Adds chat channels and town chat)
++ [PopulaceJoin](https://github.com/Turqmelon/PopulaceJoin) (Makes join and quit messages town-specific)
 + PopulacePortals (Allows creation of regions to go to specific locations in the world)
 + PopulaceScoreboards (Displays town/rank info on player nametags)
 + PopulaceSpawn (Adds /spawn and /setspawn, as well as handles deaths for town respawning)
